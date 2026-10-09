@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Travel Friends</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<style>
+:root{--ink:#0B1B3F;--night:#FBF6EC;--deep:#FFFFFF;--line:#E7DDCB;--tx:#0B1B3F;--mu:#6B7794;--blue:#1565C0;--a0:#FF6B4A;--a1:#F2547D;--a2:#4DB2FF;--a3:#2FC48D;--a4:#A592FF;--a5:#FFA03C}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font:500 16px/1.4 'Bricolage Grotesque',system-ui,sans-serif;background:radial-gradient(110% 40% at 50% -6%,#FFE3D6 0,var(--night) 70%) var(--night);color:var(--tx);overflow:hidden}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--a0);outline-offset:2px}
+.a0{--a:var(--a0)}.a1{--a:var(--a1)}.a2{--a:var(--a2)}.a3{--a:var(--a3)}.a4{--a:var(--a4)}.a5{--a:var(--a5)}
+.mu{color:var(--mu)}.c{text-align:center;margin-top:30px}
+#app{height:100%;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 8px)}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.logo{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.lang{background:var(--deep);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:14px;color:var(--mu)}
+.lang b{color:var(--a0)}
+.card-sh{box-shadow:0 6px 18px #0B1B3F14}
+#body{flex:1;min-height:0;display:flex;flex-direction:column}
+.q,.f{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font:inherit;background:var(--deep);color:var(--tx);margin-bottom:12px}
+.q::placeholder,.f::placeholder{color:var(--mu)}
+textarea.f{min-height:84px;resize:vertical}
+.list,.scroll{flex:1;overflow:auto;padding-bottom:88px;perspective:900px}
+.flt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--deep);border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;margin-bottom:10px;box-shadow:0 4px 14px #0B1B3F12;transform-origin:50% 0;animation:flip .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
+@keyframes flip{from{transform:rotateX(-85deg);opacity:0}}
+.dt{background:var(--a);color:var(--ink);border-radius:12px;min-width:58px;padding:8px 0;text-align:center;font-family:ui-monospace,Menlo,monospace}
+.dt b{display:block;font-size:24px;line-height:1}.dt span{font-size:12px}
+.mid{flex:1;min-width:0}
+.mid h3{font-weight:800;font-size:21px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mid p{font-size:14px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{display:inline-block;background:var(--a);color:var(--ink);font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:6px}
+.seat{text-align:center;color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+.seat b{display:block;font-size:22px;line-height:1}.seat span{font-size:11px;color:var(--mu)}
+.empty{text-align:center;padding:60px 20px}.empty h2{font-size:24px;margin-bottom:6px}
+nav{display:flex;align-items:center;justify-content:space-around;padding-top:6px}
+nav button{background:none;border:0;color:var(--mu);font-weight:700;padding:10px 20px;border-radius:12px}
+nav button[aria-current=true]{color:var(--tx)}
+.plus{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);width:58px;height:58px;border-radius:50%;border:0;background:var(--a0);color:var(--ink);font-size:32px;line-height:1;padding:0;box-shadow:0 8px 26px #FF6B4A66;z-index:5}
+.plus:active{transform:scale(.94)}
+.who{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.who h2{font-weight:800;font-size:24px}.who>div{flex:1;min-width:0}
+.ava{width:62px;height:62px;border-radius:50%;background:var(--a4);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;overflow:hidden;flex:none}
+.ava img{width:100%;height:100%;object-fit:cover}
+.scroll h3{font-weight:800;font-size:18px;margin:18px 0 10px}
+.ghost{background:none;border:1px solid var(--line);border-radius:12px;padding:8px 14px;color:var(--mu)}
+.stamps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:4px}
+.st{aspect-ratio:1;border:3px solid var(--a);outline:1.5px dashed var(--a);outline-offset:3px;border-radius:50%;background:none;color:var(--a);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px;font-weight:800;font-size:13px;line-height:1.1;transform:rotate(var(--r));overflow-wrap:anywhere;overflow:hidden}
+.st small{font-size:11px;font-weight:700;font-family:ui-monospace,Menlo,monospace;opacity:.85}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;flex:none}
+.chip{flex:none;background:var(--deep);border:1px solid var(--line);color:var(--mu);border-radius:99px;padding:7px 14px;font-weight:700;font-size:14px}
+.chip[aria-pressed=true]{background:var(--a0);border-color:var(--a0);color:var(--ink)}
+.opts{margin:-8px 0 12px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opts:empty{display:none}
+.opt{display:block;width:100%;text-align:left;background:var(--night);border:0;border-bottom:1px solid var(--line);padding:10px 12px;font-size:15px}
+.chatc{margin:auto;text-align:center;max-width:320px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.chatc .big{font-size:56px}.chatc h2{font-weight:800;font-size:24px}
+.cta.alt{background:none;border:1px solid var(--line);color:var(--tx);margin-top:10px}
+.big{font-size:56px;line-height:1.1;margin-bottom:6px}
+.ex{background:var(--night);border:1px dashed var(--line);border-radius:14px;padding:12px;margin:12px 0;color:var(--a0)}
+.dots{display:flex;gap:6px;justify-content:center;margin:16px 0}
+.dots i{width:7px;height:7px;border-radius:4px;background:var(--line)}.dots i.on{background:var(--a0);width:22px}
+.rules{padding-left:20px;margin:10px 0}.rules li{margin-bottom:8px}
+.bt{margin:12px 0}.bt .ghost{flex:1}
+.cb{display:flex;flex-direction:column;height:min(82vh,680px)}
+.ch{padding:18px 56px 6px 20px}.ch b{font-weight:800;font-size:20px;display:block}
+.note{padding:0 20px 8px;font-size:13px;color:var(--mu)}
+.msgs{flex:1;overflow:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:82%;background:var(--line);border-radius:16px 16px 16px 4px;padding:8px 12px;white-space:pre-wrap;overflow-wrap:anywhere;align-self:flex-start}
+.m.me{align-self:flex-end;background:var(--a0);color:var(--ink);border-radius:16px 16px 4px 16px}
+.m small{display:block;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:2px}
+.rp{background:none;border:0;color:var(--mu);font-size:12px;padding:0 4px}
+.send{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.send .f{margin:0;flex:1}
+.sb{width:48px;border:0;border-radius:14px;background:var(--a0);color:var(--ink);font-size:20px}
+.ms{position:fixed;inset:0;background:#0B1B3Fee;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10;opacity:0;pointer-events:none;transition:opacity .25s}
+.ms.on{opacity:1;pointer-events:auto}
+.mb{position:relative;width:100%;max-width:420px;max-height:92%;overflow:auto;background:var(--deep);border:1px solid var(--line);border-radius:26px;transform:perspective(900px) rotateX(40deg) translateY(50px);transition:transform .45s cubic-bezier(.2,.9,.3,1.1)}
+.ms.on .mb{transform:none}
+.x{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;border:0;background:#0B1B3F22;color:var(--ink);font-size:18px;z-index:2}
+.form{padding:24px 20px 20px}.form h2{font-weight:800;font-size:24px;margin-bottom:14px}
+.form .x{background:var(--line);color:var(--tx)}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:4px}
+.two{display:flex;gap:10px;align-items:flex-end}.two>div{flex:1;min-width:0}
+.pt{background:var(--a);color:var(--ink);padding:22px 20px 18px}
+.mini{font-size:13px;font-weight:700;opacity:.75;margin-right:40px}
+.pt h2{font-weight:800;font-size:clamp(32px,11vw,46px);line-height:1;margin:10px 0 14px;overflow-wrap:anywhere;letter-spacing:-.02em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.grid small{display:block;font-size:12px;font-weight:700;opacity:.7}.grid b{font-weight:800}
+.tearl{border-top:2px dashed #0B1B3F33;position:relative}
+.tearl:before,.tearl:after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:#1d2a4a}
+.tearl:before{left:-12px}.tearl:after{right:-12px}
+.stub{padding:16px 20px 20px;transition:transform .7s cubic-bezier(.5,0,1,.6),opacity .7s;transform-origin:0 0}
+.stub.torn{transform:translateY(120px) rotate(8deg);opacity:0}
+.stub p{margin-bottom:12px}
+.bar{height:34px;margin-bottom:14px;opacity:.7;background:repeating-linear-gradient(90deg,var(--tx) 0 2px,transparent 2px 5px,var(--tx) 5px 6px,transparent 6px 10px)}
+.cta{width:100%;border:0;border-radius:16px;padding:15px;font-weight:800;font-size:17px;background:var(--ink);color:#fff}
+.cta.pri{background:var(--a0);color:var(--ink)}
+.cta:disabled{background:#C9CFDD;color:#fff}
+.cta:active{transform:scale(.98)}
+.stamp{position:absolute;left:50%;top:36%;width:132px;height:132px;margin:-66px;border:5px solid var(--ink);outline:2px dashed var(--ink);outline-offset:5px;border-radius:50%;color:var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:22px;transform:rotate(-14deg);animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both;pointer-events:none}
+@keyframes stamp{from{transform:rotate(-34deg) scale(2.6);opacity:0}}
+.sent{padding:14px 20px 20px;font-weight:700;color:var(--a3)}
+.toast{position:fixed;left:16px;right:16px;bottom:100px;background:var(--ink);color:#fff;font-weight:700;padding:12px;border-radius:12px;text-align:center;z-index:30}
+#splash{--night:#0A0F2C;--mu:#9AA6D6;--tx:#F4F6FF;color:var(--tx);position:fixed;inset:0;z-index:20;background:radial-gradient(120% 70% at 50% 20%,#25339A 0,var(--night) 65%) var(--night);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+.orb{position:relative;width:150px;height:150px;margin-bottom:56px}
+.earth{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#5FD8FF,#1B6DFF 55%,#0A2A8C);box-shadow:0 0 50px #35D0FF55}
+.earth:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 28%,transparent 38%,#0008 100%)}
+.land{display:flex;width:600px;animation:spin 9s linear infinite}
+.land svg{width:300px;height:150px;flex:none}
+@keyframes spin{to{transform:translateX(-300px)}}
+.ring{position:absolute;inset:-38px;border:1.5px dashed #ffffff40;border-radius:50%;animation:orbit 6s linear infinite}
+.plane{position:absolute;top:-14px;left:50%;margin-left:-13px;transform:rotate(90deg)}
+@keyframes orbit{to{transform:rotate(360deg)}}
+#splash h1{font-weight:800;font-size:38px;letter-spacing:-.03em}
+#splash p{color:var(--mu)}
+.lnk{background:none;border:0;padding:0;font:inherit;font-weight:800;color:inherit;text-decoration:underline dotted;text-underline-offset:3px;text-align:left}
+.rt{color:var(--a0);font-weight:800;white-space:nowrap}.rt.n{color:#0F9D6E}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.metrics div{background:var(--night);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center}
+.metrics b{display:block;font-size:22px;font-weight:800}.metrics span{font-size:12px;color:var(--mu)}
+.rev{background:var(--night);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.rev small{color:var(--mu)}.rev p{margin-top:4px;overflow-wrap:anywhere}
+.tgp{display:inline-block;background:var(--line);border-radius:99px;padding:3px 10px;font-size:13px;margin:4px 6px 2px 0}
+.tgp.neg{background:#FF5C7A33;color:var(--a1)}
+.sp{display:flex;gap:4px;justify-content:center;margin:10px 0}
+.sp button{background:none;border:0;font-size:40px;line-height:1;color:var(--line);padding:2px 4px}
+.sp button.on{color:var(--a0)}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.mpanel{border-bottom:1px solid var(--line);max-height:42%;overflow:auto;padding:4px 16px 10px;flex:none}
+.mr{display:flex;align-items:center;gap:8px;padding:6px 0}
+.ghost.sm{padding:5px 10px;font-size:13px}
+.m.sys{align-self:center;background:none;border-radius:0;color:var(--mu);font-size:13px;padding:2px 8px;text-align:center;max-width:92%}
+.pt .lnk{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:16px 18px;margin-bottom:12px;color:#fff;background:linear-gradient(120deg,#0E2A6B,#1E6FD9 60%,#4DB2FF);flex:none}
+.hero h2{font-weight:800;font-size:22px;line-height:1.1;max-width:75%}.hero p{font-size:14px;opacity:.9;margin-top:4px;max-width:75%}
+.hero .pl{position:absolute;right:-6px;top:6px;font-size:64px;transform:rotate(-12deg);filter:drop-shadow(0 6px 10px #0004)}
+.pop{display:flex;gap:10px;overflow-x:auto;margin-bottom:12px;flex:none;padding-bottom:2px}
+.pop button{flex:none;width:78px;background:var(--deep);border:1px solid var(--line);border-radius:16px;padding:8px 4px;text-align:center;font-weight:700;font-size:13px;box-shadow:0 3px 10px #0B1B3F10}
+.pop span{display:block;font-size:30px;line-height:1.1}
+.sw{display:flex;align-items:center;gap:10px;margin:2px 0 12px}.sw input{width:22px;height:22px;accent-color:var(--a0)}
+.seg{display:flex;gap:6px;margin-bottom:12px}.seg .chip{flex:1;text-align:center;padding:8px 6px}
+.match{display:inline-block;background:#2FC48D33;color:#0F7A57;border-radius:99px;padding:2px 10px;font-size:13px;font-weight:700;margin-top:6px}
+.badge{display:inline-block;border:1px solid var(--line);background:var(--night);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+.req{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.req .mid{flex:1;min-width:0}.req .ghost.sm.ok{background:var(--a3);border-color:var(--a3);color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="splash"><div class="orb"><div class="earth"><div class="land">
+<svg viewBox="0 0 300 150" fill="#7CF0B2" opacity=".9"><path d="M30 25C45 18 62 22 66 36C70 48 58 56 62 70C66 82 78 86 74 100C70 116 56 128 48 120C42 100 44 84 34 70C24 56 14 40 30 25Z"/><path d="M120 30C135 24 150 30 154 42C162 52 160 66 150 78C146 96 138 112 128 106C118 92 116 74 108 62C102 48 108 36 120 30Z"/><path d="M170 28C190 18 224 22 244 34C262 44 258 60 244 66C232 72 226 86 212 84C196 80 184 60 172 50C164 42 164 34 170 28Z"/><path d="M232 96C246 92 262 98 262 108C260 118 244 120 236 114C228 108 226 100 232 96Z"/></svg>
+<svg viewBox="0 0 300 150" fill="#7CF0B2" opacity=".9"><path d="M30 25C45 18 62 22 66 36C70 48 58 56 62 70C66 82 78 86 74 100C70 116 56 128 48 120C42 100 44 84 34 70C24 56 14 40 30 25Z"/><path d="M120 30C135 24 150 30 154 42C162 52 160 66 150 78C146 96 138 112 128 106C118 92 116 74 108 62C102 48 108 36 120 30Z"/><path d="M170 28C190 18 224 22 244 34C262 44 258 60 244 66C232 72 226 86 212 84C196 80 184 60 172 50C164 42 164 34 170 28Z"/><path d="M232 96C246 92 262 98 262 108C260 118 244 120 236 114C228 108 226 100 232 96Z"/></svg>
+</div></div><div class="ring"><svg class="plane" width="26" height="26" viewBox="0 0 24 24"><path fill="#fff" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div></div>
+<h1>Travel Friends</h1><p id="tag"></p></div>
+
+<div id="app"></div>
+<div class="ms" id="ms"><div class="mb" id="mb"></div></div>
+
+<script>
+const tg=Telegram.WebApp;tg.ready();tg.expand();
+try{tg.setBackgroundColor('#FBF6EC');tg.setHeaderColor('#FBF6EC')}catch(e){}
+const $=s=>document.querySelector(s);
+const U=(tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+const T={ru:{tag:'Найди тех, с кем поедешь',board:'Рейсы',passport:'Паспорт',search:'Город или страна',seats:'Мест',looking:'ищет попутчиков',boarding:'Посадка',isnew:'Новый',flex:'Даты гибкие',join:'Поехать вместе',sent:'Запрос отправлен ✓',boost:'Поднять в табло на неделю',e1:'Табло пустое',e2:'Опубликуй первый рейс и позови друзей.',create:'Новый рейс',where:'Куда',from:'С',to:'По',people:'Сколько человек ищу',budget:'Бюджет',plan:'Быстрый план',plan_l:'Что планируешь',publish:'Опубликовать',posted:'Рейс опубликован',city:'Город',about:'О себе',save:'Сохранить',saved:'Сохранено',stamps:'Штампы',nost:'Штампы появятся, когда опубликуешь рейс или откликнешься.',mytrips:'Мои рейсы',reqs:'Откликов',going:'Едем!',notified:'Автор получит сообщение',pass:'Посадочный талон',who:'Кто',when:'Когда',edit:'Изменить',ph:'Москва, Париж, Грузия…',phn:'Маршрут, стиль поездки, с кем хочешь ехать',pha:'Как путешествуешь, что любишь',boosted:'Поднято',none:'Пока без откликов',nodest:'Укажи, куда едешь',flight:'Перелёт',train:'Поезд',road:'Роад-трип',hike:'Поход',other:'Другое',all:'Все',kind:'Как едем',chat:'Чаты',chat1:'Сообщество Travel Friends',chat2:'Знакомься с попутчиками, делись маршрутами и находи компанию в нашем чате.',chat3:'Ссылка на чат пока не добавлена.',openchat:'Открыть чат',howto:'Как это работает',rulesT:'Правила сообщества',next:'Далее',accept:'Принимаю правила',ok:'Понятно',welcome:'Добро пожаловать! Поехали',left:'свободно',fullt:'Собрались',opennow:'Открыть чат сейчас',waiting:'Ждём первого попутчика',chatopen:'Чат открыт!',msgph:'Сообщение…',report:'Пожаловаться',reported:'Жалоба отправлена',mem:'участников',mychats:'Мои группы',nochats:'Здесь появятся группы, где ты едешь или которые собираешь.',chatnote:'Только текст. Без интима, травли и спама. Нажми ⚑, если что-то не так.',limitnote:'Это максимум попутчиков в группе. Чат откроется, как только присоединится первый человек.',err_full:'Мест уже нет',err_rules:'Сначала прими правила',err_closed:'Чат ещё не открыт',err_own:'Это твоя поездка',err_notmember:'Ты не в этой группе',err_nobody:'Пока никто не присоединился',
+reg_t:'Регистрация',reg_p:'Чтобы путешествовать безопасно, нужен короткий профиль. Дата рождения не показывается: другие видят только возраст. Приложение только для 18+.',birth:'Дата рождения',reg_go:'Зарегистрироваться',minor_t:'Только 18+',minor_p:'Travel Friends доступен только совершеннолетним. Возвращайся, когда тебе исполнится 18!',
+newbie:'Новичок',rating:'Рейтинг',reviews:'Отзывы',trips_done:'Поездок',noreviews:'Отзывов пока нет',yo:'лет',myprof:'Мой публичный профиль',
+tag_reliable:'Надёжный',tag_fun:'С ним весело',tag_respectful:'Уважительный',tag_organized:'Организованный',tag_punctual:'Пунктуальный',tag_late:'Опаздывает',tag_rude:'Грубит',
+block:'Заблокировать',unblock:'Разблокировать',reportu:'Пожаловаться на профиль',leave:'Выйти из группы',kick:'Исключить',close:'Закрыть набор',share:'Поделиться',author:'Автор',
+rate:'Оценить попутчиков',rate_t:'Как прошла поездка?',rate_ph:'Пара слов о попутчике (необязательно)',rate_send:'Отправить',rate_skip:'Пропустить',rated_ok:'Спасибо за отзыв!',norate:'Оценивать уже некого',pickstars:'Поставь звёзды',
+sys_join:'{n} в группе',sys_leave:'{n} покинул(а) группу',sys_kick:'{n} исключён(а) из группы',sys_closed:'Автор закрыл набор в группу',
+q_leave:'Выйти из этой группы?',q_kick:'Исключить участника?',q_close:'Закрыть набор? Новые люди не смогут присоединиться.',q_block:'Заблокировать этого человека? Вы не увидите сообщения и поездки друг друга.',
+closedt:'Набор закрыт',ended_t:'Поездка завершена',torate:'Оцени',done_ok:'Готово',sharetxt:'Поедем вместе?',
+err_banned:'Доступ закрыт',err_baddate:'Проверь даты',err_limit:'Максимум 5 активных поездок',err_tripclosed:'Набор закрыт',err_tripended:'Поездка уже завершена',err_blocked:'Недоступно',err_kicked:'Автор исключил тебя из этой группы',err_notfound:'Не найдено',err_notended:'Оценивать можно после окончания поездки',err_dup:'Ты уже оценил(а) этого человека',err_slow:'Слишком часто, подожди немного',err_register:'Сначала зарегистрируйся',err_badreq:'Ошибка запроса',
+who_t:'Кого ищешь',aud_all:'Всех',aud_f:'Девушек',aud_m:'Мужчин',age_t:'Возраст попутчиков (необязательно)',approval:'Вход по заявке автора',approval_h:'Ты сам решаешь, кого взять. Без галочки люди входят сразу.',
+gender:'Пол',g_f:'Женский',g_m:'Мужской',g_x:'Не указывать',vibe_t:'Твой стиль путешествий',vibe_h:'Выбери, что тебе близко: так находят совместимых людей',
+v_early:'🌅 Ранние подъёмы',v_nature:'🌲 Природа',v_night:'🌃 Ночная жизнь',v_museums:'🏛 Музеи',v_spontaneous:'🎲 Спонтанность',v_planner:'📋 Всё по плану',v_food:'🍜 Еда',v_photo:'📸 Фото',v_active:'🏃 Активно',v_chill:'🛋 Спокойно',
+match:'Совпало интересов: {n}',req_send:'Хочу с тобой',req_pend:'Заявка отправлена, ждём автора',req_sent:'Заявка отправлена ✓',reqs_t:'Заявки',acc:'Принять',dec:'Отклонить',noreqs:'Новых заявок нет',
+for_f:'Только девушки',for_m:'Только мужчины',byreq:'По заявке',hero_h:'Найди своих людей',hero_p:'Выкладывай поездки, знакомься и открывай мир вместе',popt:'Популярные направления',
+err_audience:'Эта поездка не подходит под условия автора',err_agerange:'Твой возраст не подходит под условия автора',err_declined:'Автор отклонил твою заявку',err_baddate_plan:'Для быстрого плана укажи дату',
+ob:[{e:'🌍',h:`Привет! Это Travel Friends`,p:`Здесь находят попутчиков: для перелётов, поездок на поезде, роад-трипов и походов. Выкладываешь поездку, люди присоединяются, и как только к тебе присоединился первый человек, открывается общий чат.`},
+{e:'🗺️',h:`1. Выложи поездку`,p:`Нажми жёлтую кнопку «+». Выбери, как едешь, город или страну, даты и сколько человек ты ищешь в компанию.`,ex:`Пример: Рим · перелёт из Москвы · 1 неделя · ищу 3 человека`},
+{e:'🎫',h:`2. Присоединяйся`,p:`Открой рейс на табло и нажми «Поехать вместе». Больше людей, чем указал автор, присоединиться не смогут.`,ex:`Пример: «свободно 2» → нажимаешь → ты в группе, открывается чат`},
+{e:'💬',h:`3. Общайтесь в чате`,p:`Ждать полной компании не нужно: чат открывается сразу, остальные подключаются по ходу. Обсудите маршрут, билеты и жильё. Чат живёт во вкладке «Чаты».`,ex:`Чат только текстовый: фото и файлы отключены`},
+{e:'⭐',h:`4. Оставляй отзывы`,p:`После поездки оцени попутчиков: звёзды и пара слов. Рейтинг, возраст и число поездок видны в профиле, так сразу понятно, что человек адекватный.`,ex:`Пример: ★ 4.9 · 12 поездок · «Надёжный», «С ним весело»`}],
+rules:[`Только текст: фото и файлы в чатах отключены.`,`Никакого интима, пошлости и домогательств.`,`Уважай людей: без травли, угроз и дискриминации.`,`Без спама, рекламы и продажи услуг.`,`Не отправляй паспорт, данные карт и пароли.`,`С незнакомыми встречайся в людных местах и сообщай близким свой маршрут.`,`На нарушения жалуйся кнопкой ⚑. Нарушителей мы можем заблокировать.`,`Приложение только для 18+.`,`Отзывы должны быть честными: не пиши ложь и не мсти.`]},
+en:{tag:'Find who to travel with',board:'Flights',passport:'Passport',search:'City or country',seats:'Seats',looking:'is looking for travel buddies',boarding:'Boarding',isnew:'New',flex:'Flexible dates',join:'Join the trip',sent:'Request sent ✓',boost:'Boost on the board for a week',e1:'The board is empty',e2:'Post the first trip and invite your friends.',create:'New trip',where:'Where',from:'From',to:'To',people:'How many people I look for',budget:'Budget',plan:'Quick plan',plan_l:'The plan',publish:'Post trip',posted:'Trip posted',city:'City',about:'About you',save:'Save',saved:'Saved',stamps:'Stamps',nost:'Stamps appear when you post a trip or join one.',mytrips:'My trips',reqs:'Requests',going:"We're going!",notified:'The author will be notified',pass:'Boarding pass',who:'Who',when:'When',edit:'Edit',ph:'Paris, Tbilisi, Georgia…',phn:'Route, travel style, who you want to go with',pha:'How you travel, what you love',boosted:'Boosted',none:'No requests yet',nodest:'Enter a destination',flight:'Flight',train:'Train',road:'Road trip',hike:'Hiking',other:'Other',all:'All',kind:'How we go',chat:'Chats',chat1:'The Travel Friends community',chat2:'Meet travel buddies, share routes and find company in our chat.',chat3:'The chat link has not been added yet.',openchat:'Open chat',howto:'How it works',rulesT:'Community rules',next:'Next',accept:'I accept the rules',ok:'Got it',welcome:"Welcome! Let's go",left:'free',fullt:'Full',opennow:'Open the chat now',waiting:'Waiting for the first buddy',chatopen:'The chat is open!',msgph:'Message…',report:'Report',reported:'Report sent',mem:'members',mychats:'My groups',nochats:"Groups you join or organize will appear here.",chatnote:'Text only. No sexual content, bullying or spam. Tap ⚑ if something is wrong.',limitnote:'This is the maximum group size. The chat opens as soon as the first person joins.',err_full:'No seats left',err_rules:'Please accept the rules first',err_closed:'The chat is not open yet',err_own:'This is your trip',err_notmember:'You are not in this group',err_nobody:'Nobody has joined yet',
+reg_t:'Registration',reg_p:'A short profile keeps travel safer. Your birth date is never shown: others see only your age. The app is for 18+ only.',birth:'Date of birth',reg_go:'Sign up',minor_t:'18+ only',minor_p:'Travel Friends is available to adults only. Come back when you turn 18!',
+newbie:'Newbie',rating:'Rating',reviews:'Reviews',trips_done:'Trips',noreviews:'No reviews yet',yo:'y.o.',myprof:'My public profile',
+tag_reliable:'Reliable',tag_fun:'Fun to travel with',tag_respectful:'Respectful',tag_organized:'Organized',tag_punctual:'Punctual',tag_late:'Often late',tag_rude:'Rude',
+block:'Block',unblock:'Unblock',reportu:'Report profile',leave:'Leave group',kick:'Remove',close:'Close joining',share:'Share',author:'Author',
+rate:'Rate your buddies',rate_t:'How was the trip?',rate_ph:'A few words about this person (optional)',rate_send:'Send',rate_skip:'Skip',rated_ok:'Thanks for your review!',norate:'Nobody left to rate',pickstars:'Pick a star rating',
+sys_join:'{n} joined',sys_leave:'{n} left the group',sys_kick:'{n} was removed from the group',sys_closed:'The author closed joining',
+q_leave:'Leave this group?',q_kick:'Remove this member?',q_close:'Close joining? New people will not be able to join.',q_block:'Block this person? You will not see each other’s messages and trips.',
+closedt:'Joining closed',ended_t:'Trip is over',torate:'Rate',done_ok:'Done',sharetxt:'Wanna travel together?',
+err_banned:'Access denied',err_baddate:'Check the dates',err_limit:'Up to 5 active trips',err_tripclosed:'Joining is closed',err_tripended:'This trip is already over',err_blocked:'Unavailable',err_kicked:'The author removed you from this group',err_notfound:'Not found',err_notended:'You can rate after the trip ends',err_dup:'You already rated this person',err_slow:'Too fast, wait a bit',err_register:'Please sign up first',err_badreq:'Bad request',
+who_t:'Who I look for',aud_all:'Anyone',aud_f:'Women',aud_m:'Men',age_t:'Buddies’ age (optional)',approval:'Join by author’s approval',approval_h:'You decide who joins. Without the checkbox people join instantly.',
+gender:'Gender',g_f:'Female',g_m:'Male',g_x:'Prefer not to say',vibe_t:'Your travel style',vibe_h:'Pick what fits you: it helps find compatible people',
+v_early:'🌅 Early birds',v_nature:'🌲 Nature',v_night:'🌃 Nightlife',v_museums:'🏛 Museums',v_spontaneous:'🎲 Spontaneous',v_planner:'📋 Planner',v_food:'🍜 Food',v_photo:'📸 Photo',v_active:'🏃 Active',v_chill:'🛋 Relaxed',
+match:'Shared interests: {n}',req_send:'I want to join',req_pend:'Request sent, waiting for the author',req_sent:'Request sent ✓',reqs_t:'Requests',acc:'Accept',dec:'Decline',noreqs:'No new requests',
+for_f:'Women only',for_m:'Men only',byreq:'By request',hero_h:'Find your people',hero_p:'Post trips, meet people and explore the world together',popt:'Popular destinations',
+err_audience:'This trip doesn’t fit the author’s conditions',err_agerange:'Your age doesn’t fit the author’s conditions',err_declined:'The author declined your request',err_baddate_plan:'Pick a date for a quick plan',
+ob:[{e:'🌍',h:`Hi! This is Travel Friends`,p:`Find travel buddies for flights, train rides, road trips and hikes. You post a trip, people join, and as soon as the first person joins, a shared chat opens.`},
+{e:'🗺️',h:`1. Post a trip`,p:`Tap the yellow "+" button. Pick how you travel, a city or country, the dates and how many people you are looking for.`,ex:`Example: Rome · flight from Moscow · 1 week · looking for 3 people`},
+{e:'🎫',h:`2. Join a trip`,p:`Open a flight on the board and tap "Join the trip". No more people than the author set can join.`,ex:`Example: "2 free" → tap → you are in and the chat opens`},
+{e:'💬',h:`3. Chat together`,p:`No need to wait for a full group: the chat opens right away and others join along the way. Plan the route, tickets and stay. Chats live in the "Chats" tab.`,ex:`Text-only chat: photos and files are disabled`},
+{e:'⭐',h:`4. Leave reviews`,p:`After the trip, rate your buddies: stars and a few words. Rating, age and number of trips are visible in the profile, so you can tell who is easy to travel with.`,ex:`Example: ★ 4.9 · 12 trips · "Reliable", "Fun to travel with"`}],
+rules:[`Text only: photos and files are disabled in chats.`,`No sexual content, vulgarity or harassment.`,`Be respectful: no bullying, threats or discrimination.`,`No spam, ads or selling services.`,`Never send your passport, card details or passwords.`,`Meet strangers in public places and tell someone you trust about your plans.`,`Report violations with the ⚑ button. Violators may be blocked.`,`The app is for 18+ only.`,`Reviews must be honest: no lies and no revenge.`]}};
+let L='en';try{L=localStorage.getItem('l')||(['ru','uk','be','kk'].includes(U.language_code)?'ru':'en')}catch(e){}
+const tx=k=>T[L][k];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hap=k=>{try{tg.HapticFeedback.impactOccurred(k||'light')}catch(e){}};
+const good=()=>{try{tg.HapticFeedback.notificationOccurred('success')}catch(e){}};
+const loc=()=>L==='ru'?'ru-RU':'en-GB';
+const fmt=d=>d?new Date(d).toLocaleDateString(loc(),{day:'numeric',month:'short'}):'';
+const rng=x=>x.date_from?fmt(x.date_from)+(x.date_to?' – '+fmt(x.date_to):''):tx('flex');
+const ci=s=>{let h=0;for(const c of String(s).toLowerCase())h=(h*31+c.charCodeAt(0))%997;return h%6};
+const CITY=`Moscow|Москва|Russia|Россия|55.76|37.62
+Saint Petersburg|Санкт-Петербург|Russia|Россия|59.93|30.34
+Kazan|Казань|Russia|Россия|55.79|49.12
+Sochi|Сочи|Russia|Россия|43.60|39.73
+Paris|Париж|France|Франция|48.86|2.35
+Nice|Ницца|France|Франция|43.70|7.27
+Madrid|Мадрид|Spain|Испания|40.42|-3.70
+Barcelona|Барселона|Spain|Испания|41.39|2.17
+Rome|Рим|Italy|Италия|41.90|12.50
+Milan|Милан|Italy|Италия|45.46|9.19
+Venice|Венеция|Italy|Италия|45.44|12.32
+Florence|Флоренция|Italy|Италия|43.77|11.26
+Berlin|Берлин|Germany|Германия|52.52|13.40
+Munich|Мюнхен|Germany|Германия|48.14|11.58
+Prague|Прага|Czechia|Чехия|50.08|14.44
+Vienna|Вена|Austria|Австрия|48.21|16.37
+Budapest|Будапешт|Hungary|Венгрия|47.50|19.04
+Lisbon|Лиссабон|Portugal|Португалия|38.72|-9.14
+Amsterdam|Амстердам|Netherlands|Нидерланды|52.37|4.90
+London|Лондон|United Kingdom|Великобритания|51.51|-0.13
+Istanbul|Стамбул|Turkey|Турция|41.01|28.98
+Athens|Афины|Greece|Греция|37.98|23.73
+Tbilisi|Тбилиси|Georgia|Грузия|41.72|44.79
+Batumi|Батуми|Georgia|Грузия|41.64|41.64
+Yerevan|Ереван|Armenia|Армения|40.18|44.51
+Baku|Баку|Azerbaijan|Азербайджан|40.41|49.87
+Dubai|Дубай|UAE|ОАЭ|25.20|55.27
+Almaty|Алматы|Kazakhstan|Казахстан|43.24|76.89
+Tashkent|Ташкент|Uzbekistan|Узбекистан|41.30|69.24
+Bangkok|Бангкок|Thailand|Таиланд|13.76|100.50
+Phuket|Пхукет|Thailand|Таиланд|7.88|98.39
+Bali|Бали|Indonesia|Индонезия|-8.41|115.19
+Tokyo|Токио|Japan|Япония|35.68|139.69
+Kyoto|Киото|Japan|Япония|35.01|135.77
+Seoul|Сеул|South Korea|Южная Корея|37.57|126.98
+Singapore|Сингапур|Singapore|Сингапур|1.35|103.82
+Hanoi|Ханой|Vietnam|Вьетнам|21.03|105.85
+New York|Нью-Йорк|USA|США|40.71|-74.01
+Los Angeles|Лос-Анджелес|USA|США|34.05|-118.24
+Mexico City|Мехико|Mexico|Мексика|19.43|-99.13
+Rio de Janeiro|Рио-де-Жанейро|Brazil|Бразилия|-22.91|-43.17
+Buenos Aires|Буэнос-Айрес|Argentina|Аргентина|-34.60|-58.38
+Cairo|Каир|Egypt|Египет|30.04|31.24
+Marrakesh|Марракеш|Morocco|Марокко|31.63|-8.01
+Cape Town|Кейптаун|South Africa|ЮАР|-33.92|18.42
+Sydney|Сидней|Australia|Австралия|-33.87|151.21
+Reykjavik|Рейкьявик|Iceland|Исландия|64.15|-21.94
+Helsinki|Хельсинки|Finland|Финляндия|60.17|24.94
+Tallinn|Таллин|Estonia|Эстония|59.44|24.75
+Belgrade|Белград|Serbia|Сербия|44.79|20.45`.split('\n').map(r=>{const [en,ru,ce,cr,la,lo]=r.split('|');return {en,ru,ce,cr,lat:+la,lon:+lo}});
+const byEn=Object.fromEntries(CITY.map(c=>[c.en,c]));
+const dn=d=>{const c=byEn[d];return c&&L==='ru'?c.ru:d};
+const KIND={flight:'✈️',train:'🚆',road:'🚗',hike:'🥾',plan:'🔥',other:'🧭'};
+const ke=x=>KIND[x.kind]||KIND.flight;
+const CHAT_URL=''; // сюда вставь ссылку на твой чат, например 'https://t.me/yourchat'
+async function api(p,m='GET',b){
+  const r=await fetch('/api'+p,{method:m,body:b?JSON.stringify(b):undefined,headers:{'Content-Type':'application/json','X-Init-Data':tg.initData}});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.detail||'Error');
+  return j;
+}
+function toast(s){const e=document.createElement('div');e.className='toast';e.textContent=s;document.body.append(e);setTimeout(()=>e.remove(),2600)}
+const run=async f=>{try{await f()}catch(e){const m=e.message;if(m==='rules'||m==='register'){gate();return}if(m==='minor'){minorScreen();return}toast(T[L]['err_'+m]||m)}};
+
+$('#tag').textContent=tx('tag');
+setTimeout(()=>$('#splash').classList.add('out'),2600);
+$('#splash').onclick=()=>$('#splash').classList.add('out');
+
+const ms=$('#ms'),mb=$('#mb');
+let locked=false,poll=0;
+function modal(h,lock){locked=!!lock;mb.innerHTML=h;ms.classList.add('on');const x=mb.querySelector('.x');if(x){if(locked)x.remove();else x.onclick=closeM}}
+function closeM(){locked=false;ms.classList.remove('on');clearInterval(poll)}
+ms.onclick=e=>{if(e.target===ms&&!locked)closeM()};
+
+let tab='board',list=[],view=[],q='',kindF='all';
+let ME={vibe:''};const refreshMe=()=>api('/me').then(m=>{ME=m}).catch(()=>{});
+const VIBES=['early','nature','night','museums','spontaneous','planner','food','photo','active','chill'];
+const POP=[['Paris','🗼'],['Rome','🏛️'],['Madrid','💃'],['Moscow','🏰'],['Saint Petersburg','🌉'],['Istanbul','🕌'],['Tbilisi','🍷'],['Bali','🌴']];
+function vibePicker(box,sel){
+  box.innerHTML=VIBES.map(k=>`<button type="button" class="chip" data-v="${k}" aria-pressed="${sel.has(k)}">${tx('v_'+k)}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const k=b.dataset.v;sel.has(k)?sel.delete(k):sel.add(k);b.setAttribute('aria-pressed',sel.has(k));hap()});
+}
+function seg(box,opts,cur,cb){
+  box.innerHTML=opts.map(([v,t])=>`<button type="button" class="chip" data-s="${v}" aria-pressed="${v===cur}">${t}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{box.querySelectorAll('.chip').forEach(o=>o.setAttribute('aria-pressed',o===b));cb(b.dataset.s);hap()});
+}
+const vibeBadges=v=>(v||[]).map(k=>`<span class="badge">${tx('v_'+k)}</span>`).join('');
+let BOT='';fetch('/api/config').then(r=>r.json()).then(j=>BOT=j.bot||'').catch(()=>{});
+const NEG=new Set(['late','rude']);
+const TAGS=['reliable','fun','respectful','organized','punctual','late','rude'];
+const yo=a=>a?`${a} ${tx('yo')}`:'';
+const ask=(msg,cb)=>{try{tg.showConfirm(msg,ok=>{if(ok)cb()})}catch(e){if(confirm(msg))cb()}};
+const sysText=t=>{const i=t.indexOf(':'),k=t.slice(0,i),n=t.slice(i+1);return (tx('sys_'+k)||'').replace('{n}',n)};
+function shell(){
+  $('#app').innerHTML=`<div class="top"><span class="logo">Travel Friends</span><span><button class="lang" id="help" aria-label="${tx('howto')}">?</button> <button class="lang" id="lang">${L==='ru'?'<b>RU</b> / EN':'RU / <b>EN</b>'}</button></span></div><div id="body"></div><button class="plus" id="plus" aria-label="${tx('create')}">+</button><nav><button id="n_board">${tx('board')}</button><button id="n_chat">${tx('chat')}</button><button id="n_pass">${tx('passport')}</button></nav>`;
+  $('#help').onclick=()=>onboarding(false);$('#lang').onclick=()=>{L=L==='ru'?'en':'ru';try{localStorage.setItem('l',L)}catch(e){}hap();shell();show(tab)};
+  ['board','chat','pass'].forEach(k=>$('#n_'+k).onclick=()=>show(k));$('#plus').onclick=newTrip;
+}
+function show(t){tab=t;['board','chat','pass'].forEach(k=>$('#n_'+k).setAttribute('aria-current',k===t));({board:board,chat:chat,pass:passport})[t]()}
+
+const row=(x,i)=>{const a=ci(x.dest),d=x.date_from?new Date(x.date_from):null,fresh=Date.now()/1000-x.created<172800;
+  const tag=x.pending>0?'📩 '+x.pending:x.req==='pending'?'⏳':(x.members||0)>=x.people?tx('fullt'):x.closed?tx('closedt'):x.to_rate>0?'⭐ '+tx('torate'):x.boosted?tx('boarding'):fresh?tx('isnew'):'';
+  const who=`${esc(x.name)}${x.age?', '+x.age:''} · ${x.a_cnt?'★'+x.a_avg:tx('newbie')}`;
+  return `<button class="flt a${a}" data-i="${i}" style="--d:${Math.min(i,12)*45}ms"><div class="dt"><b>${d?d.getDate():ke(x)}</b><span>${d?d.toLocaleDateString(loc(),{month:'short'}).replace('.',''):''}</span></div><div class="mid"><h3>${ke(x)} ${esc(dn(x.dest))}</h3><p>${tag?`<span class="tag">${tag}</span>`:''}${who}</p></div><div class="seat"><b>${Math.max(0,x.people-(x.members||0))}</b><span>${tx('left')}</span></div></button>`};
+
+const hay=x=>{const c=byEn[x.dest];return (x.dest+' '+(x.country||'')+' '+(c?c.ru+' '+c.cr:'')).toLowerCase()};
+function board(){
+  $('#body').innerHTML=`<div class="hero"><h2>${tx('hero_h')}</h2><p>${tx('hero_p')}</p><span class="pl">✈️</span></div><div class="pop" aria-label="${tx('popt')}">${POP.map(([en,e])=>`<button data-c="${en}"><span>${e}</span>${esc(dn(en))}</button>`).join('')}</div><input class="q" id="q" type="search" placeholder="${tx('search')}" value="${esc(q)}"><div class="chips" id="chips">${['all',...Object.keys(KIND)].map(k=>`<button class="chip" data-k="${k}" aria-pressed="${k===kindF}">${k==='all'?'':KIND[k]+' '}${tx(k)}</button>`).join('')}</div><div class="list" id="list"></div>`;
+  $('#q').oninput=e=>{q=e.target.value;paint()};
+  document.querySelectorAll('.pop button').forEach(b=>b.onclick=()=>{q=q===dn(b.dataset.c)?'':dn(b.dataset.c);$('#q').value=q;hap();paint()});
+  document.querySelectorAll('#chips .chip').forEach(b=>b.onclick=()=>{kindF=b.dataset.k;hap();board()});
+  load();
+}
+const load=()=>run(async()=>{list=await api('/trips');paint()});
+function paint(){
+  const el=$('#list');if(!el)return;
+  const n=q.trim().toLowerCase();
+  view=list.filter(x=>(kindF==='all'||x.kind===kindF)&&hay(x).includes(n));
+  el.innerHTML=view.length?view.map(row).join(''):`<div class="empty"><h2>${tx('e1')}</h2><p class="mu">${tx('e2')}</p></div>`;
+  el.querySelectorAll('.flt').forEach(b=>b.onclick=()=>openPass(view[+b.dataset.i]));
+}
+function chat(){
+  $('#body').innerHTML='<p class="mu c">…</p>';
+  run(async()=>{
+    const d=await api('/my');
+    const all=[...d.mine.filter(x=>x.chat_open||x.members>0),...d.joined];
+    $('#body').innerHTML=`<div class="scroll">${CHAT_URL?`<button class="cta" id="oc">💬 ${tx('chat1')}</button>`:''}<div class="two bt"><button class="ghost" id="hw">${tx('howto')}</button><button class="ghost" id="rl">${tx('rulesT')}</button></div><h3>${tx('mychats')}</h3>${all.length?all.map(row).join(''):`<p class="mu">${tx('nochats')}</p>`}</div>`;
+    const oc=$('#oc');if(oc)oc.onclick=()=>tg.openTelegramLink(CHAT_URL);
+    $('#hw').onclick=()=>onboarding(false);$('#rl').onclick=rulesView;
+    document.querySelectorAll('.scroll .flt').forEach(b=>b.onclick=()=>{const x=all[+b.dataset.i];x.chat_open?openChat(x.id):openPass(x)});
+  });
+}
+
+function share(x){
+  if(!BOT){toast(tx('err_notfound'));return}
+  const link=`https://t.me/${BOT}?start=trip_${x.id}`;
+  tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(`${ke(x)} ${dn(x.dest)}: ${tx('sharetxt')}`));
+}
+
+function passBadges(x){
+  const b=[];
+  if(x.audience==='f')b.push('♀ '+tx('for_f'));if(x.audience==='m')b.push('♂ '+tx('for_m'));
+  if(x.min_age||x.max_age)b.push(`${x.min_age||18}–${x.max_age||'∞'} ${tx('yo')}`);
+  if(x.approval)b.push('📩 '+tx('byreq'));
+  const mv=new Set((ME.vibe||'').split(',').filter(Boolean)),av=(x.a_vibe||'').split(',').filter(Boolean),n=av.filter(v=>mv.has(v)).length;
+  return `<p>${b.map(t=>`<span class="badge">${esc(t)}</span>`).join('')}</p>${av.length?`<p>${vibeBadges(av)}</p>`:''}${!x.mine&&n?`<span class="match">✨ ${tx('match').replace('{n}',n)}</span>`:''}`;
+}
+function openPass(x){
+  hap('medium');
+  const left=Math.max(0,x.people-(x.members||0)),mine=!!x.mine,joined=!!x.joined;
+  const rate=x.a_cnt?`★ ${x.a_avg} (${x.a_cnt})`:tx('newbie');
+  modal(`<div class="pass"><button class="x" aria-label="Close">✕</button><div class="pt a${ci(x.dest)}"><div class="mini">Travel Friends · ${tx('pass')}</div><h2>${esc(dn(x.dest))}</h2><div class="grid"><div><small>${tx('who')}</small><b><button class="lnk" id="au">${esc(x.name)}</button>${x.age?', '+x.age:''}</b><small>${rate}</small></div><div><small>${tx('when')}</small><b>${rng(x)}</b></div><div><small>${tx('seats')}</small><b>${left} / ${x.people}</b></div><div><small>${tx('budget')}</small><b>${esc(x.budget||'—')}</b></div></div></div><div class="tearl"></div><div class="stub">${x.note?`<p>${esc(x.note)}</p>`:''}${x.about?`<p class="mu">${esc(x.name)}${x.city?', '+esc(x.city):''}: ${esc(x.about)}</p>`:''}${passBadges(x)}<div class="bar"></div><div id="acts"></div></div></div>`);
+  $('#au').onclick=()=>openProfile(x.author_id||x.user_id,()=>openPass(x));
+  const acts=[],add=(t,fn,o)=>acts.push({t,fn,...(o||{})});
+  if(mine||joined){
+    if(x.chat_open)add(tx('openchat'),()=>openChat(x.id));
+    else add(`${tx('waiting')}: ${x.members||0}/${x.people}`,null,{dis:1});
+    if(x.ended&&x.to_rate>0)add('⭐ '+tx('rate'),()=>openRate(x.id),{alt:1});
+    if(mine&&x.pending>0)add('📩 '+tx('reqs_t')+' ('+x.pending+')',()=>openRequests(x));
+    if(mine&&!x.ended&&!x.closed){
+      add(tx('boost'),()=>run(async()=>{const {link}=await api(`/trips/${x.id}/boost`,'POST');tg.openInvoice(link,s=>{if(s==='paid'){good();closeM();toast(tx('boosted'));show(tab)}})}),{alt:1});
+      add(tx('close'),()=>ask(tx('q_close'),()=>run(async()=>{await api(`/trips/${x.id}/close`,'POST');good();closeM();toast(tx('closedt'));show(tab)})),{alt:1});
+    }
+    add('🔗 '+tx('share'),()=>share(x),{alt:1});
+  }else{
+    if(x.ended)add(tx('ended_t'),null,{dis:1});
+    else if(x.closed)add(tx('closedt'),null,{dis:1});
+    else if(left<=0)add(tx('fullt'),null,{dis:1});
+    else if(x.req==='pending')add(tx('req_pend'),null,{dis:1});
+    else if(x.req==='declined')add(tx('err_declined'),null,{dis:1});
+    else add(x.approval?tx('req_send'):tx('join'),()=>run(async()=>{
+      const r=await api(`/trips/${x.id}/join`,'POST');
+      if(r.pending){x.req='pending';good();toast(tx('req_sent'));openPass(x);return}
+      x.joined=1;x.members=(x.members||0)+1;x.chat_open=1;good();
+      $('.pass').insertAdjacentHTML('beforeend',`<div class="stamp">${tx('going')}</div>`);
+      $('.stub').classList.add('torn');toast(tx('chatopen'));
+      setTimeout(()=>openChat(x.id),1800);
+    }));
+    add('🔗 '+tx('share'),()=>share(x),{alt:1});
+  }
+  $('#acts').innerHTML=acts.map((a,i)=>`<button class="cta${a.alt?' alt':a.t===tx('join')||a.t===tx('req_send')?' pri':''}" data-i="${i}"${a.dis?' disabled':''}>${esc(a.t)}</button>`).join('');
+  document.querySelectorAll('#acts .cta').forEach(b=>{const a=acts[+b.dataset.i];if(a.fn)b.onclick=a.fn});
+}
+
+function openRequests(x){run(async()=>{
+  const rs=await api(`/trips/${x.id}/requests`);
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${tx('reqs_t')}</h2><p class="mu">${esc(dn(x.dest))}</p>${rs.length?rs.map(r=>`<div class="req"><div class="mid"><button class="lnk" data-p="${r.id}">${esc(r.name)}</button>${r.age?', '+r.age:''}<p>${r.a_cnt?'★ '+r.a_avg+' ('+r.a_cnt+')':tx('newbie')}</p></div><button class="ghost sm ok" data-a="${r.id}">${tx('acc')}</button><button class="ghost sm" data-d="${r.id}">${tx('dec')}</button></div>`).join(''):`<p class="mu">${tx('noreqs')}</p>`}</div>`);
+  const again=()=>{x.pending=Math.max(0,(x.pending||1)-1);x.members=(x.members||0);openRequests(x)};
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openProfile(+b.dataset.p,()=>openRequests(x)));
+  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>run(async()=>{await api(`/trips/${x.id}/requests/${b.dataset.a}/accept`,'POST');x.members=(x.members||0)+1;x.chat_open=1;good();again()}));
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>run(async()=>{await api(`/trips/${x.id}/requests/${b.dataset.d}/decline`,'POST');hap();again()}));
+})}
+async function openChat(id){
+  hap();let since=0,first=true,info=null,panel=false;
+  modal(`<div class="cb"><button class="x" aria-label="Close">✕</button><div class="ch"><b id="ct"></b><button class="ghost sm" id="cm">👥</button></div><div id="mp"></div><p class="note">${tx('chatnote')}</p><div class="msgs" id="msgs"></div><div class="send"><input class="f" id="mi" maxlength="1000" placeholder="${tx('msgph')}" autocomplete="off"><button class="sb" id="sb" aria-label="Send">➤</button></div></div>`);
+  const back=()=>openChat(id);
+  const drawPanel=()=>{
+    const el=$('#mp');if(!el)return;
+    if(!panel||!info){el.innerHTML='';return}
+    const me=info.me,au=info.author_id===me;
+    el.innerHTML=`<div class="mpanel">${info.members.map(m=>`<div class="mr"><div class="mid"><button class="lnk" data-p="${m.id}">${esc(m.name)}</button>${m.is_author?` <span class="tag a0">${tx('author')}</span>`:''}<p>${m.age?yo(m.age)+' · ':''}${m.a_cnt?'★ '+m.a_avg+' ('+m.a_cnt+')':tx('newbie')}</p></div>${info.ended&&m.id!==me&&!m.rated?`<button class="ghost sm" data-r="${m.id}">⭐</button>`:''}${au&&m.id!==me?`<button class="ghost sm" data-k="${m.id}">${tx('kick')}</button>`:''}</div>`).join('')}<div class="two bt">${au?(info.closed||info.ended?'':`<button class="ghost" id="pc">${tx('close')}</button>`):`<button class="ghost" id="pl">${tx('leave')}</button>`}<button class="ghost" id="ps">🔗 ${tx('share')}</button></div></div>`;
+    el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openProfile(+b.dataset.p,back));
+    el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>openRate(id,+b.dataset.r));
+    el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>ask(tx('q_kick'),()=>run(async()=>{await api(`/trips/${id}/kick`,'POST',{user_id:+b.dataset.k});hap();pull()})));
+    const pc=$('#pc'),pl=$('#pl');
+    if(pc)pc.onclick=()=>ask(tx('q_close'),()=>run(async()=>{await api(`/trips/${id}/close`,'POST');good();toast(tx('closedt'));pull()}));
+    if(pl)pl.onclick=()=>ask(tx('q_leave'),()=>run(async()=>{await api(`/trips/${id}/leave`,'POST');closeM();show(tab)}));
+    $('#ps').onclick=()=>share({id,dest:info.dest});
+  };
+  const pull=async()=>{
+    if(!$('#msgs')){clearInterval(poll);return}
+    try{
+      const d=await api(`/trips/${id}/chat?since=${since}`),box=$('#msgs');if(!box)return;
+      info=d;$('#ct').textContent=dn(d.dest);$('#cm').textContent=`👥 ${d.members.length} ${panel?'▴':'▾'}`;drawPanel();
+      const stick=first||box.scrollTop+box.clientHeight>=box.scrollHeight-40;
+      d.messages.forEach(m=>{since=m.id;
+        if(m.user_id===0){box.insertAdjacentHTML('beforeend',`<div class="m sys">${esc(sysText(m.text))}</div>`);return}
+        const me=m.user_id===d.me;
+        box.insertAdjacentHTML('beforeend',`<div class="m ${me?'me':''}">${me?'':`<small><button class="lnk" data-p="${m.user_id}">${esc(m.name)}</button> <button class="rp" data-m="${m.id}" aria-label="${tx('report')}">⚑</button></small>`}${esc(m.text)}</div>`)});
+      box.querySelectorAll('[data-p]:not([data-b]),.rp:not([data-b])').forEach(b=>{b.dataset.b=1;
+        if(b.dataset.p)b.onclick=()=>openProfile(+b.dataset.p,back);
+        else b.onclick=()=>run(async()=>{await api(`/messages/${b.dataset.m}/report`,'POST');toast(tx('reported'))})});
+      if(stick)box.scrollTop=box.scrollHeight;
+    }catch(e){
+      if(e.message==='notmember'){clearInterval(poll);closeM();toast(tx('err_kicked'));return}
+      if(first)toast(T[L]['err_'+e.message]||e.message);
+    }
+    first=false;
+  };
+  $('#cm').onclick=()=>{panel=!panel;if(info){$('#cm').textContent=`👥 ${info.members.length} ${panel?'▴':'▾'}`;drawPanel()}};
+  const send=()=>run(async()=>{const i=$('#mi'),v=i.value.trim();if(!v)return;i.value='';await api(`/trips/${id}/messages`,'POST',{text:v});hap();pull()});
+  $('#sb').onclick=send;$('#mi').onkeydown=e=>{if(e.key==='Enter')send()};
+  await pull();clearInterval(poll);poll=setInterval(pull,4000);
+}
+
+function openProfile(id,back){run(async()=>{
+  const p=await api('/users/'+id);
+  const tl=Object.entries(p.tags).sort((a,b)=>b[1]-a[1]);
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button>${back?`<button class="ghost" id="bk">←</button>`:''}
+  <div class="who" style="margin-top:12px"><div class="ava">${esc((p.name||'?')[0])}</div><div><h2>${esc(p.name)}</h2><p class="mu">${[yo(p.age),esc(p.city)].filter(Boolean).join(' · ')}</p></div></div>
+  <div class="metrics"><div><b>${p.cnt?'★ '+p.avg:'—'}</b><span>${tx('rating')}</span></div><div><b>${p.cnt}</b><span>${tx('reviews')}</span></div><div><b>${p.trips}</b><span>${tx('trips_done')}</span></div></div>
+  ${p.about?`<p>${esc(p.about)}</p>`:''}${p.vibe&&p.vibe.length?`<div style="margin-top:6px">${vibeBadges(p.vibe)}</div>`:''}
+  ${tl.length?`<div>${tl.map(([k,n])=>`<span class="tgp ${NEG.has(k)?'neg':''}">${tx('tag_'+k)} ×${n}</span>`).join('')}</div>`:''}
+  <h3 style="margin:16px 0 8px;font-size:18px">${tx('reviews')}</h3>
+  ${p.reviews.length?p.reviews.map(r=>`<div class="rev"><b class="rt">${'★'.repeat(r.stars)}</b> <small>${esc(r.name)} · ${esc(dn(r.dest))}</small>${r.tags.length?`<div>${r.tags.map(k=>`<span class="tgp ${NEG.has(k)?'neg':''}">${tx('tag_'+k)}</span>`).join('')}</div>`:''}${r.text?`<p>${esc(r.text)}</p>`:''}</div>`).join(''):`<p class="mu">${tx('noreviews')}</p>`}
+  ${p.me?'':`<div class="two bt"><button class="ghost" id="bl">${p.blocked?tx('unblock'):tx('block')}</button><button class="ghost" id="rpu">${tx('reportu')}</button></div>`}</div>`);
+  const bk=$('#bk');if(bk)bk.onclick=back;
+  const bl=$('#bl');
+  if(bl){
+    bl.onclick=()=>{
+      const go=()=>run(async()=>{await api('/block','POST',{user_id:id,on:!p.blocked});good();closeM();toast(tx('done_ok'));show(tab)});
+      if(p.blocked)go();else ask(tx('q_block'),go);
+    };
+    $('#rpu').onclick=()=>run(async()=>{await api(`/users/${id}/report`,'POST');toast(tx('reported'))});
+  }
+})}
+
+function openRate(tid,only){run(async()=>{
+  const d=await api(`/trips/${tid}/people`);
+  if(!d.ended)throw new Error('notended');
+  const qu=d.members.filter(m=>m.id!==d.me&&!m.rated&&(!only||m.id===only));
+  if(!qu.length){toast(tx('norate'));return}
+  let i=0;
+  const step=()=>{
+    if(i>=qu.length){closeM();toast(tx('rated_ok'));show(tab);return}
+    const m=qu[i];let s=0;const sel=new Set();
+    modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${tx('rate_t')}</h2><p class="mu">${esc(dn(d.dest))}</p><h3 style="margin:10px 0 0;font-size:20px">${esc(m.name)}${m.age?', '+m.age:''}</h3><div class="sp" id="sp">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-label="${n}">★</button>`).join('')}</div><div class="chips wrap" id="tgs">${TAGS.map(k=>`<button type="button" class="chip" data-t="${k}" aria-pressed="false">${tx('tag_'+k)}</button>`).join('')}</div><textarea class="f" id="rtx" maxlength="300" placeholder="${tx('rate_ph')}"></textarea><button class="cta" id="go">${tx('rate_send')}</button><button class="cta alt" id="sk">${tx('rate_skip')}</button></div>`);
+    document.querySelectorAll('#sp button').forEach(b=>b.onclick=()=>{s=+b.dataset.n;hap();document.querySelectorAll('#sp button').forEach(o=>o.classList.toggle('on',+o.dataset.n<=s))});
+    document.querySelectorAll('#tgs .chip').forEach(b=>b.onclick=()=>{const k=b.dataset.t;sel.has(k)?sel.delete(k):sel.add(k);b.setAttribute('aria-pressed',sel.has(k));hap()});
+    $('#sk').onclick=()=>{i++;step()};
+    $('#go').onclick=()=>run(async()=>{
+      if(!s){hap();toast(tx('pickstars'));return}
+      await api('/reviews','POST',{trip_id:tid,to_id:m.id,stars:s,tags:[...sel],text:$('#rtx').value});
+      good();i++;step();
+    });
+  };
+  step();
+})}
+
+function rulesView(){
+  modal(`<div class="form ob"><button class="x" aria-label="Close">✕</button><div class="big">📜</div><h2>${tx('rulesT')}</h2><ul class="rules">${T[L].rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul><button class="cta" id="nx">${tx('ok')}</button></div>`);
+  $('#nx').onclick=closeM;
+}
+function onboarding(must){
+  let i=0;const S=T[L].ob,n=S.length+1;
+  const draw=()=>{
+    const last=i===S.length;
+    modal(`<div class="form ob"><button class="x" aria-label="Close">✕</button>${last?`<div class="big">📜</div><h2>${tx('rulesT')}</h2><ul class="rules">${T[L].rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:`<div class="big">${S[i].e}</div><h2>${S[i].h}</h2><p>${S[i].p}</p>${S[i].ex?`<div class="ex">${S[i].ex}</div>`:''}`}<div class="dots">${Array.from({length:n},(_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div><button class="cta" id="nx">${last?(must?tx('accept'):tx('ok')):tx('next')}</button></div>`,must);
+    $('#nx').onclick=()=>{
+      if(!last){i++;hap();draw();return}
+      if(!must){closeM();return}
+      run(async()=>{await api('/rules','POST');good();closeM();gate()});
+    };
+  };
+  draw();
+}
+
+function gate(){
+  if(ms.classList.contains('on')&&locked)return;
+  run(async()=>{const m=await api('/me');if(!m.rules_ok)onboarding(true);else if(!m.registered)regForm()});
+}
+function minorScreen(){
+  modal(`<div class="form c"><div class="big">🔞</div><h2>${tx('minor_t')}</h2><p>${tx('minor_p')}</p></div>`,true);
+}
+function regForm(){
+  modal(`<div class="form"><div class="big">🪪</div><h2>${tx('reg_t')}</h2><p class="mu" style="margin-bottom:12px">${tx('reg_p')}</p><label for="bd0">${tx('birth')}</label><input class="f" id="bd0" type="date" min="1920-01-01" max="${new Date().toISOString().slice(0,10)}"><label>${tx('gender')}</label><div class="seg" id="gs"></div><label for="rc">${tx('city')}</label><input class="f" id="rc" maxlength="60"><label for="ra">${tx('about')}</label><textarea class="f" id="ra" maxlength="500" placeholder="${tx('pha')}"></textarea><label>${tx('vibe_t')}</label><p class="mu" style="font-size:13px;margin:-2px 0 6px">${tx('vibe_h')}</p><div class="chips wrap" id="vb"></div><button class="cta" id="rg">${tx('reg_go')}</button></div>`,true);
+  let gender='x';const vs=new Set();
+  seg($('#gs'),[['f',tx('g_f')],['m',tx('g_m')],['x',tx('g_x')]],gender,v=>gender=v);vibePicker($('#vb'),vs);
+  $('#rg').onclick=()=>run(async()=>{
+    const b=$('#bd0').value;if(!b)throw new Error('baddate');
+    await api('/register','POST',{birth:b,gender,vibe:[...vs],city:$('#rc').value,about:$('#ra').value});
+    refreshMe();good();closeM();toast(tx('welcome'));show(tab);
+  });
+}
+
+function passport(){
+  $('#body').innerHTML='<p class="mu c">…</p>';
+  run(async()=>{
+    const [m,d]=await Promise.all([api('/me'),api('/my')]);
+    const all=[...d.mine,...d.joined];
+    const av=U.photo_url?`<img src="${esc(U.photo_url)}" alt="">`:esc((m.name||'?')[0]);
+    $('#body').innerHTML=`<div class="scroll"><div class="who"><div class="ava">${av}</div><div><h2>${esc(m.name)}</h2><p class="mu">${[yo(m.age),esc(m.city||'')].filter(Boolean).join(' · ')}</p></div><button class="ghost" id="edit">${tx('edit')}</button></div>${m.about?`<p>${esc(m.about)}</p>`:''}
+    <div class="metrics"><div><b>${m.cnt?'★ '+m.avg:'—'}</b><span>${tx('rating')}</span></div><div><b>${m.cnt}</b><span>${tx('reviews')}</span></div><div><b>${m.trips}</b><span>${tx('trips_done')}</span></div></div>
+    <button class="ghost" id="pub0" style="width:100%">${tx('myprof')}</button>
+    <h3>${tx('stamps')}</h3>${all.length?`<div class="stamps">${all.map((x,i)=>`<button class="st a${ci(x.dest)}" data-s="${i}" style="--r:${(ci(x.dest+i)-2.5)*5}deg">${esc(dn(x.dest))}<small>${fmt(x.date_from)||'✈'}</small></button>`).join('')}</div>`:`<p class="mu">${tx('nost')}</p>`}
+    ${d.mine.length?`<h3>${tx('mytrips')}</h3>${d.mine.map((x,i)=>row(x,i)).join('')}`:''}</div>`;
+    document.querySelectorAll('.st').forEach(b=>b.onclick=()=>openPass(all[+b.dataset.s]));
+    document.querySelectorAll('.scroll .flt').forEach(b=>b.onclick=()=>openPass(d.mine[+b.dataset.i]));
+    $('#pub0').onclick=()=>openProfile(m.id);
+    $('#edit').onclick=()=>{hap();modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${esc(m.name)}</h2><label for="city">${tx('city')}</label><input class="f" id="city" maxlength="60" value="${esc(m.city)}"><label for="ab">${tx('about')}</label><textarea class="f" id="ab" maxlength="500" placeholder="${tx('pha')}">${esc(m.about)}</textarea><label>${tx('vibe_t')}</label><div class="chips wrap" id="vb"></div><button class="cta" id="sv">${tx('save')}</button></div>`);
+      const vs=new Set((m.vibe||'').split(',').filter(Boolean));vibePicker($('#vb'),vs);
+      $('#sv').onclick=()=>run(async()=>{await api('/profile','POST',{city:$('#city').value,about:$('#ab').value,vibe:[...vs]});refreshMe();good();closeM();toast(tx('saved'));passport()})};
+  });
+}
+
+function picker(inp,box){
+  let pick=null;
+  inp.oninput=()=>{pick=null;const v=inp.value.trim().toLowerCase();
+    const m=v?CITY.filter(c=>(c.en+' '+c.ru+' '+c.ce+' '+c.cr).toLowerCase().includes(v)).slice(0,6):[];
+    box.innerHTML=m.map((c,i)=>`<button type="button" class="opt" data-i="${i}">${esc(L==='ru'?c.ru:c.en)} <span class="mu">${esc(L==='ru'?c.cr:c.ce)}</span></button>`).join('');
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{pick=m[+b.dataset.i];inp.value=L==='ru'?pick.ru:pick.en;box.innerHTML=''})};
+  return ()=>pick;
+}
+function newTrip(){
+  hap();let kind='flight';const t0=new Date().toISOString().slice(0,10);
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${tx('create')}</h2>
+  <label>${tx('kind')}</label><div class="chips" id="kc">${Object.keys(KIND).map(k=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${k===kind}">${KIND[k]} ${tx(k)}</button>`).join('')}</div>
+  <label for="dest">${tx('where')}</label><input class="f" id="dest" placeholder="${tx('ph')}" autocomplete="off"><div class="opts" id="opts"></div>
+  <div class="two"><div><label for="df">${tx('from')}</label><input class="f" id="df" type="date" min="${t0}"></div><div><label for="dt">${tx('to')}</label><input class="f" id="dt" type="date" min="${t0}"></div></div>
+  <div class="two"><div><label for="pp">${tx('people')}</label><input class="f" id="pp" type="number" min="1" max="20" value="1"></div><div><label for="bd">${tx('budget')}</label><input class="f" id="bd" placeholder="€800"></div></div><p class="mu" style="margin:-4px 0 12px;font-size:14px">${tx('limitnote')}</p>
+  <label>${tx('who_t')}</label><div class="seg" id="au2"></div>
+  <label>${tx('age_t')}</label><div class="two"><div><input class="f" id="a1" type="number" min="18" max="99" placeholder="18"></div><div><input class="f" id="a2" type="number" min="18" max="99" placeholder="99"></div></div>
+  <label class="sw"><input type="checkbox" id="ap"><span>${tx('approval')}<br><small class="mu">${tx('approval_h')}</small></span></label>
+  <label for="nt">${tx('plan_l')}</label><textarea class="f" id="nt" placeholder="${tx('phn')}"></textarea>
+  <button class="cta pri" id="pub">${tx('publish')}</button></div>`);
+  document.querySelectorAll('#kc .chip').forEach(b=>b.onclick=()=>{kind=b.dataset.k;hap();document.querySelectorAll('#kc .chip').forEach(o=>o.setAttribute('aria-pressed',o===b))});
+  const getPick=picker($('#dest'),$('#opts'));
+  let aud='all';seg($('#au2'),[['all',tx('aud_all')],['f',tx('aud_f')],['m',tx('aud_m')]],aud,v=>aud=v);
+  $('#pub').onclick=()=>run(async()=>{
+    const v=i=>$('#'+i).value,typed=v('dest').trim();
+    if(!typed)throw new Error(tx('nodest'));
+    const low=typed.toLowerCase(),c=getPick()||CITY.find(c=>c.en.toLowerCase()===low||c.ru.toLowerCase()===low);
+    await api('/trips','POST',{dest:c?c.en:typed,country:c?c.ce:'',lat:c?c.lat:null,lon:c?c.lon:null,kind,date_from:v('df'),date_to:v('dt'),people:+v('pp')||1,budget:v('bd'),note:v('nt'),audience:aud,min_age:+v('a1')||0,max_age:+v('a2')||0,approval:$('#ap').checked?1:0});
+    good();closeM();toast(tx('posted'));show('pass');
+  });
+}
+function deep(){
+  const P=new URLSearchParams(location.search),c=P.get('chat'),r=P.get('rate'),t=P.get('trip'),rq=P.get('req');
+  if(rq)run(async()=>{openRequests(await api('/trips/'+(+rq)))});else if(c)openChat(+c);else if(r)openRate(+r);else if(t)run(async()=>{openPass(await api('/trips/'+(+t)))});
+}
+shell();show('board');
+setTimeout(()=>run(async()=>{const m=await api('/me');ME=m;if(m.rules_ok&&m.registered)deep()}),2800);
+</script>
+</body>
+</html>
