@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Travel Friends</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
+<style>
+:root{--ink:#0B1B3F;--night:#FBF6EC;--deep:#FFFFFF;--line:#E7DDCB;--tx:#0B1B3F;--mu:#6B7794;--blue:#1565C0;--a0:#FF6B4A;--a1:#F2547D;--a2:#4DB2FF;--a3:#2FC48D;--a4:#A592FF;--a5:#FFA03C}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font:500 16px/1.4 'Bricolage Grotesque',system-ui,sans-serif;background:radial-gradient(110% 40% at 50% -6%,#FFE3D6 0,var(--night) 70%) var(--night);color:var(--tx);overflow:hidden;position:fixed;inset:0;width:100%;overscroll-behavior:none}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--a0);outline-offset:2px}
+.a0{--a:var(--a0)}.a1{--a:var(--a1)}.a2{--a:var(--a2)}.a3{--a:var(--a3)}.a4{--a:var(--a4)}.a5{--a:var(--a5)}
+.mu{color:var(--mu)}.c{text-align:center;margin-top:30px}
+#app{height:100%;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 8px)}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.lang{background:var(--deep);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:14px;color:var(--mu)}
+.lang b{color:var(--a0)}
+.card-sh{box-shadow:0 6px 18px #0B1B3F14}
+#body{flex:1;min-height:0;display:flex;flex-direction:column}
+.q,.f{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font:inherit;background:var(--deep);color:var(--tx);margin-bottom:12px}
+.q::placeholder,.f::placeholder{color:var(--mu)}
+textarea.f{min-height:84px;resize:vertical}
+.list,.scroll{flex:1;overflow:auto;padding-bottom:16px;perspective:900px}
+.flt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--deep);border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;margin-bottom:10px;box-shadow:0 4px 14px #0B1B3F12;transform-origin:50% 0;animation:flip .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
+@keyframes flip{from{transform:rotateX(-85deg);opacity:0}}
+.dt{background:var(--a);color:var(--ink);border-radius:12px;min-width:58px;padding:8px 0;text-align:center;font-family:ui-monospace,Menlo,monospace}
+.dt b{display:block;font-size:24px;line-height:1}.dt span{font-size:12px}
+.mid{flex:1;min-width:0}
+.mid h3{font-weight:800;font-size:21px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mid p{font-size:14px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{display:inline-block;background:var(--a);color:var(--ink);font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:6px}
+.seat{text-align:center;color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+.seat b{display:block;font-size:22px;line-height:1}.seat span{font-size:11px;color:var(--mu)}
+.empty{text-align:center;padding:60px 20px}.empty h2{font-size:24px;margin-bottom:6px}
+nav{display:flex;align-items:stretch;justify-content:space-around;background:var(--deep);border:1px solid var(--line);border-radius:22px;padding:6px 4px;box-shadow:0 6px 20px #0B1B3F18;flex:none}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--mu);font-weight:700;font-size:12px;padding:6px 4px;border-radius:16px}nav svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav button[aria-current=true]{color:var(--ink);background:#FF6B4A1f}nav button[aria-current=true] svg{stroke:var(--a0);stroke-width:2.3}
+
+
+.who{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.who h2{font-weight:800;font-size:24px}.who>div{flex:1;min-width:0}.who>.ava{flex:none;width:62px;height:62px}
+.ava{width:62px;height:62px;border-radius:50%;background:var(--a4);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;overflow:hidden;flex:none}
+.ava img{width:100%;height:100%;object-fit:cover}
+.scroll h3{font-weight:800;font-size:18px;margin:18px 0 10px}
+.ghost{background:none;border:1px solid var(--line);border-radius:12px;padding:8px 14px;color:var(--mu)}
+.stamps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:4px}
+.st{aspect-ratio:1;border:3px solid var(--a);outline:1.5px dashed var(--a);outline-offset:3px;border-radius:50%;background:none;color:var(--a);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px;font-weight:800;font-size:13px;line-height:1.1;transform:rotate(var(--r));overflow-wrap:anywhere;overflow:hidden}
+.st small{font-size:11px;font-weight:700;font-family:ui-monospace,Menlo,monospace;opacity:.85}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;flex:none}
+.chip{flex:none;background:var(--deep);border:1px solid var(--line);color:var(--mu);border-radius:99px;padding:7px 14px;font-weight:700;font-size:14px}
+.chip[aria-pressed=true]{background:var(--a0);border-color:var(--a0);color:var(--ink)}
+.opts{margin:-8px 0 12px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opts:empty{display:none}
+.opt{display:block;width:100%;text-align:left;background:var(--night);border:0;border-bottom:1px solid var(--line);padding:10px 12px;font-size:15px}
+.chatc{margin:auto;text-align:center;max-width:320px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.chatc .big{font-size:56px}.chatc h2{font-weight:800;font-size:24px}
+.cta.alt{background:none;border:1px solid var(--line);color:var(--tx);margin-top:10px}
+.big{font-size:56px;line-height:1.1;margin-bottom:6px}
+.ex{background:var(--night);border:1px dashed var(--line);border-radius:14px;padding:12px;margin:12px 0;color:var(--a0)}
+.dots{display:flex;gap:6px;justify-content:center;margin:16px 0}
+.dots i{width:7px;height:7px;border-radius:4px;background:var(--line)}.dots i.on{background:var(--a0);width:22px}
+.rules{padding-left:20px;margin:10px 0}.rules li{margin-bottom:8px}
+.bt{margin:12px 0}.bt .ghost{flex:1}
+.cb{display:flex;flex-direction:column;height:min(82vh,680px)}
+.ch{padding:18px 56px 6px 20px}.ch b{font-weight:800;font-size:20px;display:block}
+.note{padding:0 20px 8px;font-size:13px;color:var(--mu)}
+.msgs{flex:1;overflow:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:82%;background:var(--line);border-radius:16px 16px 16px 4px;padding:8px 12px;white-space:pre-wrap;overflow-wrap:anywhere;align-self:flex-start}
+.m.me{align-self:flex-end;background:var(--a0);color:var(--ink);border-radius:16px 16px 4px 16px}
+.m small{display:block;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:2px}
+.rp{background:none;border:0;color:var(--mu);font-size:12px;padding:0 4px}
+.send{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.send .f{margin:0;flex:1}
+.sb{width:48px;border:0;border-radius:14px;background:var(--a0);color:var(--ink);font-size:20px}
+.ms{position:fixed;left:0;right:0;top:0;height:var(--tg-viewport-height,100dvh);background:#0B1B3Fee;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10;opacity:0;pointer-events:none;transition:opacity .25s}
+.ms.on{opacity:1;pointer-events:auto}
+.mb{position:relative;width:100%;max-width:420px;max-height:92%;overflow:auto;background:var(--deep);border:1px solid var(--line);border-radius:26px;transform:translateY(24px) scale(.97);transition:transform .3s ease-out;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ms.on .mb{transform:none}
+.x{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;border:0;background:#0B1B3F22;color:var(--ink);font-size:18px;z-index:2}
+.form{padding:24px 20px 20px}.form h2{font-weight:800;font-size:24px;margin-bottom:14px}
+.form .x{background:var(--line);color:var(--tx)}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:4px}
+.two{display:flex;gap:10px;align-items:flex-end}.two>div{flex:1;min-width:0}
+.pt{background:var(--a);color:var(--ink);padding:22px 20px 18px}
+.mini{font-size:13px;font-weight:700;opacity:.75;margin-right:40px}
+.pt h2{font-weight:800;font-size:clamp(32px,11vw,46px);line-height:1;margin:10px 0 14px;overflow-wrap:anywhere;letter-spacing:-.02em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.grid small{display:block;font-size:12px;font-weight:700;opacity:.7}.grid b{font-weight:800}
+.tearl{border-top:2px dashed #0B1B3F33;position:relative}
+.tearl:before,.tearl:after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:#1d2a4a}
+.tearl:before{left:-12px}.tearl:after{right:-12px}
+.stub{padding:16px 20px 20px;transition:transform .7s cubic-bezier(.5,0,1,.6),opacity .7s;transform-origin:0 0}
+.stub.torn{transform:translateY(120px) rotate(8deg);opacity:0}
+.stub p{margin-bottom:12px}
+.bar{height:34px;margin-bottom:14px;opacity:.7;background:repeating-linear-gradient(90deg,var(--tx) 0 2px,transparent 2px 5px,var(--tx) 5px 6px,transparent 6px 10px)}
+.cta{width:100%;border:0;border-radius:16px;padding:15px;font-weight:800;font-size:17px;background:var(--ink);color:#fff}
+.cta.pri{background:var(--a0);color:var(--ink)}
+.cta:disabled{background:#C9CFDD;color:#fff}
+.cta:active{transform:scale(.98)}
+.stamp{position:absolute;left:50%;top:36%;width:132px;height:132px;margin:-66px;border:5px solid var(--ink);outline:2px dashed var(--ink);outline-offset:5px;border-radius:50%;color:var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:22px;transform:rotate(-14deg);animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both;pointer-events:none}
+@keyframes stamp{from{transform:rotate(-34deg) scale(2.6);opacity:0}}
+.sent{padding:14px 20px 20px;font-weight:700;color:var(--a3)}
+.toast{position:fixed;left:16px;right:16px;bottom:100px;background:var(--ink);color:#fff;font-weight:700;padding:12px;border-radius:12px;text-align:center;z-index:30}
+#splash{--night:#0A0F2C;--mu:#9AA6D6;--tx:#F4F6FF;color:var(--tx);position:fixed;inset:0;z-index:20;background:radial-gradient(120% 70% at 50% 20%,#25339A 0,var(--night) 65%) var(--night);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+.orb{position:relative;width:150px;height:150px;margin-bottom:56px}
+.earth{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#5FD8FF,#1B6DFF 55%,#0A2A8C);box-shadow:0 0 50px #35D0FF55}
+.earth:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 28%,transparent 38%,#0008 100%)}
+.land{display:flex;width:600px;animation:spin 9s linear infinite}
+.land svg{width:300px;height:150px;flex:none}
+@keyframes spin{to{transform:translateX(-300px)}}
+.ring{position:absolute;inset:-38px;border:1.5px dashed #ffffff40;border-radius:50%;animation:orbit 6s linear infinite}
+.plane{position:absolute;top:-14px;left:50%;margin-left:-13px;transform:rotate(90deg)}
+@keyframes orbit{to{transform:rotate(360deg)}}
+#splash h1{font-weight:800;font-size:38px;letter-spacing:-.03em}
+#splash p{color:var(--mu)}
+.lnk{background:none;border:0;padding:0;font:inherit;font-weight:800;color:inherit;text-decoration:underline dotted;text-underline-offset:3px;text-align:left}
+.rt{color:var(--a0);font-weight:800;white-space:nowrap}.rt.n{color:#0F9D6E}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.metrics div{background:var(--night);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center}
+.metrics b{display:block;font-size:22px;font-weight:800}.metrics span{font-size:12px;color:var(--mu)}
+.rev{background:var(--night);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.rev small{color:var(--mu)}.rev p{margin-top:4px;overflow-wrap:anywhere}
+.tgp{display:inline-block;background:var(--line);border-radius:99px;padding:3px 10px;font-size:13px;margin:4px 6px 2px 0}
+.tgp.neg{background:#FF5C7A33;color:var(--a1)}
+.sp{display:flex;gap:4px;justify-content:center;margin:10px 0}
+.sp button{background:none;border:0;font-size:40px;line-height:1;color:var(--line);padding:2px 4px}
+.sp button.on{color:var(--a0)}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.mpanel{border-bottom:1px solid var(--line);max-height:42%;overflow:auto;padding:4px 16px 10px;flex:none}
+.mr{display:flex;align-items:center;gap:8px;padding:6px 0}
+.ghost.sm{padding:5px 10px;font-size:13px}
+.m.sys{align-self:center;background:none;border-radius:0;color:var(--mu);font-size:13px;padding:2px 8px;text-align:center;max-width:92%}
+.pt .lnk{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:16px 18px;margin-bottom:12px;color:#fff;background:linear-gradient(120deg,#0E2A6B,#1E6FD9 60%,#4DB2FF);flex:none}
+.hero h2{font-weight:800;font-size:22px;line-height:1.1;max-width:75%}.hero p{font-size:14px;opacity:.9;margin-top:4px;max-width:75%}
+.hero .pl{position:absolute;right:-6px;top:6px;font-size:64px;transform:rotate(-12deg);filter:drop-shadow(0 6px 10px #0004)}
+.pop{display:flex;gap:10px;overflow-x:auto;margin-bottom:12px;flex:none;padding-bottom:2px}
+.pop button{flex:none;width:78px;background:var(--deep);border:1px solid var(--line);border-radius:16px;padding:8px 4px;text-align:center;font-weight:700;font-size:13px;box-shadow:0 3px 10px #0B1B3F10}
+.pop span{display:block;font-size:30px;line-height:1.1}
+.sw{display:flex;align-items:center;gap:10px;margin:2px 0 12px}.sw input{width:22px;height:22px;accent-color:var(--a0)}
+.seg{display:flex;gap:6px;margin-bottom:12px}.seg .chip{flex:1;text-align:center;padding:8px 6px}
+.match{display:inline-block;background:#2FC48D33;color:#0F7A57;border-radius:99px;padding:2px 10px;font-size:13px;font-weight:700;margin-top:6px}
+.badge{display:inline-block;border:1px solid var(--line);background:var(--night);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+.req{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.req .mid{flex:1;min-width:0}.req .ghost.sm.ok{background:var(--a3);border-color:var(--a3);color:var(--ink)}
+input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;width:100%;height:50px;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+.f{display:block;max-width:100%}
+.ob .big,.form .big{margin-top:4px}
+#splash p{text-align:center;padding:0 28px;max-width:360px}
+#splash #tag{color:#fff;font-weight:700;font-size:19px}
+#splash #tag2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.65}
+#splash .sl{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px;max-width:330px}
+#splash .sl button{background:#ffffff14;border:1px solid #ffffff40;color:#fff;border-radius:99px;padding:6px 12px;font-weight:700;font-size:14px}
+#splash .sl button.on{background:#FF6B4A;border-color:#FF6B4A;color:#0B1B3F}
+
+.map{position:relative;z-index:0;isolation:isolate;height:clamp(190px,32vh,300px);border-radius:20px;overflow:hidden;flex:none;margin-bottom:10px;border:1px solid var(--line);box-shadow:0 4px 14px #0B1B3F12}
+.map[hidden]{display:none}
+.mh{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px;flex:none;font-weight:800;min-height:30px}
+.pinwrap{background:none;border:0}
+.pin{position:relative;width:44px;height:44px}
+.pin span{position:absolute;inset:0;border-radius:50%;background:var(--a);border:3px solid #fff;box-shadow:0 4px 12px #0B1B3F55;display:flex;align-items:center;justify-content:center;font-size:20px;transition:transform .2s}
+.pin b{position:absolute;right:-4px;top:-5px;min-width:20px;height:20px;border-radius:10px;background:var(--ink);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff;z-index:2}
+.pin i{position:absolute;top:48px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;color:var(--ink);border-radius:99px;padding:1px 8px;font:700 11px/16px 'Bricolage Grotesque',system-ui,sans-serif;font-style:normal;box-shadow:0 2px 8px #0B1B3F33}
+.pin.fresh span{animation:pulse 2s infinite}
+.pin.sel span{transform:scale(1.18);border-color:var(--a0)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #FF6B4A99}70%{box-shadow:0 0 0 14px #FF6B4A00}100%{box-shadow:0 0 0 0 #FF6B4A00}}
+
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
+.smap{position:absolute;inset:0;background:#CFE6F7;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
+.smap svg{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;pointer-events:none}
+.smap .pl{position:absolute;left:0;top:0;width:0;height:0}
+.smap .pw{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;padding:0;background:none;border:0}
+.smap .zb{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.smap .zb button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:20px;font-weight:800;line-height:1;padding:0;box-shadow:0 2px 8px #0B1B3F22}
+.smap .dot{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#FF6B4A;border:3px solid #fff;box-shadow:0 2px 8px #0B1B3F66}
+.slogo{width:128px;height:128px;margin-bottom:22px;filter:drop-shadow(0 10px 30px #1E55E877);animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-8px)}}
+
+nav{overflow:visible;position:relative}
+.navplus{flex:none;align-self:flex-start;width:58px;height:58px;margin:-26px 6px 0;border-radius:50%;border:4px solid var(--night);background:var(--a0);color:var(--ink);font-size:32px;line-height:1;padding:0;box-shadow:0 8px 22px #FF6B4A66;display:flex;align-items:center;justify-content:center}
+.navplus:active{transform:scale(.94)}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pc{background:var(--deep);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-align:left;padding:0;box-shadow:0 4px 14px #0B1B3F12}
+.pi{height:112px;background:linear-gradient(135deg,var(--a),#ffffff99);background-size:cover;background-position:center}
+.pc b{display:block;padding:8px 10px 0;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc span{display:block;padding:0 10px 10px;font-size:13px;color:var(--mu)}
+.pt.ph{color:#fff;background-size:cover;background-position:center}
+.pt.ph .lnk{color:#fff}.pt.ph .mini{opacity:.9}
+.mm{height:130px;border-radius:14px;overflow:hidden;margin:10px 0;isolation:isolate;position:relative;z-index:0;border:1px solid var(--line)}
+.mm[hidden]{display:none}
+.rx{display:flex;flex-wrap:wrap;gap:4px}.rx:empty{display:none}
+.rx{margin-top:4px}
+.rc{border:1px solid var(--line);background:var(--deep);color:var(--ink);border-radius:99px;padding:1px 8px;font-size:13px}
+.rc.on{border-color:var(--a0);background:#FFE3DA}
+.rb{background:none;border:0;opacity:.45;font-size:14px;padding:0 0 0 6px;float:right}
+.pk{display:flex;gap:6px;margin-top:6px;clear:both}
+.pk button{background:var(--deep);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;font-size:18px;padding:0}
+</style>
+</head>
+<body>
+<div id="splash"><svg class="slogo" viewBox="0 0 512 512" role="img" aria-label="Travel Friends">
+<defs>
+<linearGradient id="sbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1D2E86"/><stop offset="1" stop-color="#0A0F2C"/></linearGradient>
+<linearGradient id="sgl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5FD8FF"/><stop offset="1" stop-color="#1E55E8"/></linearGradient>
+<linearGradient id="sor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A3D"/><stop offset="1" stop-color="#F2547D"/></linearGradient>
+<clipPath id="scp"><circle cx="248" cy="272" r="150"/></clipPath>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#sbg)"/>
+<circle cx="248" cy="272" r="150" fill="url(#sgl)"/>
+<g clip-path="url(#scp)">
+<circle cx="190" cy="206" r="30" fill="#fff"/>
+<path d="M118 400C118 300 150 252 190 252S262 300 262 400Z" fill="#fff"/>
+<circle cx="316" cy="198" r="30" fill="url(#sor)"/>
+<path d="M250 420C250 300 290 244 316 244S400 300 400 420Z" fill="url(#sor)" opacity=".96"/>
+</g>
+<path d="M62 330C110 420 290 440 400 340 460 285 440 190 330 150" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round"/>
+<g transform="translate(326 78) rotate(32 48 48) scale(4)"><path fill="#fff" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></g>
+</svg>
+
+<h1>Travel Friends</h1><p id="tag"></p><p id="tag2"></p><div class="sl"></div></div>
+
+<div id="app"></div>
+<div class="ms" id="ms"><div class="mb" id="mb"></div></div>
+
+<script>
+const LF=true;const tg=Telegram.WebApp;tg.ready();tg.expand();
+try{tg.setBackgroundColor('#FBF6EC');tg.setHeaderColor('#FBF6EC')}catch(e){}
+const $=s=>document.querySelector(s);
+const U=(tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+const T={ru:{tag:'Поездки начинаются с людей',tag2:'Настоящие люди · Настоящие поездки',board:'Рейсы',passport:'Паспорт',search:'Город или страна',seats:'Мест',looking:'ищет попутчиков',boarding:'Посадка',isnew:'Новый',flex:'Даты гибкие',join:'Поехать вместе',sent:'Запрос отправлен ✓',boost:'Поднять в табло на неделю',e1:'Табло пустое',e2:'Опубликуй первый рейс и позови друзей.',create:'Новый рейс',where:'Куда',from:'С',to:'По',people:'Сколько человек ищу',budget:'Бюджет',plan:'Быстрый план',plan_l:'Что планируешь',publish:'Опубликовать',posted:'Рейс опубликован',city:'Город',about:'О себе',save:'Сохранить',saved:'Сохранено',stamps:'Штампы',nost:'Штампы появятся, когда опубликуешь рейс или откликнешься.',mytrips:'Мои рейсы',reqs:'Откликов',going:'Едем!',notified:'Автор получит сообщение',pass:'Посадочный талон',who:'Кто',when:'Когда',edit:'Изменить',ph:'Москва, Париж, Грузия…',phn:'Маршрут, стиль поездки, с кем хочешь ехать',pha:'Как путешествуешь, что любишь',boosted:'Поднято',none:'Пока без откликов',nodest:'Укажи, куда едешь',flight:'Перелёт',train:'Поезд',road:'Роуд-трип',hike:'Поход',other:'Другое',all:'Все',kind:'Как едем',chat:'Чаты',chat1:'Сообщество Travel Friends',chat2:'Знакомься с попутчиками, делись маршрутами и находи компанию в нашем чате.',chat3:'Ссылка на чат пока не добавлена.',openchat:'Открыть чат',howto:'Как это работает',rulesT:'Правила сообщества',next:'Далее',accept:'Принимаю правила',ok:'Понятно',welcome:'Добро пожаловать! Поехали',left:'свободно',fullt:'Собрались',opennow:'Открыть чат сейчас',waiting:'Ждём первого попутчика',chatopen:'Чат открыт!',msgph:'Сообщение…',report:'Пожаловаться',reported:'Жалоба отправлена',mem:'участников',mychats:'Мои группы',nochats:'Здесь появятся группы, где ты едешь или которые собираешь.',chatnote:'Только текст. Без интима, травли и спама. Нажми ⚑, если что-то не так.',limitnote:'Это максимум попутчиков в группе. Чат откроется, как только присоединится первый человек.',err_full:'Мест уже нет',err_rules:'Сначала прими правила',err_closed:'Чат ещё не открыт',err_own:'Это твоя поездка',err_notmember:'Ты не в этой группе',err_nobody:'Пока никто не присоединился',
+reg_t:'Регистрация',reg_p:'Чтобы путешествовать безопасно, нужен короткий профиль. Дата рождения не показывается: другие видят только возраст. Приложение только для 18+.',birth:'Дата рождения',reg_go:'Зарегистрироваться',minor_t:'Только 18+',minor_p:'Travel Friends доступен только совершеннолетним. Возвращайся, когда тебе исполнится 18!',
+newbie:'Новичок',rating:'Рейтинг',reviews:'Отзывы',trips_done:'Поездок',noreviews:'Отзывов пока нет',yo:'лет',myprof:'Мой публичный профиль',
+tag_reliable:'Надёжный',tag_fun:'С ним весело',tag_respectful:'Уважительный',tag_organized:'Организованный',tag_punctual:'Пунктуальный',tag_late:'Опаздывает',tag_rude:'Грубит',
+block:'Заблокировать',unblock:'Разблокировать',reportu:'Пожаловаться на профиль',leave:'Выйти из группы',kick:'Исключить',close:'Закрыть набор',share:'Поделиться',author:'Автор',
+rate:'Оценить попутчиков',rate_t:'Как прошла поездка?',rate_ph:'Пара слов о попутчике (необязательно)',rate_send:'Отправить',rate_skip:'Пропустить',rated_ok:'Спасибо за отзыв!',norate:'Оценивать уже некого',pickstars:'Поставь звёзды',
+sys_join:'{n} в группе',sys_leave:'{n} покинул(а) группу',sys_kick:'{n} исключён(а) из группы',sys_closed:'Автор закрыл набор в группу',
+q_leave:'Выйти из этой группы?',q_kick:'Исключить участника?',q_close:'Закрыть набор? Новые люди не смогут присоединиться.',q_block:'Заблокировать этого человека? Вы не увидите сообщения и поездки друг друга.',
+closedt:'Набор закрыт',ended_t:'Поездка завершена',torate:'Оцени',done_ok:'Готово',sharetxt:'Поедем вместе?',
+err_banned:'Доступ закрыт',err_baddate:'Проверь даты',err_limit:'Максимум 5 активных поездок',err_tripclosed:'Набор закрыт',err_tripended:'Поездка уже завершена',err_blocked:'Недоступно',err_kicked:'Автор исключил тебя из этой группы',err_notfound:'Не найдено',err_notended:'Оценивать можно после окончания поездки',err_dup:'Ты уже оценил(а) этого человека',err_slow:'Слишком часто, подожди немного',err_register:'Сначала зарегистрируйся',err_badreq:'Ошибка запроса',
+who_t:'Кого ищешь',aud_all:'Всех',aud_f:'Девушек',aud_m:'Мужчин',age_t:'Возраст попутчиков (необязательно)',approval:'Вход по заявке автора',approval_h:'Ты сам решаешь, кого взять. Без галочки люди входят сразу.',
+gender:'Пол',g_f:'Женский',g_m:'Мужской',g_x:'Другое',vibe_t:'Твой стиль путешествий',vibe_h:'Выбери, что тебе близко: так находят совместимых людей',
+v_early:'🌅 Ранние подъёмы',v_nature:'🌲 Природа',v_night:'🌃 Ночная жизнь',v_museums:'🏛 Музеи',v_spontaneous:'🎲 Спонтанность',v_planner:'📋 Всё по плану',v_food:'🍜 Еда',v_photo:'📸 Фото',v_active:'🏃 Активно',v_chill:'🛋 Спокойно',
+match:'Совпало интересов: {n}',req_send:'Хочу с тобой',req_pend:'Заявка отправлена, ждём автора',req_sent:'Заявка отправлена ✓',reqs_t:'Заявки',acc:'Принять',dec:'Отклонить',noreqs:'Новых заявок нет',
+for_f:'Только девушки',for_m:'Только мужчины',byreq:'По заявке',hero_h:'Найди своих людей',hero_p:'Выкладывай поездки, знакомься и открывай мир вместе',popt:'Популярные направления',
+err_audience:'Эта поездка не подходит под условия автора',err_agerange:'Твой возраст не подходит под условия автора',err_declined:'Автор отклонил твою заявку',err_baddate_plan:'Для быстрого плана укажи дату',mapt:'Поездки на карте',trips_cnt:'Поездок: {n}',showall:'Показать все',nomap:'Карта недоступна',langt:'Язык',here:'Поездки здесь',nonearby:'В этой области пока нет поездок',places:'Места',friends:'Друзья',photoby:'Фото: Википедия',react:'Реакция',
+ob:[{e:'🌍',h:`Привет! Это Travel Friends`,p:`Здесь находят попутчиков: для перелётов, поездок на поезде, роад-трипов и походов. Выкладываешь поездку, люди присоединяются, и как только к тебе присоединился первый человек, открывается общий чат.`},
+{e:'🗺️',h:`1. Выложи поездку`,p:`Нажми жёлтую кнопку «+». Выбери, как едешь, город или страну, даты и сколько человек ты ищешь в компанию.`,ex:`Пример: Рим · перелёт из Москвы · 1 неделя · ищу 3 человека`},
+{e:'🎫',h:`2. Присоединяйся`,p:`Открой рейс на табло и нажми «Поехать вместе». Больше людей, чем указал автор, присоединиться не смогут.`,ex:`Пример: «свободно 2» → нажимаешь → ты в группе, открывается чат`},
+{e:'💬',h:`3. Общайтесь в чате`,p:`Ждать полной компании не нужно: чат открывается сразу, остальные подключаются по ходу. Обсудите маршрут, билеты и жильё. Чат живёт во вкладке «Чаты».`,ex:`Чат только текстовый: фото и файлы отключены`},
+{e:'⭐',h:`4. Оставляй отзывы`,p:`После поездки оцени попутчиков: звёзды и пара слов. Рейтинг, возраст и число поездок видны в профиле, так сразу понятно, что человек адекватный.`,ex:`Пример: ★ 4.9 · 12 поездок · «Надёжный», «С ним весело»`}],
+rules:[`Только текст: фото и файлы в чатах отключены.`,`Никакого интима, пошлости и домогательств.`,`Уважай людей: без травли, угроз и дискриминации.`,`Без спама, рекламы и продажи услуг.`,`Не отправляй паспорт, данные карт и пароли.`,`С незнакомыми встречайся в людных местах и сообщай близким свой маршрут.`,`На нарушения жалуйся кнопкой ⚑. Нарушителей мы можем заблокировать.`,`Приложение только для 18+.`,`Отзывы должны быть честными: не пиши ложь и не мсти.`]},
+en:{tag:'Trips start with people',tag2:'Real people · Real trips · Together',board:'Flights',passport:'Passport',search:'City or country',seats:'Seats',looking:'is looking for travel buddies',boarding:'Boarding',isnew:'New',flex:'Flexible dates',join:'Join the trip',sent:'Request sent ✓',boost:'Boost on the board for a week',e1:'The board is empty',e2:'Post the first trip and invite your friends.',create:'New trip',where:'Where',from:'From',to:'To',people:'How many people I look for',budget:'Budget',plan:'Quick plan',plan_l:'The plan',publish:'Post trip',posted:'Trip posted',city:'City',about:'About you',save:'Save',saved:'Saved',stamps:'Stamps',nost:'Stamps appear when you post a trip or join one.',mytrips:'My trips',reqs:'Requests',going:"We're going!",notified:'The author will be notified',pass:'Boarding pass',who:'Who',when:'When',edit:'Edit',ph:'Paris, Tbilisi, Georgia…',phn:'Route, travel style, who you want to go with',pha:'How you travel, what you love',boosted:'Boosted',none:'No requests yet',nodest:'Enter a destination',flight:'Flight',train:'Train',road:'Road trip',hike:'Hiking',other:'Other',all:'All',kind:'How we go',chat:'Chats',chat1:'The Travel Friends community',chat2:'Meet travel buddies, share routes and find company in our chat.',chat3:'The chat link has not been added yet.',openchat:'Open chat',howto:'How it works',rulesT:'Community rules',next:'Next',accept:'I accept the rules',ok:'Got it',welcome:"Welcome! Let's go",left:'free',fullt:'Full',opennow:'Open the chat now',waiting:'Waiting for the first buddy',chatopen:'The chat is open!',msgph:'Message…',report:'Report',reported:'Report sent',mem:'members',mychats:'My groups',nochats:"Groups you join or organize will appear here.",chatnote:'Text only. No sexual content, bullying or spam. Tap ⚑ if something is wrong.',limitnote:'This is the maximum group size. The chat opens as soon as the first person joins.',err_full:'No seats left',err_rules:'Please accept the rules first',err_closed:'The chat is not open yet',err_own:'This is your trip',err_notmember:'You are not in this group',err_nobody:'Nobody has joined yet',
+reg_t:'Registration',reg_p:'A short profile keeps travel safer. Your birth date is never shown: others see only your age. The app is for 18+ only.',birth:'Date of birth',reg_go:'Sign up',minor_t:'18+ only',minor_p:'Travel Friends is available to adults only. Come back when you turn 18!',
+newbie:'Newbie',rating:'Rating',reviews:'Reviews',trips_done:'Trips',noreviews:'No reviews yet',yo:'y.o.',myprof:'My public profile',
+tag_reliable:'Reliable',tag_fun:'Fun to travel with',tag_respectful:'Respectful',tag_organized:'Organized',tag_punctual:'Punctual',tag_late:'Often late',tag_rude:'Rude',
+block:'Block',unblock:'Unblock',reportu:'Report profile',leave:'Leave group',kick:'Remove',close:'Close joining',share:'Share',author:'Author',
+rate:'Rate your buddies',rate_t:'How was the trip?',rate_ph:'A few words about this person (optional)',rate_send:'Send',rate_skip:'Skip',rated_ok:'Thanks for your review!',norate:'Nobody left to rate',pickstars:'Pick a star rating',
+sys_join:'{n} joined',sys_leave:'{n} left the group',sys_kick:'{n} was removed from the group',sys_closed:'The author closed joining',
+q_leave:'Leave this group?',q_kick:'Remove this member?',q_close:'Close joining? New people will not be able to join.',q_block:'Block this person? You will not see each other’s messages and trips.',
+closedt:'Joining closed',ended_t:'Trip is over',torate:'Rate',done_ok:'Done',sharetxt:'Wanna travel together?',
+err_banned:'Access denied',err_baddate:'Check the dates',err_limit:'Up to 5 active trips',err_tripclosed:'Joining is closed',err_tripended:'This trip is already over',err_blocked:'Unavailable',err_kicked:'The author removed you from this group',err_notfound:'Not found',err_notended:'You can rate after the trip ends',err_dup:'You already rated this person',err_slow:'Too fast, wait a bit',err_register:'Please sign up first',err_badreq:'Bad request',
+who_t:'Who I look for',aud_all:'Anyone',aud_f:'Women',aud_m:'Men',age_t:'Buddies’ age (optional)',approval:'Join by author’s approval',approval_h:'You decide who joins. Without the checkbox people join instantly.',
+gender:'Gender',g_f:'Female',g_m:'Male',g_x:'Other',vibe_t:'Your travel style',vibe_h:'Pick what fits you: it helps find compatible people',
+v_early:'🌅 Early birds',v_nature:'🌲 Nature',v_night:'🌃 Nightlife',v_museums:'🏛 Museums',v_spontaneous:'🎲 Spontaneous',v_planner:'📋 Planner',v_food:'🍜 Food',v_photo:'📸 Photo',v_active:'🏃 Active',v_chill:'🛋 Relaxed',
+match:'Shared interests: {n}',req_send:'I want to join',req_pend:'Request sent, waiting for the author',req_sent:'Request sent ✓',reqs_t:'Requests',acc:'Accept',dec:'Decline',noreqs:'No new requests',
+for_f:'Women only',for_m:'Men only',byreq:'By request',hero_h:'Find your people',hero_p:'Post trips, meet people and explore the world together',popt:'Popular destinations',
+err_audience:'This trip doesn’t fit the author’s conditions',err_agerange:'Your age doesn’t fit the author’s conditions',err_declined:'The author declined your request',err_baddate_plan:'Pick a date for a quick plan',mapt:'Trips on the map',trips_cnt:'{n} trips',showall:'Show all',nomap:'Map unavailable',langt:'Language',here:'Trips here',nonearby:'No trips in this area yet',places:'Places',friends:'Friends',photoby:'Photos: Wikipedia',react:'React',
+ob:[{e:'🌍',h:`Hi! This is Travel Friends`,p:`Find travel buddies for flights, train rides, road trips and hikes. You post a trip, people join, and as soon as the first person joins, a shared chat opens.`},
+{e:'🗺️',h:`1. Post a trip`,p:`Tap the yellow "+" button. Pick how you travel, a city or country, the dates and how many people you are looking for.`,ex:`Example: Rome · flight from Moscow · 1 week · looking for 3 people`},
+{e:'🎫',h:`2. Join a trip`,p:`Open a flight on the board and tap "Join the trip". No more people than the author set can join.`,ex:`Example: "2 free" → tap → you are in and the chat opens`},
+{e:'💬',h:`3. Chat together`,p:`No need to wait for a full group: the chat opens right away and others join along the way. Plan the route, tickets and stay. Chats live in the "Chats" tab.`,ex:`Text-only chat: photos and files are disabled`},
+{e:'⭐',h:`4. Leave reviews`,p:`After the trip, rate your buddies: stars and a few words. Rating, age and number of trips are visible in the profile, so you can tell who is easy to travel with.`,ex:`Example: ★ 4.9 · 12 trips · "Reliable", "Fun to travel with"`}],
+rules:[`Text only: photos and files are disabled in chats.`,`No sexual content, vulgarity or harassment.`,`Be respectful: no bullying, threats or discrimination.`,`No spam, ads or selling services.`,`Never send your passport, card details or passwords.`,`Meet strangers in public places and tell someone you trust about your plans.`,`Report violations with the ⚑ button. Violators may be blocked.`,`The app is for 18+ only.`,`Reviews must be honest: no lies and no revenge.`]}};
+T.de={"tag": "Reisen beginnen mit Menschen", "tag2": "Echte Menschen · Echte Reisen · Gemeinsam", "board": "Reisen", "passport": "Pass", "search": "Stadt oder Land", "seats": "Plätze", "boarding": "Boarding", "isnew": "Neu", "flex": "Flexible Daten", "join": "Mitreisen", "boost": "Eine Woche oben anzeigen", "e1": "Noch keine Reisen", "e2": "Veröffentliche die erste Reise und lade Freunde ein.", "create": "Neue Reise", "where": "Wohin", "from": "Von", "to": "Bis", "people": "Wie viele Mitreisende suche ich", "budget": "Budget", "plan": "Spontanplan", "plan_l": "Der Plan", "publish": "Veröffentlichen", "posted": "Reise veröffentlicht", "city": "Stadt", "about": "Über dich", "save": "Speichern", "saved": "Gespeichert", "stamps": "Stempel", "nost": "Stempel erscheinen, sobald du eine Reise veröffentlichst oder dich anschließt.", "mytrips": "Meine Reisen", "going": "Wir fahren!", "who": "Wer", "when": "Wann", "edit": "Ändern", "ph": "Paris, Tiflis, Georgien…", "phn": "Route, Reisestil, mit wem du reisen möchtest", "pha": "Wie du reist, was du magst", "boosted": "Hervorgehoben", "nodest": "Gib ein Ziel an", "flight": "Flug", "train": "Zug", "road": "Roadtrip", "hike": "Wandern", "other": "Sonstiges", "all": "Alle", "kind": "Wie wir reisen", "chat": "Chats", "chat1": "Die Travel-Friends-Community", "openchat": "Chat öffnen", "howto": "So funktioniert’s", "rulesT": "Community-Regeln", "next": "Weiter", "accept": "Ich akzeptiere die Regeln", "ok": "Verstanden", "welcome": "Willkommen! Los geht’s", "left": "frei", "fullt": "Voll", "opennow": "Chat jetzt öffnen", "waiting": "Warten auf den ersten Mitreisenden", "chatopen": "Der Chat ist offen!", "msgph": "Nachricht…", "report": "Melden", "reported": "Meldung gesendet", "mem": "Mitglieder", "mychats": "Meine Gruppen", "nochats": "Hier erscheinen Gruppen, in denen du mitreist oder die du organisierst.", "chatnote": "Nur Text. Keine Erotik, kein Mobbing, kein Spam. Tippe auf ⚑, wenn etwas nicht stimmt.", "limitnote": "Das ist die maximale Gruppengröße. Der Chat öffnet sich, sobald die erste Person beitritt.", "err_full": "Keine Plätze mehr", "err_rules": "Bitte akzeptiere zuerst die Regeln", "err_closed": "Der Chat ist noch nicht offen", "err_own": "Das ist deine Reise", "err_notmember": "Du bist nicht in dieser Gruppe", "err_nobody": "Noch niemand ist beigetreten", "reg_t": "Registrierung", "reg_p": "Ein kurzes Profil macht das Reisen sicherer. Dein Geburtsdatum bleibt privat: andere sehen nur dein Alter. Die App ist nur für Personen ab 18.", "birth": "Geburtsdatum", "reg_go": "Registrieren", "minor_t": "Nur ab 18", "minor_p": "Travel Friends ist nur für Erwachsene. Komm wieder, wenn du 18 bist!", "newbie": "Neu dabei", "rating": "Bewertung", "reviews": "Bewertungen", "trips_done": "Reisen", "noreviews": "Noch keine Bewertungen", "yo": "J.", "myprof": "Mein öffentliches Profil", "tag_reliable": "Zuverlässig", "tag_fun": "Macht Spaß", "tag_respectful": "Respektvoll", "tag_organized": "Organisiert", "tag_punctual": "Pünktlich", "tag_late": "Oft zu spät", "tag_rude": "Unhöflich", "block": "Blockieren", "unblock": "Entsperren", "reportu": "Profil melden", "leave": "Gruppe verlassen", "kick": "Entfernen", "close": "Anmeldung schließen", "share": "Teilen", "author": "Autor", "rate": "Mitreisende bewerten", "rate_t": "Wie war die Reise?", "rate_ph": "Ein paar Worte zu dieser Person (optional)", "rate_send": "Senden", "rate_skip": "Überspringen", "rated_ok": "Danke für deine Bewertung!", "norate": "Niemand mehr zu bewerten", "pickstars": "Wähle Sterne", "sys_join": "{n} ist beigetreten", "sys_leave": "{n} hat die Gruppe verlassen", "sys_kick": "{n} wurde aus der Gruppe entfernt", "sys_closed": "Der Autor hat die Anmeldung geschlossen", "q_leave": "Diese Gruppe verlassen?", "q_kick": "Dieses Mitglied entfernen?", "q_close": "Anmeldung schließen? Neue Personen können nicht mehr beitreten.", "q_block": "Diese Person blockieren? Ihr seht gegenseitig keine Nachrichten und Reisen mehr.", "closedt": "Anmeldung geschlossen", "ended_t": "Reise beendet", "torate": "Bewerten", "done_ok": "Fertig", "sharetxt": "Lust, gemeinsam zu reisen?", "err_banned": "Zugriff verweigert", "err_baddate": "Prüfe die Daten", "err_limit": "Maximal 5 aktive Reisen", "err_tripclosed": "Anmeldung geschlossen", "err_tripended": "Diese Reise ist schon vorbei", "err_blocked": "Nicht verfügbar", "err_kicked": "Der Autor hat dich aus dieser Gruppe entfernt", "err_notfound": "Nicht gefunden", "err_notended": "Bewerten ist nach der Reise möglich", "err_dup": "Du hast diese Person schon bewertet", "err_slow": "Zu schnell, warte kurz", "err_register": "Bitte registriere dich zuerst", "err_badreq": "Fehlerhafte Anfrage", "who_t": "Wen ich suche", "aud_all": "Alle", "aud_f": "Frauen", "aud_m": "Männer", "age_t": "Alter der Mitreisenden (optional)", "approval": "Beitritt nur nach Bestätigung", "approval_h": "Du entscheidest, wer mitkommt. Ohne Haken treten Leute sofort bei.", "gender": "Geschlecht", "g_f": "Weiblich", "g_m": "Männlich", "g_x": "Divers", "vibe_t": "Dein Reisestil", "vibe_h": "Wähle, was zu dir passt: So finden wir passende Leute", "v_early": "🌅 Frühaufsteher", "v_nature": "🌲 Natur", "v_night": "🌃 Nachtleben", "v_museums": "🏛 Museen", "v_spontaneous": "🎲 Spontan", "v_planner": "📋 Planer", "v_food": "🍜 Essen", "v_photo": "📸 Foto", "v_active": "🏃 Aktiv", "v_chill": "🛋 Entspannt", "match": "Gemeinsame Interessen: {n}", "req_send": "Ich will mit", "req_pend": "Anfrage gesendet, warte auf den Autor", "req_sent": "Anfrage gesendet ✓", "reqs_t": "Anfragen", "acc": "Annehmen", "dec": "Ablehnen", "noreqs": "Keine neuen Anfragen", "for_f": "Nur Frauen", "for_m": "Nur Männer", "byreq": "Auf Anfrage", "err_audience": "Diese Reise passt nicht zu den Bedingungen des Autors", "err_agerange": "Dein Alter passt nicht zu den Bedingungen des Autors", "err_declined": "Der Autor hat deine Anfrage abgelehnt", "ob": [{"e": "🌍", "h": "Hallo! Das ist Travel Friends", "p": "Finde Mitreisende für Flüge, Zugfahrten, Roadtrips und Wanderungen. Du veröffentlichst eine Reise, andere schließen sich an, und sobald die erste Person dabei ist, öffnet sich ein gemeinsamer Chat."}, {"e": "🗺️", "h": "1. Reise veröffentlichen", "p": "Tippe auf den „+“-Button. Wähle Reiseart, Stadt oder Land, Datum und wie viele Leute du suchst.", "ex": "Beispiel: Rom · Flug ab Moskau · 1 Woche · suche 3 Personen"}, {"e": "🎫", "h": "2. Mitreisen", "p": "Öffne eine Reise und tippe auf „Mitreisen“. Mehr Leute als vom Autor festgelegt können nicht beitreten.", "ex": "Beispiel: „2 frei“ → tippen → du bist dabei und der Chat öffnet sich"}, {"e": "💬", "h": "3. Gemeinsam chatten", "p": "Du musst nicht auf eine volle Gruppe warten: Der Chat öffnet sich sofort. Plant Route, Tickets und Unterkunft. Chats findest du im Tab „Chats“.", "ex": "Nur Text: Fotos und Dateien sind deaktiviert"}, {"e": "⭐", "h": "4. Bewertungen schreiben", "p": "Bewerte deine Mitreisenden nach der Reise: Sterne und ein paar Worte. Bewertung, Alter und Anzahl der Reisen siehst du im Profil.", "ex": "Beispiel: ★ 4,9 · 12 Reisen · „Zuverlässig“, „Macht Spaß“"}], "rules": ["Nur Text: Fotos und Dateien sind in Chats deaktiviert.", "Keine sexuellen Inhalte, Vulgarität oder Belästigung.", "Sei respektvoll: kein Mobbing, keine Drohungen, keine Diskriminierung.", "Kein Spam, keine Werbung, kein Verkauf von Leistungen.", "Sende nie Pass, Kartendaten oder Passwörter.", "Triff Fremde an öffentlichen Orten und sag Vertrauten, wohin du gehst.", "Melde Verstöße mit der ⚑-Taste. Verstöße können zur Sperre führen.", "Die App ist nur für Personen ab 18.", "Bewertungen müssen ehrlich sein: keine Lügen, keine Rache."], "mapt": "Reisen auf der Karte", "trips_cnt": "{n} Reisen", "showall": "Alle anzeigen", "nomap": "Karte nicht verfügbar", "langt": "Sprache", "here": "Reisen hier", "nonearby": "Keine Reisen in diesem Bereich", "pass": "Bordkarte", "places": "Orte", "friends": "Freunde", "photoby": "Fotos: Wikipedia", "popt": "Beliebte Ziele", "react": "Reaktion"};
+T.fr={"tag": "Les voyages commencent par des rencontres", "tag2": "De vraies personnes · De vrais voyages · Ensemble", "board": "Voyages", "passport": "Passeport", "search": "Ville ou pays", "seats": "Places", "boarding": "Embarquement", "isnew": "Nouveau", "flex": "Dates flexibles", "join": "Voyager ensemble", "boost": "Mettre en avant une semaine", "e1": "Aucun voyage pour l’instant", "e2": "Publie le premier voyage et invite tes amis.", "create": "Nouveau voyage", "where": "Où", "from": "Du", "to": "Au", "people": "Combien de personnes je cherche", "budget": "Budget", "plan": "Plan express", "plan_l": "Le plan", "publish": "Publier", "posted": "Voyage publié", "city": "Ville", "about": "À propos de toi", "save": "Enregistrer", "saved": "Enregistré", "stamps": "Tampons", "nost": "Les tampons apparaissent quand tu publies un voyage ou que tu en rejoins un.", "mytrips": "Mes voyages", "going": "On y va !", "who": "Qui", "when": "Quand", "edit": "Modifier", "ph": "Paris, Tbilissi, Géorgie…", "phn": "Itinéraire, style de voyage, avec qui tu veux partir", "pha": "Comment tu voyages, ce que tu aimes", "boosted": "Mis en avant", "nodest": "Indique une destination", "flight": "Avion", "train": "Train", "road": "Road trip", "hike": "Randonnée", "other": "Autre", "all": "Tous", "kind": "Comment on voyage", "chat": "Chats", "chat1": "La communauté Travel Friends", "openchat": "Ouvrir le chat", "howto": "Comment ça marche", "rulesT": "Règles de la communauté", "next": "Suivant", "accept": "J’accepte les règles", "ok": "Compris", "welcome": "Bienvenue ! C’est parti", "left": "libres", "fullt": "Complet", "opennow": "Ouvrir le chat maintenant", "waiting": "En attente du premier compagnon", "chatopen": "Le chat est ouvert !", "msgph": "Message…", "report": "Signaler", "reported": "Signalement envoyé", "mem": "membres", "mychats": "Mes groupes", "nochats": "Les groupes que tu rejoins ou organises apparaîtront ici.", "chatnote": "Texte uniquement. Pas de contenu sexuel, de harcèlement ni de spam. Touche ⚑ en cas de problème.", "limitnote": "C’est la taille maximale du groupe. Le chat s’ouvre dès que la première personne rejoint.", "err_full": "Plus de places", "err_rules": "Accepte d’abord les règles", "err_closed": "Le chat n’est pas encore ouvert", "err_own": "C’est ton voyage", "err_notmember": "Tu n’es pas dans ce groupe", "err_nobody": "Personne n’a encore rejoint", "reg_t": "Inscription", "reg_p": "Un court profil rend les voyages plus sûrs. Ta date de naissance n’est jamais affichée : les autres voient seulement ton âge. L’application est réservée aux 18 ans et plus.", "birth": "Date de naissance", "reg_go": "S’inscrire", "minor_t": "18 ans et plus", "minor_p": "Travel Friends est réservé aux adultes. Reviens quand tu auras 18 ans !", "newbie": "Nouveau", "rating": "Note", "reviews": "Avis", "trips_done": "Voyages", "noreviews": "Pas encore d’avis", "yo": "ans", "myprof": "Mon profil public", "tag_reliable": "Fiable", "tag_fun": "Super compagnie", "tag_respectful": "Respectueux", "tag_organized": "Organisé", "tag_punctual": "Ponctuel", "tag_late": "Souvent en retard", "tag_rude": "Désagréable", "block": "Bloquer", "unblock": "Débloquer", "reportu": "Signaler le profil", "leave": "Quitter le groupe", "kick": "Retirer", "close": "Fermer les inscriptions", "share": "Partager", "author": "Auteur", "rate": "Noter tes compagnons", "rate_t": "Comment s’est passé le voyage ?", "rate_ph": "Quelques mots sur cette personne (facultatif)", "rate_send": "Envoyer", "rate_skip": "Passer", "rated_ok": "Merci pour ton avis !", "norate": "Plus personne à noter", "pickstars": "Choisis une note", "sys_join": "{n} a rejoint le groupe", "sys_leave": "{n} a quitté le groupe", "sys_kick": "{n} a été retiré du groupe", "sys_closed": "L’auteur a fermé les inscriptions", "q_leave": "Quitter ce groupe ?", "q_kick": "Retirer ce membre ?", "q_close": "Fermer les inscriptions ? De nouvelles personnes ne pourront plus rejoindre.", "q_block": "Bloquer cette personne ? Vous ne verrez plus vos messages ni vos voyages.", "closedt": "Inscriptions fermées", "ended_t": "Voyage terminé", "torate": "Noter", "done_ok": "Terminé", "sharetxt": "On voyage ensemble ?", "err_banned": "Accès refusé", "err_baddate": "Vérifie les dates", "err_limit": "Maximum 5 voyages actifs", "err_tripclosed": "Les inscriptions sont fermées", "err_tripended": "Ce voyage est déjà terminé", "err_blocked": "Indisponible", "err_kicked": "L’auteur t’a retiré de ce groupe", "err_notfound": "Introuvable", "err_notended": "Tu pourras noter après la fin du voyage", "err_dup": "Tu as déjà noté cette personne", "err_slow": "Trop vite, attends un peu", "err_register": "Inscris-toi d’abord", "err_badreq": "Requête invalide", "who_t": "Qui je cherche", "aud_all": "Tout le monde", "aud_f": "Femmes", "aud_m": "Hommes", "age_t": "Âge des compagnons (facultatif)", "approval": "Rejoindre sur validation de l’auteur", "approval_h": "Tu décides qui vient. Sans la case, les gens rejoignent tout de suite.", "gender": "Genre", "g_f": "Femme", "g_m": "Homme", "g_x": "Autre", "vibe_t": "Ton style de voyage", "vibe_h": "Choisis ce qui te correspond : cela aide à trouver des personnes compatibles", "v_early": "🌅 Lève-tôt", "v_nature": "🌲 Nature", "v_night": "🌃 Vie nocturne", "v_museums": "🏛 Musées", "v_spontaneous": "🎲 Spontané", "v_planner": "📋 Organisé", "v_food": "🍜 Cuisine", "v_photo": "📸 Photo", "v_active": "🏃 Actif", "v_chill": "🛋 Détente", "match": "Centres d’intérêt communs : {n}", "req_send": "Je veux venir", "req_pend": "Demande envoyée, en attente de l’auteur", "req_sent": "Demande envoyée ✓", "reqs_t": "Demandes", "acc": "Accepter", "dec": "Refuser", "noreqs": "Aucune nouvelle demande", "for_f": "Femmes uniquement", "for_m": "Hommes uniquement", "byreq": "Sur demande", "err_audience": "Ce voyage ne correspond pas aux conditions de l’auteur", "err_agerange": "Ton âge ne correspond pas aux conditions de l’auteur", "err_declined": "L’auteur a refusé ta demande", "ob": [{"e": "🌍", "h": "Salut ! Voici Travel Friends", "p": "Trouve des compagnons pour voyager en avion, en train, en road trip ou en randonnée. Tu publies un voyage, des gens te rejoignent, et dès que la première personne arrive, un chat de groupe s’ouvre."}, {"e": "🗺️", "h": "1. Publie un voyage", "p": "Touche le bouton « + ». Choisis le mode de voyage, une ville ou un pays, les dates et le nombre de personnes recherchées.", "ex": "Exemple : Rome · vol depuis Moscou · 1 semaine · je cherche 3 personnes"}, {"e": "🎫", "h": "2. Rejoins un voyage", "p": "Ouvre un voyage et touche « Voyager ensemble ». Il ne peut pas y avoir plus de monde que ce que l’auteur a fixé.", "ex": "Exemple : « 2 libres » → touche → tu es dans le groupe et le chat s’ouvre"}, {"e": "💬", "h": "3. Discutez ensemble", "p": "Inutile d’attendre un groupe complet : le chat s’ouvre tout de suite. Préparez l’itinéraire, les billets et le logement. Les chats sont dans l’onglet « Chats ».", "ex": "Chat en texte uniquement : photos et fichiers désactivés"}, {"e": "⭐", "h": "4. Laisse des avis", "p": "Après le voyage, note tes compagnons : des étoiles et quelques mots. La note, l’âge et le nombre de voyages sont visibles dans le profil.", "ex": "Exemple : ★ 4,9 · 12 voyages · « Fiable », « Super compagnie »"}], "rules": ["Texte uniquement : photos et fichiers sont désactivés dans les chats.", "Pas de contenu sexuel, de vulgarité ni de harcèlement.", "Sois respectueux : pas de harcèlement, de menaces ni de discrimination.", "Pas de spam, de publicité ni de vente de services.", "N’envoie jamais ton passeport, tes données bancaires ou tes mots de passe.", "Rencontre les inconnus dans des lieux publics et préviens un proche de tes plans.", "Signale les abus avec le bouton ⚑. Les contrevenants peuvent être bloqués.", "L’application est réservée aux 18 ans et plus.", "Les avis doivent être honnêtes : pas de mensonges ni de vengeance."], "mapt": "Voyages sur la carte", "trips_cnt": "{n} voyages", "showall": "Tout afficher", "nomap": "Carte indisponible", "langt": "Langue", "here": "Voyages ici", "nonearby": "Aucun voyage dans cette zone", "pass": "Carte d’embarquement", "places": "Lieux", "friends": "Amis", "photoby": "Photos : Wikipédia", "popt": "Destinations populaires", "react": "Réaction"};
+T.it={"tag": "I viaggi iniziano dalle persone", "tag2": "Persone vere · Viaggi veri · Insieme", "board": "Viaggi", "passport": "Passaporto", "search": "Città o paese", "seats": "Posti", "boarding": "Imbarco", "isnew": "Nuovo", "flex": "Date flessibili", "join": "Parti insieme", "boost": "In evidenza per una settimana", "e1": "Ancora nessun viaggio", "e2": "Pubblica il primo viaggio e invita i tuoi amici.", "create": "Nuovo viaggio", "where": "Dove", "from": "Dal", "to": "Al", "people": "Quante persone cerco", "budget": "Budget", "plan": "Piano veloce", "plan_l": "Il piano", "publish": "Pubblica", "posted": "Viaggio pubblicato", "city": "Città", "about": "Su di te", "save": "Salva", "saved": "Salvato", "stamps": "Timbri", "nost": "I timbri compaiono quando pubblichi un viaggio o ti unisci a uno.", "mytrips": "I miei viaggi", "going": "Si parte!", "who": "Chi", "when": "Quando", "edit": "Modifica", "ph": "Parigi, Tbilisi, Georgia…", "phn": "Itinerario, stile di viaggio, con chi vuoi partire", "pha": "Come viaggi, cosa ami", "boosted": "In evidenza", "nodest": "Indica una destinazione", "flight": "Volo", "train": "Treno", "road": "Road trip", "hike": "Trekking", "other": "Altro", "all": "Tutti", "kind": "Come viaggiamo", "chat": "Chat", "chat1": "La community Travel Friends", "openchat": "Apri la chat", "howto": "Come funziona", "rulesT": "Regole della community", "next": "Avanti", "accept": "Accetto le regole", "ok": "Capito", "welcome": "Benvenuto! Si parte", "left": "liberi", "fullt": "Al completo", "opennow": "Apri la chat ora", "waiting": "In attesa del primo compagno", "chatopen": "La chat è aperta!", "msgph": "Messaggio…", "report": "Segnala", "reported": "Segnalazione inviata", "mem": "membri", "mychats": "I miei gruppi", "nochats": "Qui compariranno i gruppi a cui partecipi o che organizzi.", "chatnote": "Solo testo. Niente contenuti sessuali, bullismo o spam. Tocca ⚑ se qualcosa non va.", "limitnote": "È la dimensione massima del gruppo. La chat si apre appena entra la prima persona.", "err_full": "Posti esauriti", "err_rules": "Prima accetta le regole", "err_closed": "La chat non è ancora aperta", "err_own": "È il tuo viaggio", "err_notmember": "Non fai parte di questo gruppo", "err_nobody": "Nessuno si è ancora unito", "reg_t": "Registrazione", "reg_p": "Un breve profilo rende i viaggi più sicuri. La tua data di nascita non viene mostrata: gli altri vedono solo l’età. L’app è riservata ai maggiorenni.", "birth": "Data di nascita", "reg_go": "Registrati", "minor_t": "Solo 18+", "minor_p": "Travel Friends è riservata ai maggiorenni. Torna quando avrai 18 anni!", "newbie": "Nuovo", "rating": "Valutazione", "reviews": "Recensioni", "trips_done": "Viaggi", "noreviews": "Ancora nessuna recensione", "yo": "anni", "myprof": "Il mio profilo pubblico", "tag_reliable": "Affidabile", "tag_fun": "Bella compagnia", "tag_respectful": "Rispettoso", "tag_organized": "Organizzato", "tag_punctual": "Puntuale", "tag_late": "Spesso in ritardo", "tag_rude": "Scortese", "block": "Blocca", "unblock": "Sblocca", "reportu": "Segnala il profilo", "leave": "Esci dal gruppo", "kick": "Rimuovi", "close": "Chiudi le adesioni", "share": "Condividi", "author": "Autore", "rate": "Valuta i compagni", "rate_t": "Com’è andato il viaggio?", "rate_ph": "Due parole su questa persona (facoltativo)", "rate_send": "Invia", "rate_skip": "Salta", "rated_ok": "Grazie per la recensione!", "norate": "Nessuno da valutare", "pickstars": "Scegli le stelle", "sys_join": "{n} si è unito", "sys_leave": "{n} ha lasciato il gruppo", "sys_kick": "{n} è stato rimosso dal gruppo", "sys_closed": "L’autore ha chiuso le adesioni", "q_leave": "Uscire da questo gruppo?", "q_kick": "Rimuovere questo membro?", "q_close": "Chiudere le adesioni? Nuove persone non potranno unirsi.", "q_block": "Bloccare questa persona? Non vedrete più messaggi e viaggi l’uno dell’altro.", "closedt": "Adesioni chiuse", "ended_t": "Viaggio concluso", "torate": "Valuta", "done_ok": "Fatto", "sharetxt": "Viaggiamo insieme?", "err_banned": "Accesso negato", "err_baddate": "Controlla le date", "err_limit": "Massimo 5 viaggi attivi", "err_tripclosed": "Le adesioni sono chiuse", "err_tripended": "Questo viaggio è già finito", "err_blocked": "Non disponibile", "err_kicked": "L’autore ti ha rimosso da questo gruppo", "err_notfound": "Non trovato", "err_notended": "Puoi valutare dopo la fine del viaggio", "err_dup": "Hai già valutato questa persona", "err_slow": "Troppo veloce, aspetta un attimo", "err_register": "Registrati prima", "err_badreq": "Richiesta non valida", "who_t": "Chi cerco", "aud_all": "Tutti", "aud_f": "Donne", "aud_m": "Uomini", "age_t": "Età dei compagni (facoltativo)", "approval": "Adesione su conferma dell’autore", "approval_h": "Decidi tu chi viene. Senza la spunta le persone entrano subito.", "gender": "Genere", "g_f": "Donna", "g_m": "Uomo", "g_x": "Altro", "vibe_t": "Il tuo stile di viaggio", "vibe_h": "Scegli cosa ti rappresenta: aiuta a trovare persone compatibili", "v_early": "🌅 Mattinieri", "v_nature": "🌲 Natura", "v_night": "🌃 Vita notturna", "v_museums": "🏛 Musei", "v_spontaneous": "🎲 Spontaneo", "v_planner": "📋 Organizzato", "v_food": "🍜 Cibo", "v_photo": "📸 Foto", "v_active": "🏃 Attivo", "v_chill": "🛋 Relax", "match": "Interessi in comune: {n}", "req_send": "Voglio venire", "req_pend": "Richiesta inviata, in attesa dell’autore", "req_sent": "Richiesta inviata ✓", "reqs_t": "Richieste", "acc": "Accetta", "dec": "Rifiuta", "noreqs": "Nessuna nuova richiesta", "for_f": "Solo donne", "for_m": "Solo uomini", "byreq": "Su richiesta", "err_audience": "Questo viaggio non rispetta le condizioni dell’autore", "err_agerange": "La tua età non rispetta le condizioni dell’autore", "err_declined": "L’autore ha rifiutato la tua richiesta", "ob": [{"e": "🌍", "h": "Ciao! Questa è Travel Friends", "p": "Trova compagni di viaggio per voli, treni, road trip ed escursioni. Pubblichi un viaggio, le persone si uniscono e, appena arriva la prima, si apre una chat di gruppo."}, {"e": "🗺️", "h": "1. Pubblica un viaggio", "p": "Tocca il pulsante «+». Scegli come viaggi, una città o un paese, le date e quante persone cerchi.", "ex": "Esempio: Roma · volo da Mosca · 1 settimana · cerco 3 persone"}, {"e": "🎫", "h": "2. Unisciti a un viaggio", "p": "Apri un viaggio e tocca «Parti insieme». Non possono unirsi più persone di quelle indicate dall’autore.", "ex": "Esempio: «2 liberi» → tocca → sei nel gruppo e la chat si apre"}, {"e": "💬", "h": "3. Chiacchierate insieme", "p": "Non serve aspettare il gruppo completo: la chat si apre subito. Organizzate itinerario, biglietti e alloggio. Le chat sono nella scheda «Chat».", "ex": "Chat solo testo: foto e file disattivati"}, {"e": "⭐", "h": "4. Lascia recensioni", "p": "Dopo il viaggio valuta i compagni: stelle e due parole. Valutazione, età e numero di viaggi sono visibili nel profilo.", "ex": "Esempio: ★ 4,9 · 12 viaggi · «Affidabile», «Bella compagnia»"}], "rules": ["Solo testo: foto e file sono disattivati nelle chat.", "Niente contenuti sessuali, volgarità o molestie.", "Sii rispettoso: niente bullismo, minacce o discriminazione.", "Niente spam, pubblicità o vendita di servizi.", "Non inviare mai passaporto, dati della carta o password.", "Incontra gli sconosciuti in luoghi pubblici e avvisa una persona di fiducia.", "Segnala le violazioni con il pulsante ⚑. I trasgressori possono essere bloccati.", "L’app è riservata ai maggiorenni.", "Le recensioni devono essere oneste: niente bugie né vendette."], "mapt": "Viaggi sulla mappa", "trips_cnt": "{n} viaggi", "showall": "Mostra tutti", "nomap": "Mappa non disponibile", "langt": "Lingua", "here": "Viaggi qui", "nonearby": "Nessun viaggio in questa zona", "pass": "Carta d’imbarco", "places": "Luoghi", "friends": "Amici", "photoby": "Foto: Wikipedia", "popt": "Destinazioni popolari", "react": "Reazione"};
+T.zh={"tag": "旅行，从遇见人开始", "tag2": "真实的人 · 真实的旅行 · 一起", "board": "行程", "passport": "护照", "search": "城市或国家", "seats": "名额", "boarding": "登机中", "isnew": "新", "flex": "日期灵活", "join": "一起去", "boost": "置顶一周", "e1": "还没有行程", "e2": "发布第一个行程，邀请朋友吧。", "create": "新行程", "where": "目的地", "from": "出发", "to": "返回", "people": "我想找几位旅伴", "budget": "预算", "plan": "临时计划", "plan_l": "计划", "publish": "发布", "posted": "行程已发布", "city": "城市", "about": "关于你", "save": "保存", "saved": "已保存", "stamps": "印章", "nost": "发布行程或加入行程后会出现印章。", "mytrips": "我的行程", "going": "出发！", "who": "发起人", "when": "时间", "edit": "编辑", "ph": "巴黎、第比利斯、格鲁吉亚…", "phn": "路线、旅行风格、想和谁同行", "pha": "你怎么旅行，喜欢什么", "boosted": "已置顶", "nodest": "请填写目的地", "flight": "飞机", "train": "火车", "road": "自驾", "hike": "徒步", "other": "其他", "all": "全部", "kind": "出行方式", "chat": "聊天", "chat1": "Travel Friends 社区", "openchat": "打开聊天", "howto": "使用说明", "rulesT": "社区规则", "next": "下一步", "accept": "我接受规则", "ok": "知道了", "welcome": "欢迎！出发吧", "left": "空位", "fullt": "已满", "opennow": "现在打开聊天", "waiting": "等待第一位旅伴", "chatopen": "聊天已开启！", "msgph": "消息…", "report": "举报", "reported": "已提交举报", "mem": "位成员", "mychats": "我的小组", "nochats": "你加入或组织的小组会显示在这里。", "chatnote": "仅限文字。禁止色情、欺凌和垃圾信息。发现问题请点 ⚑。", "limitnote": "这是小组的最大人数。第一个人加入后聊天就会开启。", "err_full": "名额已满", "err_rules": "请先接受规则", "err_closed": "聊天尚未开启", "err_own": "这是你自己的行程", "err_notmember": "你不在这个小组里", "err_nobody": "还没有人加入", "reg_t": "注册", "reg_p": "简单的个人资料让旅行更安全。你的出生日期不会公开，别人只能看到年龄。本应用仅限 18 岁以上用户。", "birth": "出生日期", "reg_go": "注册", "minor_t": "仅限 18 岁以上", "minor_p": "Travel Friends 仅面向成年人。等你满 18 岁再来吧！", "newbie": "新人", "rating": "评分", "reviews": "评价", "trips_done": "行程", "noreviews": "暂无评价", "yo": "岁", "myprof": "我的公开主页", "tag_reliable": "靠谱", "tag_fun": "相处愉快", "tag_respectful": "尊重他人", "tag_organized": "有条理", "tag_punctual": "守时", "tag_late": "常迟到", "tag_rude": "不礼貌", "block": "拉黑", "unblock": "取消拉黑", "reportu": "举报此主页", "leave": "退出小组", "kick": "移出", "close": "关闭报名", "share": "分享", "author": "发起人", "rate": "评价旅伴", "rate_t": "这次旅行怎么样？", "rate_ph": "说几句关于 TA 的话（选填）", "rate_send": "提交", "rate_skip": "跳过", "rated_ok": "感谢你的评价！", "norate": "没有需要评价的人了", "pickstars": "请选择星级", "sys_join": "{n} 加入了", "sys_leave": "{n} 退出了小组", "sys_kick": "{n} 被移出小组", "sys_closed": "发起人已关闭报名", "q_leave": "退出这个小组？", "q_kick": "移出这位成员？", "q_close": "关闭报名？新的人将无法加入。", "q_block": "拉黑此人？你们将看不到彼此的消息和行程。", "closedt": "报名已关闭", "ended_t": "行程已结束", "torate": "去评价", "done_ok": "完成", "sharetxt": "要不要一起去旅行？", "err_banned": "访问被拒绝", "err_baddate": "请检查日期", "err_limit": "最多同时发布 5 个行程", "err_tripclosed": "报名已关闭", "err_tripended": "这个行程已经结束", "err_blocked": "无法使用", "err_kicked": "发起人已将你移出此小组", "err_notfound": "未找到", "err_notended": "行程结束后才能评价", "err_dup": "你已经评价过 TA 了", "err_slow": "太快了，稍等一下", "err_register": "请先注册", "err_badreq": "请求有误", "who_t": "我想找", "aud_all": "不限", "aud_f": "女生", "aud_m": "男生", "age_t": "旅伴年龄（选填）", "approval": "需发起人确认才能加入", "approval_h": "由你决定谁加入。不勾选则任何人可直接加入。", "gender": "性别", "g_f": "女", "g_m": "男", "g_x": "其他", "vibe_t": "你的旅行风格", "vibe_h": "选择适合你的标签，帮助找到合拍的人", "v_early": "🌅 早起", "v_nature": "🌲 自然", "v_night": "🌃 夜生活", "v_museums": "🏛 博物馆", "v_spontaneous": "🎲 说走就走", "v_planner": "📋 计划控", "v_food": "🍜 美食", "v_photo": "📸 摄影", "v_active": "🏃 活力", "v_chill": "🛋 悠闲", "match": "共同兴趣：{n}", "req_send": "我想加入", "req_pend": "申请已发送，等待发起人确认", "req_sent": "申请已发送 ✓", "reqs_t": "申请", "acc": "通过", "dec": "拒绝", "noreqs": "没有新的申请", "for_f": "仅限女生", "for_m": "仅限男生", "byreq": "需申请", "err_audience": "这个行程不符合发起人的条件", "err_agerange": "你的年龄不符合发起人的条件", "err_declined": "发起人拒绝了你的申请", "ob": [{"e": "🌍", "h": "你好！这里是 Travel Friends", "p": "为飞行、火车、自驾和徒步寻找旅伴。你发布行程，别人加入，第一个人加入后就会开启群聊。"}, {"e": "🗺️", "h": "1. 发布行程", "p": "点击“+”按钮。选择出行方式、城市或国家、日期，以及想找几位旅伴。", "ex": "例如：罗马 · 从莫斯科飞 · 1 周 · 找 3 人"}, {"e": "🎫", "h": "2. 加入行程", "p": "打开一个行程，点击“一起去”。加入人数不会超过发起人设定的上限。", "ex": "例如：“空位 2” → 点击 → 你已加入，聊天开启"}, {"e": "💬", "h": "3. 一起聊天", "p": "不用等人满：聊天会立即开启。一起讨论路线、机票和住宿。聊天都在“聊天”标签里。", "ex": "仅限文字聊天：不支持图片和文件"}, {"e": "⭐", "h": "4. 留下评价", "p": "旅行结束后给旅伴评分：星级加几句话。评分、年龄和行程数会显示在个人主页。", "ex": "例如：★ 4.9 · 12 次行程 · “靠谱”“相处愉快”"}], "rules": ["仅限文字：聊天中不支持图片和文件。", "禁止色情、低俗和骚扰内容。", "互相尊重：禁止欺凌、威胁和歧视。", "禁止垃圾信息、广告和推销服务。", "不要发送护照、银行卡信息或密码。", "与陌生人在公共场所见面，并告诉信任的人你的行程。", "发现违规请点 ⚑ 举报，违规者可能被封禁。", "本应用仅限 18 岁以上用户。", "评价必须真实：不要说谎，不要报复。"], "mapt": "地图上的行程", "trips_cnt": "{n} 个行程", "showall": "显示全部", "nomap": "地图不可用", "langt": "语言", "here": "这里的行程", "nonearby": "该区域暂无行程", "pass": "登机牌", "places": "发现", "friends": "好友", "photoby": "图片：维基百科", "popt": "热门目的地", "react": "表情"};
+const LANGS=[['ru','Русский','🇷🇺'],['en','English','🇬🇧'],['de','Deutsch','🇩🇪'],['fr','Français','🇫🇷'],['it','Italiano','🇮🇹'],['zh','中文','🇨🇳']];
+const guessLang=c=>{c=(c||'').toLowerCase();if(['ru','uk','be','kk'].includes(c))return 'ru';for(const k of ['de','fr','it','zh'])if(c.startsWith(k))return k;return 'en'};
+let L='en';try{const sv=localStorage.getItem('l');L=T[sv]?sv:guessLang(U.language_code)}catch(e){L=guessLang(U.language_code)}
+const tx=k=>{const v=T[L][k];return v!==undefined?v:T.en[k]};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hap=k=>{try{tg.HapticFeedback.impactOccurred(k||'light')}catch(e){}};
+const good=()=>{try{tg.HapticFeedback.notificationOccurred('success')}catch(e){}};
+const loc=()=>({ru:'ru-RU',en:'en-GB',de:'de-DE',fr:'fr-FR',it:'it-IT',zh:'zh-CN'})[L];
+const fmt=d=>d?new Date(d).toLocaleDateString(loc(),{day:'numeric',month:'short'}):'';
+const rng=x=>x.date_from?fmt(x.date_from)+(x.date_to?' – '+fmt(x.date_to):''):tx('flex');
+const ci=s=>{let h=0;for(const c of String(s).toLowerCase())h=(h*31+c.charCodeAt(0))%997;return h%6};
+const CITY=`Russia|Россия|Russia|Россия|61.5|105.3
+Moscow|Москва|Russia|Россия|55.76|37.62
+Saint Petersburg|Санкт-Петербург|Russia|Россия|59.93|30.34
+Kazan|Казань|Russia|Россия|55.79|49.12
+Sochi|Сочи|Russia|Россия|43.60|39.73
+Vladivostok|Владивосток|Russia|Россия|43.12|131.89
+Kamchatka|Камчатка|Russia|Россия|53.04|158.65
+Baikal|Байкал|Russia|Россия|53.5|108.0
+Irkutsk|Иркутск|Russia|Россия|52.29|104.28
+Altai|Алтай|Russia|Россия|51.0|86.0
+Karelia|Карелия|Russia|Россия|62.0|33.0
+Sakhalin|Сахалин|Russia|Россия|46.96|142.73
+Elbrus|Эльбрус|Russia|Россия|43.35|42.44
+Dagestan|Дагестан|Russia|Россия|42.98|47.5
+Kaliningrad|Калининград|Russia|Россия|54.71|20.51
+Yekaterinburg|Екатеринбург|Russia|Россия|56.84|60.6
+Novosibirsk|Новосибирск|Russia|Россия|55.03|82.92
+Murmansk|Мурманск|Russia|Россия|68.97|33.08
+Nizhny Novgorod|Нижний Новгород|Russia|Россия|56.33|44.0
+Krasnodar|Краснодар|Russia|Россия|45.04|38.98
+Anapa|Анапа|Russia|Россия|44.89|37.32
+France|Франция|France|Франция|46.6|2.2
+Paris|Париж|France|Франция|48.86|2.35
+Nice|Ницца|France|Франция|43.70|7.27
+Lyon|Лион|France|Франция|45.76|4.84
+Spain|Испания|Spain|Испания|40.4|-3.7
+Madrid|Мадрид|Spain|Испания|40.42|-3.70
+Barcelona|Барселона|Spain|Испания|41.39|2.17
+Valencia|Валенсия|Spain|Испания|39.47|-0.38
+Seville|Севилья|Spain|Испания|37.39|-5.98
+Malaga|Малага|Spain|Испания|36.72|-4.42
+Mallorca|Майорка|Spain|Испания|39.57|2.65
+Tenerife|Тенерифе|Spain|Испания|28.29|-16.63
+Italy|Италия|Italy|Италия|42.8|12.8
+Rome|Рим|Italy|Италия|41.90|12.50
+Milan|Милан|Italy|Италия|45.46|9.19
+Venice|Венеция|Italy|Италия|45.44|12.32
+Florence|Флоренция|Italy|Италия|43.77|11.26
+Naples|Неаполь|Italy|Италия|40.85|14.27
+Amalfi Coast|Амальфи|Italy|Италия|40.63|14.60
+Sicily|Сицилия|Italy|Италия|37.6|14.0
+Germany|Германия|Germany|Германия|51.2|10.4
+Berlin|Берлин|Germany|Германия|52.52|13.40
+Munich|Мюнхен|Germany|Германия|48.14|11.58
+Hamburg|Гамбург|Germany|Германия|53.55|9.99
+Czechia|Чехия|Czechia|Чехия|49.8|15.5
+Prague|Прага|Czechia|Чехия|50.08|14.44
+Austria|Австрия|Austria|Австрия|47.5|14.5
+Vienna|Вена|Austria|Австрия|48.21|16.37
+Salzburg|Зальцбург|Austria|Австрия|47.81|13.04
+Hungary|Венгрия|Hungary|Венгрия|47.2|19.5
+Budapest|Будапешт|Hungary|Венгрия|47.50|19.04
+Portugal|Португалия|Portugal|Португалия|39.4|-8.2
+Lisbon|Лиссабон|Portugal|Португалия|38.72|-9.14
+Porto|Порту|Portugal|Португалия|41.15|-8.61
+Netherlands|Нидерланды|Netherlands|Нидерланды|52.1|5.3
+Amsterdam|Амстердам|Netherlands|Нидерланды|52.37|4.90
+Belgium|Бельгия|Belgium|Бельгия|50.6|4.7
+Brussels|Брюссель|Belgium|Бельгия|50.85|4.35
+United Kingdom|Великобритания|United Kingdom|Великобритания|54.0|-2.0
+London|Лондон|United Kingdom|Великобритания|51.51|-0.13
+Edinburgh|Эдинбург|United Kingdom|Великобритания|55.95|-3.19
+Ireland|Ирландия|Ireland|Ирландия|53.3|-8.0
+Dublin|Дублин|Ireland|Ирландия|53.35|-6.26
+Switzerland|Швейцария|Switzerland|Швейцария|46.8|8.2
+Zurich|Цюрих|Switzerland|Швейцария|47.38|8.54
+Geneva|Женева|Switzerland|Швейцария|46.20|6.14
+Turkey|Турция|Turkey|Турция|39.0|35.2
+Istanbul|Стамбул|Turkey|Турция|41.01|28.98
+Antalya|Анталья|Turkey|Турция|36.90|30.70
+Cappadocia|Каппадокия|Turkey|Турция|38.64|34.83
+Greece|Греция|Greece|Греция|39.0|22.0
+Athens|Афины|Greece|Греция|37.98|23.73
+Santorini|Санторини|Greece|Греция|36.39|25.46
+Crete|Крит|Greece|Греция|35.24|24.81
+Croatia|Хорватия|Croatia|Хорватия|45.1|15.2
+Split|Сплит|Croatia|Хорватия|43.51|16.44
+Dubrovnik|Дубровник|Croatia|Хорватия|42.65|18.09
+Montenegro|Черногория|Montenegro|Черногория|42.7|19.4
+Kotor|Котор|Montenegro|Черногория|42.42|18.77
+Serbia|Сербия|Serbia|Сербия|44.0|21.0
+Belgrade|Белград|Serbia|Сербия|44.79|20.45
+Bulgaria|Болгария|Bulgaria|Болгария|42.7|25.5
+Sofia|София|Bulgaria|Болгария|42.70|23.32
+Romania|Румыния|Romania|Румыния|45.9|25.0
+Bucharest|Бухарест|Romania|Румыния|44.43|26.10
+Poland|Польша|Poland|Польша|52.0|19.0
+Warsaw|Варшава|Poland|Польша|52.23|21.01
+Krakow|Краков|Poland|Польша|50.06|19.94
+Lithuania|Литва|Lithuania|Литва|55.2|23.9
+Vilnius|Вильнюс|Lithuania|Литва|54.69|25.28
+Latvia|Латвия|Latvia|Латвия|56.9|24.6
+Riga|Рига|Latvia|Латвия|56.95|24.11
+Estonia|Эстония|Estonia|Эстония|58.6|25.0
+Tallinn|Таллин|Estonia|Эстония|59.44|24.75
+Finland|Финляндия|Finland|Финляндия|64.0|26.0
+Helsinki|Хельсинки|Finland|Финляндия|60.17|24.94
+Sweden|Швеция|Sweden|Швеция|62.0|15.0
+Stockholm|Стокгольм|Sweden|Швеция|59.33|18.07
+Norway|Норвегия|Norway|Норвегия|61.0|9.0
+Oslo|Осло|Norway|Норвегия|59.91|10.75
+Denmark|Дания|Denmark|Дания|56.0|10.0
+Copenhagen|Копенгаген|Denmark|Дания|55.68|12.57
+Iceland|Исландия|Iceland|Исландия|64.9|-18.5
+Reykjavik|Рейкьявик|Iceland|Исландия|64.15|-21.94
+Cyprus|Кипр|Cyprus|Кипр|35.0|33.2
+Limassol|Лимасол|Cyprus|Кипр|34.68|33.04
+Malta|Мальта|Malta|Мальта|35.9|14.4
+Georgia|Грузия|Georgia|Грузия|42.3|43.4
+Tbilisi|Тбилиси|Georgia|Грузия|41.72|44.79
+Batumi|Батуми|Georgia|Грузия|41.64|41.64
+Kazbegi|Казбеги|Georgia|Грузия|42.66|44.64
+Armenia|Армения|Armenia|Армения|40.1|45.0
+Yerevan|Ереван|Armenia|Армения|40.18|44.51
+Azerbaijan|Азербайджан|Azerbaijan|Азербайджан|40.4|47.7
+Baku|Баку|Azerbaijan|Азербайджан|40.41|49.87
+Kazakhstan|Казахстан|Kazakhstan|Казахстан|48.0|68.0
+Almaty|Алматы|Kazakhstan|Казахстан|43.24|76.89
+Astana|Астана|Kazakhstan|Казахстан|51.17|71.43
+Uzbekistan|Узбекистан|Uzbekistan|Узбекистан|41.4|64.6
+Tashkent|Ташкент|Uzbekistan|Узбекистан|41.30|69.24
+Samarkand|Самарканд|Uzbekistan|Узбекистан|39.65|66.96
+Kyrgyzstan|Киргизия|Kyrgyzstan|Киргизия|41.2|74.8
+Bishkek|Бишкек|Kyrgyzstan|Киргизия|42.87|74.59
+Issyk-Kul|Иссык-Куль|Kyrgyzstan|Киргизия|42.45|77.25
+Mongolia|Монголия|Mongolia|Монголия|46.9|103.8
+UAE|ОАЭ|UAE|ОАЭ|24.0|54.0
+Dubai|Дубай|UAE|ОАЭ|25.20|55.27
+Abu Dhabi|Абу-Даби|UAE|ОАЭ|24.45|54.38
+Israel|Израиль|Israel|Израиль|31.4|35.0
+Tel Aviv|Тель-Авив|Israel|Израиль|32.09|34.78
+Jerusalem|Иерусалим|Israel|Израиль|31.77|35.21
+Jordan|Иордания|Jordan|Иордания|31.2|36.5
+Petra|Петра|Jordan|Иордания|30.33|35.44
+Oman|Оман|Oman|Оман|21.5|55.9
+Muscat|Маскат|Oman|Оман|23.59|58.41
+Thailand|Таиланд|Thailand|Таиланд|15.0|101.0
+Bangkok|Бангкок|Thailand|Таиланд|13.76|100.50
+Phuket|Пхукет|Thailand|Таиланд|7.88|98.39
+Chiang Mai|Чиангмай|Thailand|Таиланд|18.79|98.98
+Koh Samui|Самуи|Thailand|Таиланд|9.51|100.0
+Krabi|Краби|Thailand|Таиланд|8.09|98.91
+Indonesia|Индонезия|Indonesia|Индонезия|-2.5|118.0
+Bali|Бали|Indonesia|Индонезия|-8.41|115.19
+Jakarta|Джакарта|Indonesia|Индонезия|-6.2|106.85
+Lombok|Ломбок|Indonesia|Индонезия|-8.65|116.32
+Japan|Япония|Japan|Япония|36.2|138.3
+Tokyo|Токио|Japan|Япония|35.68|139.69
+Kyoto|Киото|Japan|Япония|35.01|135.77
+Osaka|Осака|Japan|Япония|34.69|135.50
+Sapporo|Саппоро|Japan|Япония|43.06|141.35
+South Korea|Южная Корея|South Korea|Южная Корея|36.5|127.9
+Seoul|Сеул|South Korea|Южная Корея|37.57|126.98
+Busan|Пусан|South Korea|Южная Корея|35.18|129.08
+Jeju|Чеджу|South Korea|Южная Корея|33.5|126.53
+China|Китай|China|Китай|35.0|103.0
+Beijing|Пекин|China|Китай|39.90|116.40
+Shanghai|Шанхай|China|Китай|31.23|121.47
+Hong Kong|Гонконг|China|Китай|22.32|114.17
+Vietnam|Вьетнам|Vietnam|Вьетнам|16.0|107.8
+Hanoi|Ханой|Vietnam|Вьетнам|21.03|105.85
+Ho Chi Minh City|Хошимин|Vietnam|Вьетнам|10.82|106.63
+Da Nang|Дананг|Vietnam|Вьетнам|16.05|108.20
+Nha Trang|Нячанг|Vietnam|Вьетнам|12.24|109.19
+Singapore|Сингапур|Singapore|Сингапур|1.35|103.82
+Malaysia|Малайзия|Malaysia|Малайзия|4.2|102.0
+Kuala Lumpur|Куала-Лумпур|Malaysia|Малайзия|3.14|101.69
+Philippines|Филиппины|Philippines|Филиппины|12.9|121.8
+Manila|Манила|Philippines|Филиппины|14.60|120.98
+Cebu|Себу|Philippines|Филиппины|10.32|123.89
+India|Индия|India|Индия|21.0|78.0
+Delhi|Дели|India|Индия|28.61|77.21
+Goa|Гоа|India|Индия|15.30|74.0
+Mumbai|Мумбаи|India|Индия|19.08|72.88
+Sri Lanka|Шри-Ланка|Sri Lanka|Шри-Ланка|7.9|80.7
+Colombo|Коломбо|Sri Lanka|Шри-Ланка|6.93|79.85
+Maldives|Мальдивы|Maldives|Мальдивы|3.2|73.2
+Nepal|Непал|Nepal|Непал|28.4|84.1
+Kathmandu|Катманду|Nepal|Непал|27.72|85.32
+USA|США|USA|США|39.8|-98.6
+New York|Нью-Йорк|USA|США|40.71|-74.01
+Los Angeles|Лос-Анджелес|USA|США|34.05|-118.24
+San Francisco|Сан-Франциско|USA|США|37.77|-122.42
+Las Vegas|Лас-Вегас|USA|США|36.17|-115.14
+Miami|Майами|USA|США|25.76|-80.19
+Chicago|Чикаго|USA|США|41.88|-87.63
+Washington|Вашингтон|USA|США|38.91|-77.04
+Grand Canyon|Гранд-Каньон|USA|США|36.1|-112.11
+Hawaii|Гавайи|USA|США|20.8|-156.3
+Canada|Канада|Canada|Канада|56.1|-106.3
+Toronto|Торонто|Canada|Канада|43.65|-79.38
+Vancouver|Ванкувер|Canada|Канада|49.28|-123.12
+Montreal|Монреаль|Canada|Канада|45.50|-73.57
+Mexico|Мексика|Mexico|Мексика|23.6|-102.5
+Mexico City|Мехико|Mexico|Мексика|19.43|-99.13
+Cancun|Канкун|Mexico|Мексика|21.16|-86.85
+Cuba|Куба|Cuba|Куба|21.5|-79.0
+Havana|Гавана|Cuba|Куба|23.11|-82.37
+Peru|Перу|Peru|Перу|-9.2|-75.0
+Lima|Лима|Peru|Перу|-12.05|-77.04
+Cusco|Куско|Peru|Перу|-13.52|-71.97
+Brazil|Бразилия|Brazil|Бразилия|-10.0|-52.0
+Rio de Janeiro|Рио-де-Жанейро|Brazil|Бразилия|-22.91|-43.17
+Sao Paulo|Сан-Паулу|Brazil|Бразилия|-23.55|-46.63
+Argentina|Аргентина|Argentina|Аргентина|-34.0|-64.0
+Buenos Aires|Буэнос-Айрес|Argentina|Аргентина|-34.60|-58.38
+Patagonia|Патагония|Argentina|Аргентина|-49.3|-72.0
+Chile|Чили|Chile|Чили|-33.5|-70.7
+Santiago|Сантьяго|Chile|Чили|-33.45|-70.67
+Colombia|Колумбия|Colombia|Колумбия|4.6|-74.1
+Bogota|Богота|Colombia|Колумбия|4.71|-74.07
+Medellin|Медельин|Colombia|Колумбия|6.24|-75.58
+Egypt|Египет|Egypt|Египет|26.8|30.8
+Cairo|Каир|Egypt|Египет|30.04|31.24
+Sharm El Sheikh|Шарм-эль-Шейх|Egypt|Египет|27.91|34.33
+Hurghada|Хургада|Egypt|Египет|27.26|33.81
+Morocco|Марокко|Morocco|Марокко|31.8|-7.1
+Marrakesh|Марракеш|Morocco|Марокко|31.63|-8.01
+Casablanca|Касабланка|Morocco|Марокко|33.57|-7.59
+Tanzania|Танзания|Tanzania|Танзания|-6.4|34.9
+Zanzibar|Занзибар|Tanzania|Танзания|-6.17|39.2
+Kenya|Кения|Kenya|Кения|0.2|37.9
+Nairobi|Найроби|Kenya|Кения|-1.29|36.82
+South Africa|ЮАР|South Africa|ЮАР|-29.0|24.0
+Cape Town|Кейптаун|South Africa|ЮАР|-33.92|18.42
+Australia|Австралия|Australia|Австралия|-25.3|133.8
+Sydney|Сидней|Australia|Австралия|-33.87|151.21
+Melbourne|Мельбурн|Australia|Австралия|-37.81|144.96
+New Zealand|Новая Зеландия|New Zealand|Новая Зеландия|-41.0|173.0
+Auckland|Окленд|New Zealand|Новая Зеландия|-36.85|174.76
+Queenstown|Квинстаун|New Zealand|Новая Зеландия|-45.03|168.66`.split('\n').map(r=>{const [en,ru,ce,cr,la,lo]=r.split('|');return {en,ru,ce,cr,lat:+la,lon:+lo}});
+const byEn=Object.fromEntries(CITY.map(c=>[c.en,c]));
+const dn=d=>{const c=byEn[d];return c&&L==='ru'?c.ru:d};
+const KIND={flight:'✈️',train:'🚆',road:'🚗',hike:'🥾',plan:'🔥',other:'🧭'};
+const ke=x=>KIND[x.kind]||KIND.flight;
+const CHAT_URL=''; // сюда вставь ссылку на твой чат, например 'https://t.me/yourchat'
+async function api(p,m='GET',b){
+  const r=await fetch('/api'+p,{method:m,body:b?JSON.stringify(b):undefined,headers:{'Content-Type':'application/json','X-Init-Data':tg.initData}});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.detail||'Error');
+  return j;
+}
+function toast(s){const e=document.createElement('div');e.className='toast';e.textContent=s;document.body.append(e);setTimeout(()=>e.remove(),2600)}
+const run=async f=>{try{await f()}catch(e){const m=e.message;if(m==='rules'||m==='register'){gate();return}if(m==='minor'){minorScreen();return}toast(T[L]['err_'+m]||m)}};
+
+const setSplash=()=>{$('#tag').textContent=tx('tag');$('#tag2').textContent=tx('tag2');$('#splash .sl').innerHTML=LANGS.map(l=>`<button data-l="${l[0]}" class="${l[0]===L?'on':''}">${l[2]} ${l[0].toUpperCase()}</button>`).join('');document.querySelectorAll('#splash .sl button').forEach(b=>b.onclick=e=>{e.stopPropagation();setLang(b.dataset.l)})};
+setSplash();
+setTimeout(()=>$('#splash').classList.add('out'),3600);
+$('#splash').onclick=()=>$('#splash').classList.add('out');
+function setLang(c){L=c;try{localStorage.setItem('l',L)}catch(x){}document.documentElement.lang=L;setSplash();hap();shell();show(tab)}
+
+const ms=$('#ms'),mb=$('#mb');
+let locked=false,poll=0;
+function modal(h,lock){locked=!!lock;mb.innerHTML=h;ms.classList.add('on');const x=mb.querySelector('.x');if(x){if(locked)x.remove();else x.onclick=closeM}}
+function closeM(){locked=false;ms.classList.remove('on');clearInterval(poll)}
+ms.onclick=e=>{if(e.target===ms&&!locked)closeM()};
+
+let tab='board',list=[],view=[],q='',kindF='all';
+let ME={vibe:''};const refreshMe=()=>api('/me').then(m=>{ME=m}).catch(()=>{});
+const VIBES=['early','nature','night','museums','spontaneous','planner','food','photo','active','chill'];
+const POP=[['Paris','🗼'],['Rome','🏛️'],['Madrid','💃'],['Barcelona','⛪'],['Moscow','🏰'],['Saint Petersburg','🌉'],['Vladivostok','🌊'],['Kamchatka','🌋'],['Istanbul','🕌'],['Tbilisi','🍷'],['Bali','🌴'],['Japan','🗾'],['USA','🗽'],['Dubai','🏙️']];
+function vibePicker(box,sel){
+  box.innerHTML=VIBES.map(k=>`<button type="button" class="chip" data-v="${k}" aria-pressed="${sel.has(k)}">${tx('v_'+k)}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const k=b.dataset.v;sel.has(k)?sel.delete(k):sel.add(k);b.setAttribute('aria-pressed',sel.has(k));hap()});
+}
+function seg(box,opts,cur,cb){
+  box.innerHTML=opts.map(([v,t])=>`<button type="button" class="chip" data-s="${v}" aria-pressed="${v===cur}">${t}</button>`).join('');
+  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{box.querySelectorAll('.chip').forEach(o=>o.setAttribute('aria-pressed',o===b));cb(b.dataset.s);hap()});
+}
+const vibeBadges=v=>(v||[]).map(k=>`<span class="badge">${tx('v_'+k)}</span>`).join('');
+let BOT='';fetch('/api/config').then(r=>r.json()).then(j=>BOT=j.bot||'').catch(()=>{});
+const NEG=new Set(['late','rude']);
+const TAGS=['reliable','fun','respectful','organized','punctual','late','rude'];
+const yo=a=>a?`${a} ${tx('yo')}`:'';
+const ask=(msg,cb)=>{try{tg.showConfirm(msg,ok=>{if(ok)cb()})}catch(e){if(confirm(msg))cb()}};
+const sysText=t=>{const i=t.indexOf(':'),k=t.slice(0,i),n=t.slice(i+1);return (tx('sys_'+k)||'').replace('{n}',n)};
+const IC={places:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.1 5.1-5.1 2.1 2.1-5.1z"/></svg>',board:'<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-5h4v5h3.5a1 1 0 0 0 1-1v-9"/></svg>',chat:'<svg viewBox="0 0 24 24"><path d="M20.5 11.5a8 8 0 0 1-11.7 7.1L4 20l1.3-4.4A8 8 0 1 1 20.5 11.5z"/><path d="M9 11.5h6M9 14.5h3.5"/></svg>',pass:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><circle cx="12" cy="10" r="2.6"/><path d="M8.5 16.5c.8-1.6 2-2.2 3.5-2.2s2.7.6 3.5 2.2"/></svg>'};
+function shell(){
+  $('#app').innerHTML=`<div class="top"><span class="logo">Travel Friends</span><span><button class="lang" id="help" aria-label="${tx('howto')}">?</button> <button class="lang" id="lang">${LANGS.find(l=>l[0]===L)[2]} <b>${L.toUpperCase()}</b></button></span></div><div id="body"></div><nav><button id="n_board">${IC.board}<span>${tx('board')}</span></button><button id="n_places">${IC.places}<span>${tx('places')}</span></button><button class="navplus" id="plus" aria-label="${tx('create')}">+</button><button id="n_chat">${IC.chat}<span>${tx('chat')}</span></button><button id="n_pass">${IC.pass}<span>${tx('passport')}</span></button></nav>`;
+  $('#help').onclick=()=>onboarding(false);$('#lang').onclick=langModal;
+  ['board','places','chat','pass'].forEach(k=>$('#n_'+k).onclick=()=>show(k));$('#plus').onclick=newTrip;
+}
+const PHT={'Georgia':'Georgia (country)','Altai':'Altai Republic','Kamchatka':'Kamchatka Peninsula','Washington':'Washington, D.C.','Cancun':'Cancún','Split':'Split, Croatia','Santiago':'Santiago, Chile','Kazbegi':'Stepantsminda','Jeju':'Jeju Island','Malaga':'Málaga','Baikal':'Lake Baikal','Sao Paulo':'São Paulo','Medellin':'Medellín','Bogota':'Bogotá','USA':'United States','UAE':'United Arab Emirates','Mexico':'Mexico','Karelia':'Karelia','Sakhalin':'Sakhalin','Dagestan':'Dagestan','Hawaii':'Hawaii','Goa':'Goa','Czechia':'Czech Republic','Ho Chi Minh City':'Ho Chi Minh City','Koh Samui':'Ko Samui','Mallorca':'Majorca','Kotor':'Kotor','Ireland':'Republic of Ireland'};
+const PH={};
+function photo(dest){
+  if(PH[dest]!==undefined)return Promise.resolve(PH[dest]);
+  const key='ph1:'+dest;
+  try{const c=localStorage.getItem(key);if(c!==null){PH[dest]=c;return Promise.resolve(c)}}catch(e){}
+  return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent((PHT[dest]||dest).replace(/ /g,'_')))
+    .then(r=>r.ok?r.json():{}).then(j=>{const u=(j&&j.thumbnail&&j.thumbnail.source)||'';PH[dest]=u;try{localStorage.setItem(key,u)}catch(e){}return u}).catch(()=>'');
+}
+const big=(u,px)=>u?u.replace(/\/\d+px-/,'/'+px+'px-'):'';
+const POPD=['Paris','Rome','Madrid','Barcelona','Moscow','Saint Petersburg','Vladivostok','Kamchatka','Baikal','Istanbul','Tbilisi','Bali','Phuket','Tokyo','Seoul','Dubai','New York','Los Angeles','Cancun','Rio de Janeiro','Cairo','Marrakesh','Cape Town','Sydney','Iceland','Japan','Georgia','Italy'];
+function places(){
+  $('#body').innerHTML=`<input class="q" id="pq" type="search" placeholder="${tx('search')}"><div class="scroll"><h3 style="margin-top:2px">${tx('popt')}</h3><div class="pgrid" id="pg"></div><p class="mu" style="font-size:12px;margin-top:14px">${tx('photoby')}</p></div>`;
+  const draw=()=>{
+    const v=$('#pq').value.trim().toLowerCase();
+    const arr=v?CITY.filter(c=>(c.en+' '+c.ru+' '+c.ce+' '+c.cr).toLowerCase().includes(v)).slice(0,30).map(c=>c.en):POPD;
+    const cnt={};list.forEach(x=>{cnt[x.dest]=(cnt[x.dest]||0)+1});
+    $('#pg').innerHTML=arr.map(d=>`<button class="pc a${ci(d)}" data-d="${esc(d)}"><div class="pi"></div><b>${esc(dn(d))}</b><span>${tx('trips_cnt').replace('{n}',cnt[d]||0)}</span></button>`).join('');
+    document.querySelectorAll('.pc').forEach(b=>{
+      b.onclick=()=>{q=dn(b.dataset.d);placeF='';kindF='all';hap();show('board')};
+      photo(b.dataset.d).then(u=>{if(u&&b.isConnected)b.querySelector('.pi').style.backgroundImage=`url("${big(u,500)}")`});
+    });
+  };
+  $('#pq').oninput=draw;
+  draw();
+  run(async()=>{list=await api('/trips');draw()});
+}
+function langModal(){
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>🌐 ${tx('langt')}</h2>${LANGS.map(l=>`<button class="cta alt" data-l="${l[0]}" style="text-align:left;${l[0]===L?'border-color:var(--a0);':''}">${l[2]} ${l[1]}</button>`).join('')}</div>`);
+  document.querySelectorAll('#mb [data-l]').forEach(b=>b.onclick=()=>{closeM();setLang(b.dataset.l)});
+}
+function show(t){tab=t;['board','places','chat','pass'].forEach(k=>$('#n_'+k).setAttribute('aria-current',k===t));({board:board,places:places,chat:chat,pass:passport})[t]()}
+
+const row=(x,i)=>{const a=ci(x.dest),d=x.date_from?new Date(x.date_from):null,fresh=Date.now()/1000-x.created<172800;
+  const tag=x.pending>0?'📩 '+x.pending:x.req==='pending'?'⏳':(x.members||0)>=x.people?tx('fullt'):x.closed?tx('closedt'):x.to_rate>0?'⭐ '+tx('torate'):x.boosted?tx('boarding'):fresh?tx('isnew'):'';
+  const who=`${esc(x.name)}${x.age?', '+x.age:''} · ${x.a_cnt?'★'+x.a_avg:tx('newbie')}`;
+  return `<button class="flt a${a}" data-i="${i}" style="--d:${Math.min(i,12)*45}ms"><div class="dt"><b>${d?d.getDate():ke(x)}</b><span>${d?d.toLocaleDateString(loc(),{month:'short'}).replace('.',''):''}</span></div><div class="mid"><h3>${ke(x)} ${esc(dn(x.dest))}</h3><p>${tag?`<span class="tag">${tag}</span>`:''}${who}</p></div><div class="seat"><b>${Math.max(0,x.people-(x.members||0))}</b><span>${tx('left')}</span></div></button>`};
+
+const hay=x=>{const c=byEn[x.dest];return (x.dest+' '+(x.country||'')+' '+(c?c.ru+' '+c.cr:'')).toLowerCase()};
+
+const WLD="M311.8,382.7L315.4,384.3L319.3,385L318.1,386.4L315.4,386.5L314,385.6L313.1,386.7L310.7,387.5L307.7,387.2L305.7,386.4L302.8,386L299.3,384.4L296.4,383L292.6,379.8L294.9,380.4L298.8,382.3L302.5,383.3L303.9,382L304.8,380.1L307.4,379L309.4,379.3L310.4,380.6ZM337.4,375L339.6,376.3L338.8,377.2L335,378.1L333.8,377.1L331.4,378.3L330,377.1L333.3,375.4L335.7,376.1ZM695.2,371.2L691,371.3L690.9,369.9L691.3,368.7L691.5,368.1L693.3,369L695.9,369.4L696,369.9ZM903.9,346.4L906.6,347.3L908.1,347L910.2,346.4L911.9,346.6L912.1,349.9L911.2,350.9L910.9,353.1L909.9,352.3L908,354.3L907.4,354.1L905.7,354L904,351.7L903.6,349.8L902,347.4L902.1,346.1ZM980.6,346.7L981.2,347.9L983.2,346.8L984,347.9L984,349.1L983,350.4L981.2,352.4L979.7,353.6L980.8,354.9L978.6,354.9L976.3,356L975.5,357.8L973.9,360.6L971.7,361.8L970.4,362.6L967.8,362.6L966,361.7L963,361.5L962.5,360.4L964,358.4L967.5,355.6L969.3,355.1L971.3,354.1L973.7,352.6L975.3,351.2L976.6,349.1L977.6,348.4L978,346.8L980,345.6ZM985,333.5L987,336.4L987.1,334.5L988.4,335.3L988.8,337.4L991,338.3L992.9,338.5L994.5,337.5L995.9,337.8L995.2,340.2L994.4,341.9L992.2,341.8L991.5,342.7L991.8,343.8L991.3,344.4L990.3,345.9L988.9,347.8L986.8,348.9L986.3,348.1L985.1,347.7L986.7,345.5L985.8,343.9L982.8,342.8L982.9,341.8L984.9,340.8L985.4,338.7L985.3,336.9L984.1,335L984.2,334.6L982.9,333.4L980.7,331L979.5,329L980.6,328.8L982.1,330.3L984.2,331ZM964.2,294.6L963.2,295.3L961.6,294.5L959.6,293.3L957.9,291.8L956,289.9L955.6,288.9L956.8,289L958.4,289.9L959.6,290.8L960.5,291.6L962.8,293.3ZM995.5,281.2L996.4,282L996,283.5L994.3,283.9L992.7,283.5L992.5,282.3L993.5,281.3L994.8,281.7ZM1000,279.1L998.2,279.7L996.5,280.3L996.1,279.3L997.5,278.7L998.4,278.6L1000,277.7L1000,279.1ZM0,277.7L0,277.7L0.6,277.6L0.2,278.9L0,279.1L0,279.1L0,279.1L0,277.7ZM966.2,278.8L965.3,279.2L964.4,278L964.5,277.2ZM964.2,274.6L964.6,276.8L963.9,276.4L963.3,276.6L962.9,275.8L962.9,273.7ZM639,270.7L639.5,274.1L640.2,275.4L639.9,276.7L639.4,277.5L638.5,275.9L638,276.7L638.5,278.8L638.3,279.9L637.5,280.6L637.3,282.9L636.2,286.2L634.9,290L633.1,295.3L632.1,299.1L630.8,302.4L628.6,303L626.1,304.2L624.5,303.5L622.3,302.5L621.6,301L621.4,298.6L620.4,296.3L620.1,294.3L620.6,292.3L621.9,291.9L621.9,290.9L623.3,288.8L623.5,287.1L622.9,285.7L622.3,284L622.1,281.4L623.1,279.9L623.5,278.1L624.8,278L626.4,277.4L627.4,276.9L628.6,276.9L630.2,275.3L632.5,273.6L633.3,272.2L633,271L634.1,271.4L635.7,269.4L635.7,267.8L636.7,266.5L637.6,267.7L638.4,268.9ZM898.8,271.3L899.8,273.5L901.6,272.4L902.5,273.6L903.8,274.7L903.5,275.9L904.1,278.3L904.5,279.7L905.2,280L906,282.4L905.7,283.9L906.6,285.7L909.6,287.2L911.6,288.5L913.5,289.7L913.1,290.4L914.7,292.1L915.8,295.1L916.9,294.5L918,295.7L918.7,295.3L919.2,298.2L921.1,299.9L922.4,301L924.6,303.3L925.4,305.5L925.4,307.1L925.3,308.8L926.6,311.2L926.4,313.6L925.9,314.9L925.2,317.4L925.2,319L924.7,321L923.5,323.5L921.4,324.9L920.4,327L919.5,328.4L918.6,330.8L917.6,332.2L916.9,334.2L916.5,336.2L916.7,337L915.1,338L912,338.1L909.4,339.2L908.1,340.3L906.4,341.5L904.1,340.3L902.4,339.8L902.9,338.3L901.3,338.9L898.9,340.9L896.5,340.1L894.9,339.7L893.3,339.5L890.7,338.7L888.9,337L888.3,334.9L887.7,333.5L886.3,332.3L883.7,332L884.6,330.6L883.9,328.6L882.5,330.5L880.1,331L881.5,329.5L882,327.9L883,326.5L882.8,324.5L880.5,326.8L878.8,327.8L877.7,330L875.6,328.8L875.7,327.4L873.9,325.4L872.5,324.3L873,323.7L869.4,322L867.5,321.9L864.8,320.6L859.8,320.8L856.2,321.8L853.1,322.7L850.4,322.6L847.5,324L845.1,324.6L844.5,326.1L843.5,327.2L841.1,327.3L839.4,327.5L836.9,327L834.9,327.3L833,327.4L831.4,328.9L830.6,328.8L829.2,329.6L827.8,330.5L825.8,330.4L824,330.4L821,328.6L819.5,328.1L819.6,326.5L821,326.1L821.4,325.5L821.3,324.5L821.7,322.5L821.4,320.9L819.9,318.1L819.4,316.5L819.6,314.9L818.4,313.1L818.4,312.3L817.1,311.2L816.8,309L815.2,306.8L814.8,305.6L816,306.8L815.1,304.2L816.5,305L817.3,306.1L817.3,304.7L815.9,302.5L815.6,301.6L815,300.8L815.3,299.2L815.8,298.5L816.2,297.1L815.9,295.5L817.1,293.5L817.3,295.6L818.5,293.7L820.7,292.8L822.1,291.6L824.2,290.6L825.5,290.4L826.2,290.7L828.4,289.7L830.1,289.4L830.5,288.7L831.3,288.5L832.8,288.6L835.7,287.7L837.2,286.5L837.9,285L839.6,283.6L839.7,282.5L839.8,281L841.7,278.6L842.9,281L844.1,280.5L843.1,279.2L843.9,277.8L845.2,278.4L845.5,276.3L847,274.9L847.7,273.9L849.1,273.4L849.1,272.6L850.3,272.9L850.4,272.2L851.6,271.8L853,271.5L855,272.7L856.6,274.4L858.3,274.4L860.1,274.7L859.5,273.1L860.8,270.9L862.1,270.2L861.6,269.5L862.8,267.9L864.5,266.9L865.9,267.2L868.3,266.7L868.2,265.3L866.2,264.4L867.7,264L869.5,264.7L871,265.8L873.3,266.5L874.1,266.2L875.8,267.1L877.4,266.3L878.5,266.5L879.1,266L880.4,267.4L879.7,268.9L878.6,270L877.7,270.1L878,271.2L877.2,272.6L876.2,273.9L876.4,274.7L878.6,276.3L880.7,277.2L882.2,278.1L884.2,279.8L885,279.8L886.4,280.5L886.8,281.3L889.5,282.3L891.3,281.3L891.9,279.8L892.4,278.6L892.8,277.1L893.6,274.9L893.2,273.5L893.4,272.7L893.1,271.1L893.5,269L894,268.5L893.6,267.5L894.2,266.1L894.8,264.5L894.8,263.7L895.9,262.7L896.7,264.1L896.8,265.8L897.5,266.1L897.7,267.3L898.7,268.7L898.9,270.3ZM950.3,262.2L951.1,263.1L949.2,263.1L948.1,261.4L949.8,262.1ZM835.3,261.5L834.1,261.6L830.5,259.6L833.1,259.1L834.5,259.9L835.5,260.8ZM946.8,260.5L945.7,260.6L944,260.3L943.4,259.8L943.6,258.7L945.4,259.2L946.4,259.8ZM949.1,259.7L948.7,260.2L946.6,257.8L946.1,256.2L947,256.2L948,258.4ZM845.7,261.2L843.3,261.8L842.9,261.5L843.2,260.6L844.4,258.9L847.1,257.8L847.5,257.1L849.8,256.5L851.8,256.4L852.7,256.1L853.7,256.4L852.7,257.2L849.8,258.4L847.5,259.2ZM827.5,255.6L828.5,256.3L830.2,256.1L830.9,257.3L827.7,257.8L825.8,258.2L824.3,258.2L825.2,256.6L826.8,256.5ZM841.4,255.6L841,257.1L836.8,257.9L833.1,257.5L833.1,256.5L835.3,256L837.1,256.8L838.9,256.6ZM944.1,256.2L944.2,256.8L942,255.6L940.5,254.6L939.5,253.7L939.9,253.4L941.2,254.1L943.4,255.3ZM937.6,253.5L937,253.6L935.8,253L934.7,251.9L934.8,251.4L936.5,252.6ZM801.7,251.9L807.1,252.2L807.7,251L812.8,252.4L813.8,254.2L818,254.7L821.4,256.3L818.2,257.4L815.2,256.3L812.7,256.3L809.8,256.1L807.2,255.6L804,254.6L801.9,254.3L800.8,254.6L795.7,253.5L795.2,252.3L792.7,252.1L794.6,249.4L798,249.6L800.2,250.7L801.3,250.9ZM874.2,250.3L872.8,252.2L872.5,250.1L873,249.1L873.6,248.2L874.2,249ZM933,252L932.2,252.3L931,251.2L929.8,249.5L929.2,247.3L929.6,247.1L929.9,247.9L930.7,248.5L932.1,250.3L933.4,251.2ZM922.2,248.3L920.7,248.5L920.3,249.3L918.8,250L917.3,250.6L915.9,250.6L913.6,249.8L912,249L912.2,248.2L914.7,248.6L916.2,248.4L916.7,247L917.1,247L917.3,248.4L918.9,248.2L919.7,247.3L921.2,246.3L920.9,244.6L922.6,244.6L923.2,245.1L923.1,246.6ZM853.5,242.7L852.4,243.6L850.5,243.1L850,241.9L852.8,241.8ZM862.4,241.7L863.4,243.8L861.1,242.6L858.8,242.4L857.2,242.6L855.3,242.5L855.9,241L859.4,240.9ZM925.4,245.6L924.5,246.3L924,244.7L923.3,243.6L922.1,242.7L920.5,241.5L918.5,240.7L919.3,240L920.8,240.8L921.7,241.4L922.9,242.1L924,243.2L925.1,244.1ZM872.6,236.3L873.4,240.8L876.3,242.4L878.6,239.5L881.8,237.8L884.2,237.8L886.6,238.8L888.7,239.8L891.7,240.3L896.5,242.2L901.6,243.8L903.5,245.2L905.1,246.6L905.5,248.3L910.1,250L910.8,251.4L908.2,251.7L908.9,253.6L911.3,255.4L913.1,258.4L914.7,258.3L914.6,259.5L916.8,260L915.9,260.5L918.9,261.7L918.6,262.5L916.7,262.7L916.1,261.9L913.7,261.6L910.9,261.2L908.7,259.4L907.1,257.9L905.7,255.5L902.1,254.3L899.7,255.1L898,256L898.4,258L896.2,259L894.6,258.5L891.8,258.4L889.3,256.1L886.5,255.6L885.8,256.4L882.3,256.4L883.4,254.2L885.2,253.4L884.5,250.4L883.1,248.1L877.7,245.7L875.5,245.5L871.3,242.9L870.5,244.2L869.4,244.5L868.8,243.5L868.8,242.3L866.6,240.9L869.6,239.9L871.6,240L871.4,239.2L867.3,239.2L866.2,237.6L863.7,237.1L862.6,235.7L866.3,235L867.7,234.1L872.2,235.2ZM847.9,229.1L845.7,231.9L843.6,232.4L840.9,231.9L836.3,232L833.8,232.4L833.4,234.5L835.9,237L837.4,235.7L842.6,234.8L842.4,236.1L841.2,235.7L840,237.3L837.5,238.4L840.1,241.9L839.6,242.9L842.1,246.1L842.1,247.9L840.6,248.7L839.5,247.7L840.9,245.5L838.2,246.5L837.5,245.8L837.8,244.7L835.8,243.1L836,240.4L834.2,241.2L834.4,244.5L834.5,248.4L832.8,248.8L831.6,248L832.4,245.5L831.9,242.8L830.8,242.8L829.9,240.9L831.1,239L831.5,236.8L832.8,232.6L833.4,231.5L835.8,229.4L838,230.3L841.5,230.6L844.7,230.5L847.4,228.5ZM857.5,229.9L857.3,232.4L855.9,232.1L855.5,233.8L856.6,235.2L855.8,235.6L854.7,233.8L853.9,230.3L854.4,228L855.4,227L855.6,228.5L857.2,228.8ZM793.9,249.3L790.9,249.4L788.5,247.1L785,244.8L783.8,243.1L781.7,240.8L780.3,238.8L778.2,234.9L775.7,232.6L774.9,230.2L773.9,228L771.4,226.3L769.9,223.9L767.8,222.3L764.9,219.3L764.7,217.8L766.5,218L770.8,218.5L773.2,221.2L775.4,223.1L776.9,224.3L779.6,227.2L782.4,227.3L784.7,229.2L786.3,231.5L788.4,232.8L787.3,235L788.9,236L789.9,236.1L790.4,238L791.4,239.6L793.4,239.8L794.7,241.6L794,245ZM827.4,228L830.5,230.6L827.3,230.9L826.3,232.8L826.4,235.3L823.8,237.2L823.7,240L822.6,244.2L822.2,243.2L819.1,244.5L818,242.8L816,242.6L814.6,241.7L811.3,242.7L810.3,241.4L808.5,241.5L806.2,241.2L805.7,237.5L804.4,236.7L803,234.3L802.6,231.9L803,229.3L804.6,227.5L806.7,228.4L808.8,227.9L809.4,225.6L810.5,225.1L813.9,224.5L815.9,222.3L817.2,220.5L818.3,219.5L820.7,217.9L822.8,216L824.2,213.8L825.4,213.8L826.8,215.2L826.9,216.4L828.7,217.2L831.1,218L830.9,219.1L829,219.3L829.5,220.6L827.4,221.6L825.9,224.1L827.9,226.7ZM851,209.7L851.3,211.5L851.5,213.1L850.5,215.6L849.5,212.8L848.2,214.2L849.1,216.3L848.3,217.6L845.1,216L844.3,213.9L845.1,212.6L843.4,211.3L842.5,212.5L841.2,212.4L839.1,213.9L838.7,213.1L839.8,210.8L841.5,210L843,208.9L844,210.2L846.1,209.4L846.6,208.2L848.5,208.1L848.4,206L850.6,207.3L850.8,208.7ZM725.6,215.9L723.2,216.5L721.9,214.3L721.4,210.3L722.6,205.8L724.6,207.3L725.8,209.3L727.2,212.2L726.8,215.1ZM330.7,205L328.4,205.3L327.9,205L328.7,204.3L328.7,203.2L330.3,202.8L330.8,202.9ZM844.4,204.5L843.4,205.4L842.5,207.2L841.7,208L839.9,206.1L840.5,205.3L841.2,204.6L841.5,202.8L843,202.7L842.6,204.5L844.7,201.9ZM829.2,207.2L825.5,209.8L826.8,207.9L828.8,206.2L830.5,204.2L832,201.5L832.5,203.8L830.6,205.3ZM838.6,200L840.2,200.9L842,200.9L841.9,202.1L840.7,203.2L838.9,204.1L838.8,202.8L839,201.4ZM848.6,199.3L849.4,202.4L847.3,201.6L847.3,202.6L848,204.3L846.7,204.9L846.6,203L845.7,202.8L845.3,201.1L846.9,201.4L846.9,200.3L845.2,198.2L847.8,198.2ZM837.6,196.8L836.8,199.2L835.6,197.8L834.2,195.7L836.6,195.8ZM837,181.7L838.7,182.5L839.6,181.7L839.8,182.4L839.4,183.6L840.3,185.6L839.6,187.9L837.9,188.8L837.5,191.1L838.1,193.3L839.6,193.6L840.8,193.2L844.3,194.8L844,196.3L844.9,197L844.7,198.2L842.5,196.9L841.5,195.4L840.8,196.4L839,194.8L836.5,195.2L835.1,194.6L835.2,193.4L836.1,192.7L835.3,192.1L834.9,193.1L833.5,191.5L833.1,190.3L833,187.6L834.1,188.5L834.4,184.2L835.3,181.7ZM317.8,182.4L317.1,183.1L315,183.1L313.4,183.2L313.2,182L313.6,181.6L315.9,181.6L317.3,181.9ZM286.4,183.4L285.5,183.9L284,183.5L282.4,182.4L282.7,181.8L283.9,181.6L284.5,181.7L286.4,182L287.9,182.6L288.3,183.4ZM298.4,177.9L300.8,178.3L301.1,177.8L303.3,177.8L305,178.6L305.7,178.5L306.2,179.5L307.7,179.4L307.6,180.3L308.9,180.4L310.2,181.4L309.2,182.5L307.9,181.9L306.6,182L305.7,181.9L305.2,182.4L304.1,182.6L303.7,181.9L302.8,182.3L301.7,184.2L301,183.7L300.8,182.9L299,182.5L297.7,182.7L296,182.5L294.7,183L293.2,182.1L293.4,181.2L296,181.6L298.1,181.8L299.1,181.2L297.8,180L297.8,178.9L296.1,178.5L296.7,177.8ZM806.5,181.2L804.1,182.5L801.8,181.7L801.7,179.3L803.1,178L806.1,177.2L807.7,177.3L808.4,178.4L807.1,179.6ZM67.9,180.1L67.5,180.5L66.8,180.1L66.9,179.4L66.5,178.3L66.6,178L67.1,177.6L66.9,177L67.1,176.8L67.3,176.8L68.3,177.3L68.8,177.5L69.3,177.9L70,178.9L69.9,179L68.8,179.6ZM66.5,175.7L65.5,175.9L65,175.3L64.7,175.1L64.7,174.9L65,174.7L66,175L66.7,175.4ZM64.6,174.2L64.5,174.5L63,174.5L63.2,174.1ZM62.1,173.8L61.9,174L61.7,174L60.8,173.9L60.4,173.2L60.3,173.1L61,172.7L61.3,172.9ZM57.4,172L57,172.3L56.1,171.8L56.3,171.6L56.7,171.3L57.3,171.4ZM278.7,169.8L279.8,170.8L282.4,170.5L283.4,171.2L285.7,172.9L287.4,174.2L288.4,174.1L290,174.7L289.8,175.5L291.9,175.6L294,176.7L293.6,177.4L291.8,177.7L289.9,177.9L288,177.6L284,177.9L285.9,176.4L284.7,175.6L283,175.5L282,174.7L281.3,173.1L279.8,173.2L277.2,172.4L276.3,171.9L272.7,171.4L271.8,170.9L272.8,170.2L270.1,170L268.1,171.5L266.9,171.5L266.5,172.2L265.1,172.5L264,172.2L265.4,171.4L266,170.4L267.3,169.8L268.7,169.2L270.8,169L271.5,168.7L273.9,168.9L276.1,168.9ZM284.6,167.1L283.9,167.2L283.2,165.6L282.2,164.8L282.8,163L283.6,163.2L284.6,165.5ZM836.6,169.8L835.4,172L833.9,169.7L833.6,167.6L835.3,164.9L837.5,162.8L838.8,163.6L838.3,165.3ZM283.8,159.2L280.8,159.7L280.6,158.7L281.9,158.4L283.8,158.5ZM286.1,159.2L285.6,161.2L285.1,160.8L285.2,159.4L283.9,158.3L283.9,158ZM874,138.2L874.3,139.2L872.8,140.8L871.6,140L870.2,140.6L869.5,142.2L867.7,141.4L867.7,140.1L869.2,138.5L870.8,138.8L872,137.6ZM596,134L594.2,135.2L594.4,135.7L594.5,135.9L591.6,137L590.2,136.7L589.6,135.6L590.9,135.5L591.1,135.4L591.5,134.8L593.5,134.8ZM565.8,133.9L567.4,134.8L569.5,134.7L571.6,134.9L571.5,135.3L573,135L572.7,135.8L568.7,136.1L568.7,135.6L565.3,135.1ZM543.1,126.9L542.1,129.1L542.5,129.9L541.9,131.3L539.8,130.3L538.4,130L534.5,128.6L534.9,127.2L538.2,127.4L541,127.1ZM525.6,118.6L527.2,120.6L526.9,124.2L525.6,124.1L524.5,125L523.4,124.3L523.3,120.9L522.7,119.3L524.2,119.5ZM891.6,129.9L890.6,132.1L891,133.5L889.6,135.5L886,136.8L881.2,136.9L877.2,140.1L875.3,139L875.2,137L870.4,137.6L867.1,138.9L863.8,138.9L866.7,141L864.8,145.7L863,146.9L861.7,145.8L862.4,143.3L860.6,142.5L859.5,140.6L862.1,139.7L863.5,138L866.3,136.5L868.4,134.6L873.9,133.8L876.9,134.4L879.8,129.4L881.6,130.8L885.7,128L887.3,126.9L889,123.5L888.6,120.4L889.7,118.6L892.7,118.1L894.2,122L894.1,124.2L891.6,127ZM526.6,116L525.6,118.1L524.4,117.6L523.7,115.7L524.3,114.7L526.1,113.6ZM899.7,110.4L901.7,111L903.7,109.8L904.3,112.9L900.2,113.7L897.7,116.4L893.4,114.5L891.8,117.6L888.8,117.6L888.4,114.8L889.8,112.7L892.7,112.5L893.5,108.7L894.4,106.5L897.6,109.4ZM323.2,103.8L325.2,104.1L327.7,104.1L326.4,105.2L325.4,105.4L321.8,104.2L321.1,103.3L322.2,102.4ZM328.3,96.7L327,96.7L323.4,95.8L320.8,94.5L321.7,94.3L325.4,95L328.2,96.2ZM156.9,98.3L155.5,98.7L151,97.4L150.1,96.5L147.6,95.5L147.1,94.7L144.3,94.2L143.2,92.7L143.5,92L146.4,92.6L148.1,93.1L150.7,93.4L151.6,94.3L153,95.6L155.8,96.8ZM344.1,92.3L342.2,94.7L344,93.8L345.9,94.4L344.9,95.3L347.4,96.1L348.7,95.4L351.5,96.3L350.6,98.3L352.5,97.8L352.9,99.3L353.8,101L352.6,103.5L351.3,103.6L349.5,103.1L350.1,100.8L349.3,100.4L346.1,102.8L344.5,102.7L346.4,101.4L343.7,100.8L340.8,100.9L335.4,100.8L334.9,100L336.7,99L335.5,98.3L337.8,96.6L340.7,92.2L342.4,90.6L344.8,89.6L346.1,89.8L345.6,90.5ZM131.4,83L134,82.7L133.2,85.9L135.6,88.1L134.5,88.1L132.8,86.9L131.8,85.6L130.4,84.7L129.9,83.5L130.1,82.6ZM899,92.1L901.8,97L897.7,96.1L896,100.1L898.7,103L898.6,104.9L896.5,103.2L894.7,105.4L894.2,103.1L894.5,100.3L894.2,97.3L894.8,95.3L894.9,91.5L893.3,88.8L893.6,85L896.1,83.7L895,82.4L896.3,82.1L897,83.9L897.9,86.6L897.9,89.3ZM481.1,87.9L476.2,89.5L472.3,89.1L474.5,86.2L473.1,83.4L476.9,81.2L479,79.9L481.3,79.8L484.3,81.5L482.8,83.4L483.2,85.4ZM535.2,78.6L533.6,80.8L530.7,79.3L530.3,78.1L534.4,77.2ZM75,74.4L72.2,75.5L70.8,74.8L70.4,73.5L72.9,72.5L74.4,72L76.2,72.2L77.4,73.1ZM491.7,70.2L488.7,73.2L491.5,72.8L494.6,72.8L493.8,75.1L491.3,77.6L494.2,77.8L496.9,81.3L498.8,81.8L500.5,84.9L501.3,86L504.7,86.6L504.3,88.4L502.9,89.2L504,90.6L501.5,92.1L497.8,92L493.1,92.8L491.8,92.2L490,93.5L487.4,93.2L485.4,94.3L484,93.7L488,90.8L490.5,90.2L486.2,89.8L485.4,88.7L488.3,87.8L486.8,86.3L487.3,84.5L491.4,84.7L491.8,83.1L489.9,81.4L486.5,80.9L485.9,80.1L486.9,78.9L486,78.1L484.5,79.4L484.3,76.8L482.9,75.3L483.9,72.5L486.1,70.2L488.3,70.4ZM40.1,66.7L38.4,67.1L36.5,66.6L34.9,65.8L37.6,65.3L39.8,65.6ZM279.8,60.4L278.7,61.9L277.5,61.6L276.8,60.8L276.9,60.6L278,59.8L279.1,59.8ZM272.5,58.9L269.3,60.4L267.3,60.3L266.7,59.6L268.8,58.3L272.6,58.3ZM23,55.9L24.7,56.4L26.4,56.1L28.7,56.9L31.4,57.2L31.2,57.5L29.1,58.1L27,57.5L25.9,57L23.5,57.2L22.8,56.9ZM263.4,50.7L264,51.9L265.4,51.5L267,52.2L270,53.2L273.2,54L273.5,55.4L275.5,55.1L277.5,56.1L275,56.9L270.7,56.3L269.1,55L266.4,56.5L262.4,57.9L261.5,56.3L257.7,56.6L260.1,55.2L260.5,53L261.4,50.5ZM459.7,48.5L459.1,50.3L462.2,52.2L458.6,54.3L450.6,56.2L448.2,56.7L444.5,56.3L436.8,55.4L439.5,54.2L433.5,52.8L438.4,52.3L438.3,51.5L432.4,50.8L434.3,49L438.5,48.6L442.8,50.5L447.1,49L450.6,49.8L455.1,48.3ZM289.3,46.5L286.1,46.7L285.5,45.3L286.6,43.8L289.2,43.4L291.4,44.2L291.4,45.3L291.1,45.7ZM636.4,118.4L637.8,120.4L639.1,120.5L640,121.2L637.7,121.5L637.2,123.6L636.7,124.6L635.7,125.2L635.8,126.6L636.7,128.7L639.3,129.3L641.2,130.6L645.2,131.1L649.5,130.4L649.8,129.7L649.3,127.8L649.7,124.9L647.5,123.9L648.2,122L646.4,121.9L647,119.5L649.6,120.2L652,119.3L650,117.7L649.2,116.1L647,116.8L646.7,118.8L645.8,117L645.7,116.3L646.4,115.2L645.8,114.2L642.6,113.3L641.4,110.8L639.8,110.1L639.7,109.2L642.4,109.4L642.5,107.4L644.9,106.9L647.3,107.3L647.8,104.6L647.3,102.9L644.6,103.1L642.2,102.4L639,103.6L636.4,104.2L635.1,105.8L632.4,106.3L629.7,109.2L632.2,111.8L631.9,113.7L635,116.9ZM1000,52.6L1000,52.6L996.4,53.8L992.8,53.6L995.3,55.1L997,57.4L998.2,58.1L998.6,59.3L997.9,60L992.7,59.4L984.9,61.5L982.4,61.8L978.2,63.8L974.2,65.5L973.1,66.7L969.2,64.8L961.9,67L960.7,66L958,67.2L954.3,66.8L953.4,68.6L950,71.3L950.1,72.4L953.3,73L952.9,77.1L950.4,77.2L949.2,79.5L950.3,80.7L945.5,82.1L944.5,85.3L940.4,86L939.5,88.8L935.5,91.4L934.5,89.5L933.3,85.4L931.8,79.2L933.1,75.4L935.4,73.7L935.6,72.4L939.9,71.8L944.9,68.3L949.6,65.4L954.6,63.2L956.9,59.3L953.5,59.6L951.8,61.8L944.8,64.9L942.5,61.5L935.3,62.4L928.4,67.1L930.7,68.8L924.5,69.5L920.2,69.8L920.4,67.8L916.1,67.4L912.6,68.7L904.1,68.2L895,69.1L886,74.5L875.3,81L879.7,81.4L881.1,83.1L883.8,83.8L885.6,82.4L888.6,82.5L892.6,85.6L892.7,88L890.5,90.7L890.3,94.1L889.1,98.5L884.9,102.5L883.9,104.4L880.2,107.7L876.4,110.9L874.6,112.5L870.9,114.1L869.2,114.2L867.4,112.8L863.7,114.9L863.3,115.8L862.2,115.6L861,116.6L860.2,117.5L860.3,119.5L858.9,120.1L858.4,120.6L857.3,121.4L855.5,121.9L854.3,122.6L854.2,123.8L853.8,124.1L855,124.6L856.5,125.8L858.9,129.1L859.6,130.9L859.6,134.1L858.6,135.6L856.1,136.2L853.8,137.3L851.3,137.5L851,136L851.6,133.9L850.3,131.1L852.4,130.6L850.5,128.2L849.1,127.7L848.8,128.2L848,128.4L847.9,127.9L847.2,127.7L846.4,127.2L847.2,126L847.8,125.7L847.6,125.2L848.3,123.7L848.1,123.2L846.5,122.9L845.2,122.2L841.3,123L839.3,124.3L836.3,125L837.7,123.7L837.2,122.7L839.4,120.8L837.9,119.3L835.5,120.3L832.3,122.2L830.6,124L827.9,124.2L826.5,125.5L827.9,127.3L830.2,127.8L830.3,129L832.5,129.9L835.6,127.9L838.1,129L839.9,129L840.3,130.5L836.4,131.3L835.1,132.8L832.4,134.2L831,136.1L834,137.6L835.1,140.4L836.7,142.9L838.6,145L838.6,147.1L836.8,147.9L837.5,149.3L839.1,150.2L838.7,152.5L838,154.7L836.5,154.9L834.4,157.9L832.2,161.6L829.6,164.9L825.8,167.4L821.9,169.8L818.8,170.1L817.1,171.3L816.1,170.4L814.6,171.8L810.7,173.2L807.7,173.6L806.8,176.6L805.2,176.7L804.5,174.7L805.2,173.6L801.4,172.7L800.1,173.2L796.4,175.6L794.1,178.2L793.5,180.1L795.6,183.1L798.2,186.7L800.7,188.4L802.4,190.6L803.7,195.8L803.3,200.7L801,202.5L797.8,204.3L795.6,206.6L792.1,209.2L791.1,207.4L791.9,205.5L789.8,203.9L787.5,203.5L786.4,202.1L785,199.2L782.5,197.9L780.1,198L780.5,195.8L778,195.8L777.8,198.9L776.3,202.9L775.4,205.4L775.6,207.4L777.4,207.5L778.6,210L779.1,212.4L780.6,214L782.3,214.3L783.7,215.8L784.4,216L786,217.7L787.2,219.6L787.3,221.5L787,222.7L787.3,223.7L787.5,225.3L788.5,226.1L789.6,228.5L789.5,229.5L787.6,229.7L784.9,227.6L781.6,225.4L781.3,224L779.7,222.1L779.3,219.8L778.3,218.3L778.6,216.3L778,215.1L776.9,214L776.4,212.7L775,211.1L773.6,209.8L773.2,211.4L772.6,209.9L772.9,208.1L773.8,205.5L773.5,203.4L774.3,201.3L773.4,199.6L773.6,196.6L772.5,195.2L771.6,191.9L771.1,188.3L769.9,186L768.1,187.4L764.9,189.4L763.4,189.2L761.6,188.5L762.6,185.1L762,182.5L759.8,179.3L760.2,178.3L758.5,177.9L756.6,175.7L755.8,174.2L755.6,172.8L755.1,171.5L753.9,169.8L751.4,169.7L751.6,170.9L750.8,172.4L749.6,171.8L749.2,172.4L748.4,172.1L747.3,171.8L746.9,172.8L745,172.8L741.6,173.4L741.8,175.5L740.3,177.1L736.3,179L733.2,182.2L731.1,184L728.3,185.8L728.3,187.1L726.9,187.8L724.4,188.8L723.1,188.9L722.3,191L722.9,194.6L723,196.9L721.8,199.6L721.8,204.3L720.4,204.4L719.1,206.6L720,207.5L717.4,208.3L716.5,210.1L715.4,210.9L712.8,208.3L711.5,204.5L710.4,201.7L709.4,200.3L708,197.7L707.3,194.2L706.8,192.5L704.3,188.7L703.1,183.3L702.3,179.7L702.3,176.3L701.7,173.7L697.7,175.4L695.7,175.1L692.1,171.7L693.5,170.7L692.6,169.6L689.4,167.3L687.3,166.6L686.5,164.6L684.4,162.4L679.2,163L674.7,163L670.8,163.4L665.6,162.6L662.6,161.9L659.4,161.6L658.3,158.2L656.9,157.7L654.8,158.2L652,159.5L648.6,158.6L645.8,156.5L643.1,155.7L641.3,153L639.2,149.3L637.7,149.8L635.9,148.9L634.9,149.9L633.3,149.8L633.8,151L633.6,151.7L634.5,153.8L635.6,156.2L636.9,156.8L637.4,157.8L639.3,158.9L639.5,160.1L639.2,161L639.6,161.9L640.4,162.7L640.7,163.6L641.1,164.3L641,162.3L641.7,160.8L642.5,160.5L643.3,161.4L643.4,163L642.7,164.7L643.3,165.7L643.8,165.6L643.9,166.3L646,165.9L648.3,166L650,166.1L651.9,164.2L654,162.4L655.8,160.7L656.6,159.7L656.9,160L656.6,161.1L656.3,161.6L656.7,163.8L657.9,165.7L659.5,166.7L661.5,167.1L663.1,167.6L664.4,169.2L665.1,170.1L666.1,170.5L666.1,171.1L665.1,172.8L664.7,173.5L663.5,174.4L662.5,176.3L661.2,176.2L660.6,176.8L660.2,178.2L660.5,180.1L660.3,180.4L659,180.4L657.2,181.5L657,182.8L656.3,183.4L654.6,183.4L653.5,184.1L653.5,185.2L652.2,186L650.7,185.7L648.8,186.7L647.5,186.8L645.5,187.6L645,188.8L644.9,189.7L642.1,190.9L637.7,192.2L635.2,194.2L634,194.3L633.2,194.2L631.5,195.3L629.8,195.8L627.4,196L626.7,196.2L626.1,196.9L625.4,197.1L625,197.8L623.6,197.7L622.7,198.1L620.8,198L620.1,196.3L620.1,194.8L619.7,194L619.1,192L618.3,190.8L618.9,190.7L618.6,189.4L619,188.9L618.8,187.7L618.5,186.5L617.6,185.6L617.4,184.5L616,183.5L614.5,181.2L613.7,178.9L611.8,177L610.6,176.6L608.7,173.9L608.4,172L608.5,170.4L606.9,167.3L605.6,166.2L604.1,165.6L603.2,164L603.4,163.4L602.6,161.9L601.8,161.3L600.7,159.3L599,157L597.6,155.1L596.2,155.1L596.6,153.6L596.8,152.6L597.1,151.5L597,151.1L596.2,152.2L595.6,154.3L594.9,155.8L594.2,156.3L593.3,155.4L592,154.1L590.1,150.2L589.8,150.4L590.9,153.3L592.6,156.1L594.7,160.5L595.8,162L596.7,163.5L599.1,166.6L598.6,167.1L598.7,168.9L601.9,171.4L602.4,172L603.3,174.7L602.7,175.2L603.1,178L604.1,181.4L605.2,182L606.7,183.1L608.3,186.3L609.1,188.8L610.6,190.2L614.4,192.8L615.9,194.4L617.4,196L618.3,197L619.7,197.8L620.3,198.7L620.2,199.8L618.7,200.5L619.8,201.2L620.8,201.7L621.3,202.9L622.5,204.1L623.9,204.1L626.5,203.4L629.6,203L632,202.2L633.4,202L634.4,201.5L636,201.4L636.9,201.3L638.1,200.9L639.6,200.6L640.9,199.7L642,199.7L642,200.4L641.8,202.1L641.8,203.5L641.2,204.5L640.4,207.5L639.1,210.6L637.4,214.2L635,218.2L632.6,221.3L629.3,225.1L626.6,227.4L622.4,230.1L619.8,232.3L616.8,235.6L616.1,237.1L615.5,237.7L613.6,238.9L612.9,240L611.8,240.2L611.4,242.2L610.6,243.3L610,245.1L608.9,246.1L607.6,249.5L607.8,251.1L609.6,252.1L609.6,252.8L608.9,254.5L609,255.3L608.9,256.6L609.8,258.4L611,261.1L612,261.7L612.4,263L612.3,265.7L612.7,268.2L612.8,272.5L613.3,273.9L612.4,275.9L611.4,277.8L609.6,279.5L607,280.6L603.9,281.9L600.8,284.9L599.7,285.4L597.8,287.4L596.6,288L596.4,290L597.7,292.1L598.3,293.7L598.3,294.6L598.8,294.4L598.7,297.2L598.3,298.4L598.9,298.9L598.5,300.1L597.3,301.1L595,302L591.7,303.5L590.5,304.5L590.7,305.7L591.4,305.9L591.2,307.4L590.5,309.4L590.2,311.7L589.5,312.9L587.6,314.3L587,314.7L585.8,316.2L585.1,317.6L583.5,319.6L580.3,322.4L578.4,324.1L576.3,325.4L573.4,326.4L572,326.6L571.6,327.4L569.9,326.9L568.5,327.5L565.5,326.9L563.9,327.3L562.7,327.1L559.8,328.2L557.5,328.7L555.8,329.7L554.5,329.8L553.3,328.8L552.4,328.8L551.2,327.5L551,327.9L550.7,327.1L550.7,325.5L549.8,323.7L550.7,323.2L550.6,321L548.8,318.4L547.4,316.1L547.4,316.1L545.4,312.4L543.3,310.4L542.3,308.3L541.6,305.6L541,303.6L540,299.3L540,296L539.6,294.5L538.5,293.3L537.1,291L535.6,287.7L535,286L532.8,283.3L532.6,281.1L532.3,279.4L532.7,276.9L533.7,274.4L533.8,273.2L534.7,270.7L535.4,269.6L537,267.7L537.9,266.5L538.2,264.5L538,262.9L537.2,261.9L536.4,260.2L535.8,258.5L535.9,258L536.8,256.9L535.9,254.2L535.4,252.3L534,250.6L534.2,250L533.8,249.2L533.1,247.1L530.8,244.1L528,241.3L526.1,239L524.4,236.2L524.5,235.2L525.1,234.3L525.8,232.3L526.4,230.3L525.8,229.8L526.8,226.7L527.2,224.5L526.1,222.7L524.9,222.2L524.3,221L523.6,220.6L523.6,219.8L520.7,220.8L519.7,220.7L518.6,221.3L516.4,221.2L514.9,219.5L514,217.5L512,215.6L509.9,215.7L507.5,215.7L505.2,216L502.9,216.6L498.6,218.2L497,219.2L494.5,220L492.1,219.2L490.8,219.2L488.9,218.7L487.1,218.7L483.8,219.2L481.9,220L479.1,221L478.6,220.9L477.8,221L475,219.6L472.5,217.5L470.1,216L468.2,214.2L467.5,214L465.5,212.9L464,211.4L463.5,210.4L463.2,208.3L462,206.7L460.9,205.6L460.2,205.2L459.5,204.7L459.2,203.5L458.8,202.9L458,202.4L456.5,201.2L455.3,201.1L454.7,200.3L454.7,199.9L453.9,199.3L453.7,198.7L453.2,196.5L453.6,195.3L452.4,193.1L451,192.2L452.3,191.6L453.6,189.7L454.3,188.2L454,186.8L454.8,185.4L455.1,182.8L454.8,180L454.5,178.6L454.8,177.3L454.1,175.9L452.6,174.7L452.7,173.6L452.9,172.3L453.9,171.5L454.8,170.1L454.6,169.1L455.6,167.2L457.2,165.4L458.1,165L458.8,163.3L458.9,161.9L459.9,160.1L461.7,159.1L463.5,156.3L464.9,155.2L467.5,154.9L469.7,153L471.1,152.2L473.4,149.9L472.7,146.5L473.8,144.1L474.2,142.6L476,140.7L478.7,139.5L480.8,138.3L482.7,135.4L483.5,133.7L485.6,133.7L487.2,134.9L489.9,134.7L492.8,135.4L494,135.4L496.6,133.9L499.6,133.4L501.4,132.2L504.1,131.4L508.8,130.9L513.4,130.7L514.8,131.1L517.4,130L520.4,130L521.5,130.6L523.4,130.4L526.4,129.3L528.4,129.7L528.3,131.1L530.6,130L530.8,130.6L529.4,131.9L529.4,133.2L530.4,133.9L530,136.3L528.2,137.7L528.7,139.2L530.2,139.3L530.9,140.6L531.9,141L535.2,142L536.3,141.7L538.7,142.2L542.3,143.4L543.6,145.9L546.1,146.5L550.1,147.6L553,149L554.4,148.3L555.7,147L555.1,144.9L555.9,143.5L557.9,142.2L559.8,141.8L563.6,142.4L564.5,143.7L565.6,143.7L566.5,144.1L569.2,144.5L569.9,145.4L573.6,145.3L576.3,146.1L579,146.9L580.3,147.3L582.5,146.4L583.6,145.6L586,145.4L588,145.8L588.8,147.1L589.4,146.2L591.6,146.9L593.8,147L595.2,146.3L596,145.4L595.8,145.3L596.5,144L597.1,141.9L597.5,141.2L597.6,141.2L598.6,138.9L599.9,136.9L600,136.8L599.7,134.7L600.4,133.6L599.4,132.3L600.4,131.3L598.8,131.5L596.4,130.9L594.5,132.5L590.3,132.8L588.1,131.3L585.1,131.2L584.4,132.3L582.5,132.7L579.8,131.2L576.8,131.2L575.1,128.5L573.1,126.9L574.5,124.8L572.7,123.4L575.8,120.8L580.1,120.7L581.2,118.6L586.5,118.9L589.9,117.1L593.1,116.4L597.7,116.3L602.5,118.2L606.5,119.3L609.8,118.9L612.1,119.1L615.4,117.7L615.8,116.5L615.1,114.6L613.5,113.6L612,113.3L611,112.4L607.4,110.1L604.3,109L601.9,107.4L603.9,106.9L606.2,104.6L604.6,103.5L608.7,102.4L608.7,101.8L606.2,102.2L604,102.5L602.1,103.4L599.5,103.5L597.1,104.5L597.3,106.3L598.6,106.9L601.5,106.8L600.9,107.8L597.9,108.2L594.1,109.8L592.6,109.3L593.2,108L590.1,107.2L590.6,106.6L593.3,105.7L592.5,105.1L588.2,104.4L588,103.3L585.4,103.7L584.4,105.2L582.2,107.3L582.3,108L580.9,108.6L580.1,108.3L579.3,111.7L577.9,112.8L576.9,114.8L577.8,116.4L578.1,117.5L580.5,118.3L580,119L576.7,119.2L575.5,120L573.2,121.5L572.3,120.2L572.4,119.7L570.7,119.6L569.2,119.3L565.9,120.1L567.8,121.6L566.4,122.1L564.8,122.1L563.4,120.6L562.9,121.2L563.5,122.9L564.9,124.2L563.8,124.8L565.4,126.1L566.7,126.9L566.8,128.5L564.2,127.7L565,129.2L563.3,129.4L564.3,131.9L562.5,131.9L560.2,130.7L559.2,128.5L558.7,126.7L557.6,125.4L556.2,123.8L556,123L555.5,122.8L555.4,122.2L553.9,121.3L553.7,119.9L553.9,118L554.3,117.2L553.8,116.7L553.2,116.5L552.4,115.6L551.2,115.1L548.6,114L547,113L544.5,112.2L542.2,110.2L542.7,110L541.4,108.8L541.4,107.9L539.6,107.4L538.8,108.6L537.9,107.7L538,106.7L538.1,106.7L538.7,106.4L536.5,106L534.2,107L534.4,108.4L534.1,109.2L535,110.6L537.6,112L539,114.3L542.1,116.5L544.2,116.5L544.9,117.1L544.1,117.7L546.6,118.7L548.7,119.5L551,121L551.3,121.5L550.8,122.5L549.3,121.2L546.9,120.7L545.7,122.5L547.7,123.6L547.4,125L546.2,125.2L544.7,127.6L543.6,127.8L543.6,126.9L544.1,125.4L544.7,124.8L543.7,123.2L542.8,121.8L541.7,121.5L540.8,120.3L539.1,119.8L537.9,118.7L535.8,118.5L533.6,117.2L531.1,115.4L529.2,113.8L528.3,111.1L527,110.7L524.7,109.8L523.4,110.2L521.8,111.5L520.7,111.7L518.1,113.3L512.7,112.5L508.6,113.4L508.3,115.1L508.4,116.7L505.8,118.6L502.3,119.1L502,120.1L500.3,121.6L499.2,123.9L500.3,125.5L498.7,126.7L498.1,128.5L496,129.1L494,131.2L490.5,131.2L487.9,131.2L486.1,132.2L485.1,133.2L483.7,133L482.7,132.1L481.9,130.5L479.3,130L478.2,130.7L476.7,130.3L475.3,130.7L475.7,128.5L475.4,126.8L474.2,126.5L473.5,125.5L473.8,123.6L474.9,122.6L475.1,121.5L475.6,119.8L475.6,118.7L475,117.7L474.9,116.7L475,114.8L473.9,113.6L477.8,111.5L481.2,112.1L485,112L487.9,112.5L490.2,112.4L494.7,112.5L496.2,110.8L496.7,105.3L493.8,102.3L491.8,100.9L487.5,99.9L487.2,97.8L490.8,97.2L495.5,97.9L494.6,94.8L497.3,96L503.7,93.8L504.6,91.6L507,91L509.2,90.4L510.6,89.7L513.1,85.6L516.9,84.4L519.2,84.5L519.7,83.9L522,83.8L522.6,84.4L524.4,83L523.8,82L523.7,80.4L522.6,78.9L522.5,76L522.9,75.3L523.7,74.4L526.2,74.3L527.2,73.5L529.4,72.7L529.3,74.1L528.5,75L528.8,75.8L530.3,76.2L529.6,77.3L528.8,77L526.8,79L527.6,80.3L527.6,81.4L530.4,82.1L530.4,83L533.2,82.5L534.8,81.8L537.9,82.9L539.2,83.7L541.1,82.9L545.5,81.6L549,80.7L551.7,81.2L551.9,81.9L554.6,81.9L555.2,80.7L559.1,79.8L558.5,77.4L558.6,75.3L559.9,73.6L562.6,72.6L564.8,74.7L567,74.7L567.5,72.5L567.9,70.9L566.8,71.2L565.1,70.3L564.8,68.7L568.3,67.9L571.8,67.5L574.9,67.9L577.7,67.9L580.9,66.3L578,65L572.9,65.2L568,66.2L563.5,66.8L561.9,65.3L559.2,64.4L559.8,61.7L558.5,59.2L559.8,57.5L562.3,55.8L568.7,52.8L570.5,52.2L570.3,51L566.4,49.7L561.6,50.5L558.9,52.4L559.4,54.1L554.9,56.4L549.6,58.8L547.6,62.7L549.5,64.6L552.2,66.2L549.6,69.3L546.7,70L545.7,74.6L544.1,77.2L540.7,77L539.2,79.2L536,79.3L535.1,76.7L532.7,73.5L530.6,69.6L528.8,67.9L523.3,71.1L519.6,71.7L515.7,70.3L514.7,67.3L513.9,60.9L516.4,59.1L523.8,56.8L529.2,53.9L534.3,50.1L541,44.7L545.7,42.6L553.3,39.1L559.4,37.9L564,38.1L568.2,35.8L573.2,35.9L578.2,35.3L586.9,37.4L583.3,38.1L586.4,39.9L589.3,38.9L593.8,40.6L601.4,41.2L611.9,44.4L614.1,45.7L614.2,47.5L611.2,49L606.6,49.7L594.2,47.6L592.2,48L596.7,50L597.1,54.1L600.6,55L602.8,55.7L603.2,54.4L601.4,53.1L603.3,52.1L610,53.8L612.3,53.2L610.5,51.1L616.9,48.4L619.5,48.6L622.1,49.5L623.7,47.6L621.4,46L622.7,44.3L620.7,42.6L628.5,43.5L630.1,45L626.5,45.4L626.6,46.9L628.7,47.9L633,47.3L633.7,45.5L639.5,44.2L649.2,41.8L651.3,41.9L648.6,43.6L652,43.9L654,43L659.2,42.9L663.3,41.7L666.5,43.4L669.7,41.6L666.7,40L668.2,39L676.4,39.9L680.2,40.8L690.3,43.9L692.2,42.5L689.3,41L689.3,40.4L685.9,40.1L686.8,38.8L685.3,36.7L685.3,35.8L690.4,33.3L692.2,30.7L694.3,30.2L701.6,30.9L702.2,32.5L699.6,34.7L701.3,35.6L702.2,37.5L701.6,41.3L704.6,43L703.4,44.9L698,48.8L701.2,49.3L702.3,48.3L705.3,47.5L706.1,46.2L708.5,44.8L706.9,43.3L708.2,41.4L705.1,41.2L704.4,39.7L706.7,36.9L703.1,34.6L708,32.7L707.4,30.8L708.8,30.7L710.2,32.2L709.1,34.9L712.1,35.4L710.8,33.4L715.5,32.3L721.3,32.2L726.4,33.8L723.9,31.5L723.6,28.5L728.5,27.9L735.2,28.1L741.2,27.7L738.9,26.2L742.1,24.4L745.3,24.3L750.7,23L758.1,22.6L759,21.8L766.3,21.6L768.5,22.2L774.8,20.7L779.9,20.8L780.7,19.6L783.3,18.4L789.9,17.2L794.6,18.1L790.8,18.8L797.1,19.3L797.9,20.6L800.4,20L808.5,20L814.8,21.3L817,22.4L816.3,23.8L813.3,24.6L806,26.2L803.9,27L807.3,27.4L811.4,28.1L813.9,27.6L815.4,29.4L816.6,28.6L821,28.2L829.9,28.7L830.6,30L842.2,30.4L842.4,28.3L848.3,28.7L852.7,28.7L857.2,30.2L858.5,32L856.8,33.1L860.3,35.3L864.7,36.4L867.4,33.5L871.8,34.8L876.6,34L881.9,34.9L884,34.1L888.5,34.5L886.5,31.9L890.2,30.7L915.3,32.5L917.6,34.2L924.9,36.3L936.1,35.8L941.7,36.2L944,37.4L943.6,39.4L947.1,40.2L950.8,39.6L955.7,39.5L960.9,40.1L966.2,39.8L971,42.3L974.5,41.4L972.2,39.6L973.5,38.4L982.3,39.1L988.1,39L996.1,40.3L1000,41.5L1000,52.6ZM0,41.5L0,41.5L0,41.5L6.8,43.6L14.1,46.4L13.9,48.1L15.7,48.8L15.1,46.8L22.6,47.2L28.1,49.8L25.3,51L20.8,51.3L20.7,54L19.6,54.6L17,54.5L14.9,53.5L11.2,52.7L10.5,51.5L7.7,51.1L4.6,51.4L3.1,50.5L3.7,49.4L0.3,50.1L1.6,51.4L0,52.6L0,52.6L0,41.5ZM234.3,41.1L232.6,42.1L228.8,41.2L226.6,41.5L222.8,40.3L225.2,39.4L227.2,38.2L230.1,39L231.8,39.5L232.6,40ZM1000,35.3L1000,36.3L996.9,36.5L996.5,35.6L1000,34.4L1000,35.3ZM0,34.4L0,34.4L0,34.4L0,35.3L0,34.4ZM0,34.4L0.4,34.3L2.7,34.3L6.7,35.1L6.5,35.5L3.6,36.1L0,36.3ZM248.5,40L248.5,42.9L252.2,40.7L255.5,42.5L254.7,44.5L257.4,46.4L260.3,44.4L262.3,42L262.4,39L266.4,39.2L270.5,39.6L274.2,41L274.4,42.3L272.3,43.8L274.3,45.3L273.9,46.7L268.5,48.6L264.6,49L261.8,48.2L260.9,49.6L258.2,51.9L257.4,53.1L254.2,55L250.2,55.2L248,56.4L247.9,58.2L244.6,58.5L241.2,60.8L238.2,63.9L237.1,66.1L237,69.3L241.1,69.8L242.3,72.4L243.6,74.5L247.5,73.9L252.7,75.1L255.4,76.2L257.4,77.5L260.9,78.3L263.9,79.5L268.4,79.6L271.5,79.9L271,82.3L271.9,85.1L273.9,88.2L278,90.8L280.2,89.9L281.7,87.1L280.2,82.7L278.3,81.2L282.7,79.9L285.8,78L287.4,76L287.2,74.2L285.3,71.8L281.9,69.7L285.2,66.8L284,64.3L283,60L285,59.3L289.7,60.1L292.6,60.3L294.9,59.6L297.5,60.6L300.9,62.2L301.7,63.2L306.7,63.5L306.6,65.8L307.5,69.3L310.1,69.7L312.1,71.4L316.1,69.8L318.8,66.8L320.6,65.5L322.8,68L326.4,71.5L329.5,74.8L328.3,76.6L332,78.1L334.5,79.7L339,80.4L340.7,81.3L341.8,83.7L344,84L345.1,85.1L345.3,88.2L343.3,89.3L341.3,90.2L336.7,91.2L333.2,93.5L328.5,94L322.6,93.4L318.4,93.4L315.6,93.5L313.2,95.5L309.7,96.8L305.7,100.4L302.5,103L304.8,102.6L309.3,98.9L315.1,96.6L319.3,96.3L321.7,97.7L319.1,99.5L320,102.5L320.9,104.6L324.5,106L329.1,105.6L331.9,102.5L332.1,104.5L333.9,105.5L330.4,107.3L324.3,109L321.5,110.1L318.4,112.1L316.3,111.9L316.2,109.6L321,107.3L316.6,107.3L313.5,107.7L314,108.6L311,109.9L308.2,110.9L305.2,111.7L303.6,113.5L303.3,114L303.3,115.5L304.2,116.9L305.3,117L305,116L305.9,116.6L305.7,117.4L303.8,117.9L302.4,117.8L300.4,118.3L299.2,118.4L297.6,118.6L295.3,119.4L299.3,118.8L300.2,119.4L296.3,120.2L294.5,120.2L294.6,119.9L293.7,120.6L294.6,120.8L294,122.8L291.9,124.9L291.7,124.2L291.1,124L290.2,123.4L290.8,124.8L291.4,125.3L291.5,126.4L290.6,127.5L289.1,129.7L288.8,129.6L289.7,127.7L288.2,126.6L287.9,124.3L287.4,125.5L288,127.3L286.2,126.9L288.1,127.7L288.2,130.4L289,130.6L289.3,131.5L289.6,134.3L287.9,136.4L285,137.2L283.2,138.8L281.8,139L280.4,140L280,141L276.9,142.8L275.4,144.1L274.1,145.7L273.6,147.7L274.1,149.6L275.1,152L276.3,154L276.3,155.2L277.6,158.4L277.5,160.3L277.4,161.4L276.7,163.1L275.9,163.4L274.5,163.1L274.1,161.8L273,161.2L271.6,158.8L270.3,156.7L269.8,155.6L270.4,153.8L269.6,152.2L267.5,149.9L266.4,149.5L263.6,150.7L263.1,150.6L261.7,149.3L260,148.6L256.9,149L254.4,148.7L252.3,148.9L251.1,149.2L251.6,150L251.6,151.2L252.2,151.7L251.6,152.1L250.6,151.7L249.6,152.2L247.6,152.1L245.5,150.6L243.1,151L241,150.3L239.3,150.5L237,151.2L234.4,153.2L231.7,154.4L230.2,155.8L229.5,157L229.5,158.9L229.6,160.3L230.2,161.2L230.2,161.2L230.2,161.2L229.1,163.6L228.6,165.6L228.4,169.4L228.1,170.7L228.6,172.2L229.5,173.6L230,175.7L231.9,177.8L232.5,179.4L233.6,180.8L236.6,181.5L237.7,182.7L240.1,181.9L242.3,181.6L244.3,181.1L246.1,180.6L247.9,179.5L248.5,177.9L248.7,175.6L249.2,174.7L251.1,174L254,173.4L256.5,173.5L258.2,173.2L258.9,173.8L258.8,175.2L257.3,176.8L256.6,178.5L257.1,179L256.7,180.2L256,182.3L255.3,181.6L254.7,181.7L254.7,182.1L255.3,182.1L255.2,182.9L254.8,184.1L255,184.5L254.7,185.5L254.9,185.7L254.6,187.2L254,187.9L253.5,188L253,188.9L253.9,189.4L254.1,189L254.9,189.4L255.2,189.5L255.8,189L256.6,189L256.9,189.2L257.3,189.1L258.6,189.3L259.9,189.2L260.8,188.9L261.1,188.6L262,188.8L262.7,188.9L263.4,188.9L263.9,188.6L265.2,189L265.6,189.1L266.5,189.6L267.3,190.2L268.3,190.7L269,191.4L268.8,191.7L268.7,192.3L268.9,193.3L268.3,194.3L268,195.4L267.9,196.6L268.1,197.3L268.1,198.6L267.7,198.8L267.4,200L267.6,200.8L267.1,201.5L267.2,202.2L267.6,202.7L268.3,204.2L269.4,205.3L270.7,206.5L271.7,207.5L271.6,208.1L272.8,208.2L273,208L273.8,208.7L275.1,208.5L276.3,207.8L278,207.2L279,206.4L280.5,206.5L280.4,206.8L281.9,206.9L283.2,207.4L284.1,208.2L285.1,209L286.6,209.1L288.7,207.1L289.8,206.8L289.8,205.9L290.3,203.6L291.9,202.3L293.7,202.2L293.9,201.7L296.1,201.9L298.3,200.5L299.3,199.9L300.7,198.5L301.7,198.7L302.4,199.4L301.9,200.4L301.8,201L300.1,201.3L301.1,202.6L301,204.1L299.8,205.7L300.8,207.9L302,207.7L302.7,205.7L301.8,204.7L301.7,202.6L305.1,201.5L304.7,200.2L305.7,199.3L306.7,201.2L308.7,201.3L310.5,202.8L310.6,203.7L313.1,203.8L316,203.5L317.6,204.7L319.8,205.1L321.3,204.2L321.3,203.5L324.8,203.3L328.1,203.3L325.8,204.1L326.7,205.4L328.9,205.6L331,207L331.5,209.2L332.9,209.2L334,209.8L335.8,210.8L337.5,212.7L337.6,214.1L338.7,214.2L340.2,215.5L341.3,216.5L344.6,217L344.9,216.5L347.1,216.3L350.1,217.1L351.1,217.4L353.1,218L356,220.4L356.5,221.5L357.5,221.4L358.1,222.9L359.7,227.8L361.2,228.2L361.3,230.2L359.2,232.5L360,233.3L364.9,233.7L365,236.5L367.2,234.7L370.6,235.7L375.3,237.4L376.6,239L376.2,240.5L379.4,239.7L384.8,241.2L388.9,241.1L393.1,243.4L396.6,246.5L398.7,247.3L401.1,247.4L402.1,248.3L403.1,251.8L403.5,253.5L402.4,258.1L401,259.9L397.1,263.7L395.3,266.9L393.3,269.3L392.6,269.3L391.8,271.4L392,276.6L391.2,280.9L390.9,282.7L390,283.8L389.6,287.5L386.7,291.1L386.3,294L384,295.2L383.4,296.9L380.3,296.9L376,297.9L374,299.2L370.9,300L367.6,302.2L365.3,305L364.9,307L365.3,308.6L364.8,311.4L364.2,312.7L362.3,314.3L359.2,319.1L356.7,321.3L354.8,322.6L353.6,325.3L351.7,326.9L350.5,328.6L347.4,330.2L345.4,329.6L343.8,329.9L341.3,328.7L339.4,328.8L337.7,327.3L337.5,328.7L341,331.1L340.7,333L342.4,334.2L342.3,335.6L339.6,339.1L335.5,340.6L329.9,341.2L326.8,340.9L327.4,342.6L326.9,344.7L327.4,346.1L325.7,347L322.9,347.4L320.2,346.4L319.1,347.1L319.5,349.9L321.4,350.7L322.9,349.9L323.7,351.3L321.2,352.2L318.9,353.9L318.5,356.7L317.9,358.2L315.3,358.2L313.1,359.6L312.3,361.7L315,363.7L317.7,364.3L316.7,366.8L313.4,368.3L311.6,371.6L309.1,372.7L308,374L308.8,376.9L310.7,378.5L309.5,378.3L307.1,378.3L305.7,379L303.2,380L302.8,382.6L301.6,382.7L298.5,381.8L295.3,379.8L291.8,378.2L290.9,376.5L291.7,374.9L290.3,373L290,368.3L291.2,365.6L294.1,363.5L289.9,362.6L292.5,360.2L293.5,355.6L296.6,356.6L298,350.8L296.1,350.1L295.3,353.5L293.5,353.1L294.4,349.2L295.3,344L296.6,342.1L295.8,339.4L295.6,336.3L296.8,336.2L298.5,331.7L300.4,327.3L301.6,323.1L300.9,319L301.8,316.7L301.4,313.2L303,309.8L303.5,304.5L304.4,298.7L305.3,292.5L305.1,288L304.5,284L301.7,282.4L301.5,281.3L296,278.5L291,275.5L288.9,273.8L287.7,271.5L288.2,270.7L285.8,267L283.1,261.9L280.5,256.4L279.3,255.1L278.4,253.1L276.3,251.2L274.3,250.1L275.2,248.9L273.9,246.2L274.7,244.3L276.9,242.5L278.4,240.5L277.8,239.2L276.8,240.5L275.1,239.3L275.7,238.5L275.2,236L276.2,235.6L276.7,233.9L277.7,232.1L277.5,230.9L279.1,230.3L281,229.2L280.6,228.4L281.6,228.2L281.5,226.8L282.1,225.8L283.5,225.6L284.7,223.8L285.8,222.4L284.7,221.7L285.3,220.1L284.6,217.6L285.2,216.8L284.8,214.5L283.7,213L282.7,212.2L282.1,210.7L282.8,210L282.1,209.8L281.6,208.9L280.2,208.1L279,208.3L278.4,209.2L277.3,209.9L276.7,210L276.4,210.6L277.8,212.1L277,212.5L276.6,212.9L275.3,213L274.8,211.4L274.5,211.8L273.6,211.7L273,210.5L271.9,210.4L271.1,210L269.9,210L269.9,210.6L269.5,210.2L268,209.6L267.5,209L267.8,208.5L267.7,207.9L266.9,207.3L265.8,206.7L264.9,206.4L264.7,205.5L264,205.1L264.1,205.9L263.6,206.5L262.9,205.8L262.1,205.5L261.7,204.9L261.7,204.1L262.1,203.2L261.3,202.8L261.9,202.3L261,201.4L259.7,200.3L259,199.3L257.9,198.5L256.5,197.2L256.8,196.8L257.2,197.2L257.5,197L257,196.1L256.1,195.9L255.8,196.5L254.2,196.5L253.2,196.2L252.1,195.7L250.5,195.5L249.7,194.9L248.3,194.4L246.6,194.4L245.3,193.8L243.8,192.7L240.7,189.7L239.2,188.8L237,188.1L235.4,188.3L233.2,189.3L231.8,189.6L229.8,188.9L227.7,188.3L225.1,187.1L223.1,186.7L219.9,185.4L217.6,184L216.9,183.3L215.3,183.1L212.5,182.3L211.3,181L208.4,179.4L207,177.7L206.3,176.3L207.2,176L206.9,175.2L207.6,174.5L207.6,173.6L206.7,172.3L206.4,171.2L205.5,169.8L203,167L200.2,164.9L198.9,163.1L196.5,162L196,161.3L196.4,159.6L195,159L193.4,157.6L192.7,155.7L191.2,155.5L189.6,154L188.3,152.6L188.1,151.8L186.6,149.7L185.7,147.6L185.7,146.5L183.7,145.4L182.8,145.5L181.2,144.7L180.7,145.9L181.2,147.2L181.5,149.3L182.4,150.4L184.5,152.3L184.9,153L185.4,153.2L185.7,154.1L186.2,154.1L186.8,155.9L187.6,156.6L188.2,157.6L190,159L190.9,161.6L191.7,162.8L192.5,164.1L192.6,165.6L194,165.7L195.1,166.9L196.1,168.2L196,168.7L194.9,169.7L194.4,169.7L193.6,168L191.8,166.4L189.8,165.1L188.4,164.4L188.5,162.3L188.1,160.8L186.7,160L184.8,158.7L184.5,159.1L183.8,158.3L182,157.7L180.4,156.1L180.6,155.9L181.8,156L182.8,155L182.9,153.7L180.7,151.7L179.1,151L178.1,149.2L177.1,147.4L175.8,145.2L174.6,142.7L174.2,141.3L172.4,139.7L171.1,139.3L170.8,138.5L169.2,138.4L168.2,137.7L165.6,137.4L164.9,136.9L164.6,135.4L161.9,132.6L159.6,128.8L159.7,128.1L158.5,127.2L156.3,124.9L155.9,122.6L154.5,121.1L155.1,118.8L155,116.4L154.1,114.3L155.2,111.7L155.8,106.6L155.3,102.9L154.5,100.5L153.7,99.2L154,98.7L158,99.6L159.5,102.2L160.2,101.5L159.7,99.2L158.8,97L158.4,97L153,94.2L151,93L146,91.9L144.5,89.4L144.9,87.7L141.3,86.5L140.8,84.3L137.5,82.3L137.4,80.8L135.9,79.8L133.4,78.9L132.6,76.5L129.1,74.2L127.6,71.6L124.9,71.4L120.5,71.4L117.2,70.6L111.5,67.7L108.8,67.2L104,66.2L100.1,66.4L94.7,65.1L91.4,63.9L88.3,64.5L88.8,66.5L87.3,66.6L84.1,67.2L81.6,68.2L78.6,68.7L78.2,67.1L79.4,64.4L82.4,63.5L81.6,62.8L78.1,64.4L76.2,66.2L72.2,68.2L74.2,69.6L71.6,71.6L68.6,72.7L65.8,73.6L65.1,74.8L60.8,76.2L59.9,77.5L56.7,78.7L54.8,78.5L52.2,79.3L49.3,80.2L47,81.2L42.3,81.9L41.8,81.5L44.9,80.2L47.6,79.3L50.5,77.8L54,77.5L55.4,76.4L59.2,74.7L59.8,74.1L61.9,73.2L62.4,71L63.8,69.4L60.6,70.2L59.7,69.8L58.2,70.8L56.4,69.4L55.6,70.4L54.6,69L51.8,70.1L50.1,70.1L49.9,68.4L50.4,67.4L48.6,66.4L45,67L42.6,65.7L40.7,65L40.7,63.4L38.6,62.2L39.6,60.6L41.9,59.1L42.9,57.7L45.1,57.5L47,57.9L49.3,56.6L51.3,56.8L53.4,55.9L52.9,54.7L51.3,54.2L53.4,53.1L51.7,53.1L48.7,53.7L47.9,54.4L45.7,53.7L41.8,54.1L37.7,53.4L36.5,52.3L33,50.7L36.9,49.5L43.1,48.1L45.4,48.1L45,49.5L50.9,49.4L48.6,47.7L45.2,46.6L43.3,45.2L40.6,44.1L36.8,43.2L38.3,41.7L43.3,41.6L46.8,40.4L47.4,39L50.3,37.7L53,37.4L58.2,36.1L60.8,36.3L65.1,34.9L69.3,35.4L71.3,36.7L72.5,36.2L77.2,36.3L77,37L81.3,37.4L84.1,37.2L90,38L95.3,38.3L97.4,38.7L101.1,38.2L105.4,39L108.4,39.4L113.6,40.1L117.9,41.4L120.8,41.7L123.3,40.5L126.6,39.7L130.8,40L134.9,38.8L139.5,38.1L141.4,39.2L143.4,38.6L144.1,37.3L146,37.6L150.7,40.1L154.4,38.2L154.8,40.3L158.2,39.8L159.2,39L162.6,39.2L166.8,40.4L173.3,41.4L177.2,41.8L179.9,41.7L183.6,43.1L179.7,44.5L184.7,45L192.2,44.7L194.6,44.2L197.6,45.9L200.6,44.5L197.7,43.3L199.5,42.4L202.9,42.2L205.1,42L207.4,42.6L210.2,44.1L213.3,43.9L218.2,45.2L222.5,44.7L226.5,44.8L226.2,43.1L228.7,42.6L233,43.5L233,46.1L234.8,43.9L237,44L238.2,41.2L235.3,39.5L232,38.4L232.2,35.3L235.5,33.3L239.2,33.7L242,35L245.8,38.1L243.3,39.5ZM182.9,30L181.5,31.3L187.7,30.4L191.5,31.8L194.7,30.4L197.2,31.3L199.5,34L200.9,32.9L198.9,30L201.3,29.6L204.1,30.1L207.2,31.2L209,33.9L209.8,35.9L214.5,37.2L219.5,38.6L219.2,39.8L214.6,40L216.4,41.1L215.5,42.1L210.4,41.7L205.7,40.9L202.4,41.1L197.2,42L189,42.5L185.2,42.7L183.7,41.4L179.9,40.6L177.5,40.9L174.1,38.7L175.9,38.4L180.2,38L184.1,38.1L187.7,37.6L182.4,37L176.4,37.2L172.5,37.1L171,36.1L177.5,35L173.2,35L168.3,34.3L170.7,32.2L172.6,31.1L180,29.4ZM209.7,29.1L207.3,31L202.9,29L203.9,28.6L207.6,28.5ZM287.9,30L288.2,30.8L285.2,30.7L282.2,30.6L279.2,31L278.4,30.8L275.3,29.4L275.5,28.4L276.8,28.2L283.2,28.5ZM259.6,29.9L261.7,31.6L264.3,29.3L271.3,28.2L276.1,31.1L275.7,32.9L281.2,32.1L283.8,31L290,32.4L293.8,33.7L294.2,34.9L299.3,34.3L302.2,36.1L308.9,37.2L311.3,38.3L314,40.9L308.9,42.2L315.4,44L319.8,44.6L323.8,47.2L328.2,47.3L327.3,49.3L322.5,52.5L319,51.3L314.7,48.7L311.1,49L310.7,50.6L313.6,52.2L317.4,53.5L318.6,54.2L320.4,57L319.4,59L315.9,58.2L308.9,56L312.9,58.4L315.8,60.1L316.2,61L308.7,59.9L302.7,58.3L299.3,57L300.3,56.2L296.2,54.8L292.1,53.4L292.2,54.2L284.1,54.7L281.8,53.7L283.6,51.7L288.8,51.6L294.6,51.3L293.6,50.3L294.6,48.9L298.2,46.2L297.4,44.9L296.4,44L292.1,42.6L286.5,41.7L288.3,41L285.3,39.3L282.9,39.1L280.7,38.2L279.2,39L274.2,39.3L264,38.7L258.2,37.9L253.7,37.5L251.4,36.5L254.3,35.2L250.3,35.2L249.4,32.4L251.6,29.9L254.4,28.8L261.6,28.1ZM221.2,27.9L224.5,28.5L229.5,28.2L230.2,29L227.6,30.3L231.8,31.5L231.3,34L226.8,35.1L224.1,34.9L222.2,33.8L215.3,31.7L215.3,30.8L221,31.1L217.9,29.3ZM898.9,29.7L894.7,29.7L889,29.4L888.5,29.3L891.1,28.2L894.6,27.9L898.6,29ZM241.1,30.9L238.1,33L235,32.9L233.2,30.5L233.3,29.1L234.7,27.9L237.5,27.1L243.3,27.2L248.6,27.9L244.4,30.4ZM165.4,34.7L158.1,36.1L156.6,34.9L150.2,33.4L151.1,32.5L153.3,30.2L155.7,28.4L153,26.7L162.4,26.3L166.4,26.8L173.5,27L176.2,27.8L179.1,29L175.6,29.7L168.8,31.6L165.4,33.6ZM918.7,24.5L915.5,25.6L911,25.4L905.9,24.3L906.5,23.4L911.7,23.8ZM240,24.8L238.5,25.9L234.4,25.7L231.1,24.9L232.5,23.7L236.5,22.9L239,23.9ZM903,23.2L900.8,25.2L890.6,25.2L886,25.8L880.5,24L882,22.1L885.6,21.6L893,21.7ZM226.4,20L228.5,21.2L228.6,22.7L227.3,24.7L222.8,25L219.8,24.6L219.8,23L215.3,23.2L215.1,21L218.1,21.1L222.3,20.2L226.2,20.3ZM199.4,21.4L200.5,22.4L203,21.9L205.9,22L206.4,23.4L204.7,24.7L195.3,25.2L188.3,26.4L184,26.4L183.7,25.5L189.5,24.3L176.9,24.6L173,24.1L176.8,21.4L179.4,20.6L187.3,21.6L192.2,23.2L197,23.4L193.1,20.8L195.6,19.8L198.5,20.1ZM659.8,36.6L658.2,36.9L649.1,36.5L648.4,35.3L643.3,34.5L642.9,33L645.8,32.4L645.7,30.9L651.2,28.6L648.6,28.2L655.3,25.8L654.5,24.5L660.7,23L669.9,21.3L679.2,20.7L683.9,19.7L689.3,19.4L691.3,20.4L689.4,21.3L679.5,22.7L671.1,24L662.4,26.7L658.3,29.4L653.9,32L654.5,34.3ZM237,18.9L240.1,19.8L245.5,19.8L247.9,20.7L247.3,21.8L250.5,22.4L252.3,23L256,23.2L260.1,23.4L264.5,22.8L270.1,22.6L274.6,22.8L277.6,23.8L278.2,24.9L276.5,25.7L272.4,26.3L268.8,25.9L260.8,26.4L255.1,26.4L250.7,26.1L243.3,25.2L242.3,23.7L242,22.3L239.2,21.1L233.4,20.7L230.2,19.9L231.3,18.7ZM177.2,17.4L176.8,19.5L174.7,20.5L172.1,20.6L166.9,21.8L162.5,22.2L158.7,21.6L163.5,19.6L169.2,17.8L173.4,17.8ZM239.3,17.7L238.1,17.8L232.9,17.6L232.1,16.9L237.7,16.9L239.7,17.4ZM193.9,17.2L188.7,18L184.6,17.1L186.9,16.3L190.9,16L194.9,16.4ZM568.7,16.8L562.5,17.9L557.6,17.3L559.5,16.6L557.8,15.7L563.6,15.1L564.7,16.2ZM195.4,14.7L192,15.3L187.4,15.3L187.4,14.9L190.3,14L191.8,14.2ZM233.8,16.2L229.7,16.8L227.4,16.2L226.2,15.1L226,14L229.6,14.1L231.2,14.3L234.6,15.2ZM222.1,15.5L223.1,16.7L218.6,16.4L214,15.4L207.8,15.3L210.5,14.5L207.2,13.9L207,12.8L212.4,13.2L219.9,14.2ZM791.9,15.6L776.2,16.6L781.3,13L783.6,12.7L785.7,12.8L792.7,14.4ZM550.7,11.7L559.8,13.7L552.9,14.8L551.3,16.9L548.9,17.4L547.6,19.7L544.2,19.8L538.2,18.1L540.7,17.1L536.6,16.3L531.2,14L529,11.8L536.6,10.8L538.1,11.8L542.1,11.8L543.1,10.8L547.2,10.7ZM570.7,9.7L576.1,10.7L572,12.2L564,12.5L555.8,12.1L555.3,11.3L551.3,11.2L548.2,10L556.8,9.2L560.9,9.9L563.7,9ZM642,9.3L638.3,9.7L635.8,9.9L635.4,10.4L632.2,10.8L629.2,10.2L630.8,9.3L624.6,9.2L630,8.7L634.2,8.7L634.8,9.4L636.4,8.8L639,8.3L643.1,8.9ZM777.6,14L771.5,14.3L763.8,13.5L759.2,12.4L757.1,10.5L753.3,9.9L760.5,8L766.5,7.4L771.9,8.8L778.3,11.5ZM258.3,11.8L261.6,12.7L257.8,13.5L252.7,15.6L247.8,15.8L242,15.4L239,14.3L239.1,13.3L241.3,12.6L236.2,12.6L233.1,11.7L231.4,10.4L233.3,9.2L235.2,8.3L238.1,8.1L236.8,7.5L243.3,7.4L246.9,8.8L251.5,9.4L256.1,10ZM309.7,2.2L317.1,2.4L323.1,2.8L328.2,3.5L328.1,4.3L321.3,5.5L314.6,6.1L312.1,6.7L318.1,6.7L311.6,8.3L307,9.1L302.3,11.4L296.5,11.9L294.8,12.4L286.4,12.7L290.2,13.1L288.3,13.6L290.6,14.9L287.9,15.9L283.6,16.7L282.3,17.8L278.4,18.6L278.8,19.2L283.6,19.1L283.6,19.8L276.2,21.5L269,20.7L260.8,21.1L256.7,20.8L251.4,20.6L251.1,19.3L256.2,18.7L254.8,16.7L256.5,16.5L264,17.7L260.2,15.9L255.7,15.4L257.9,14.3L262.8,13.6L263.6,12.7L259.7,11.6L258.5,10.1L266.1,10.3L268.3,10.6L272.6,9.6L266.4,9.2L256.7,9.4L251.8,8.5L249.4,7.3L246.2,6.5L245.6,5.6L249.7,5.1L253,5L258.4,4.5L262.5,3.5L265.9,3.6L268.9,4.4L271.1,2.9L274.7,2.5L279.7,2.2L288.2,2L289.7,2.3L297.7,1.9L303.7,2ZM424.7,1.1L442.1,3.3L437,4.3L426.3,4.5L411.4,4.7L412.8,5.2L422.6,4.9L431,5.9L436.4,5L438.7,6L435.6,7.6L442.7,6.6L456.2,5.5L464.5,6.1L466.1,7.3L454.8,9.2L453.2,9.9L444.3,10.4L450.7,10.5L447.5,12.5L445.3,14.3L445.4,17.4L448.7,19.2L444.3,19.3L439.8,20.2L444.9,21.7L445.6,24L442.6,24.3L446.2,26.7L440,26.9L443.2,28L442.3,29L438.4,29.4L434.5,29.4L438,31.3L438.1,32.6L432.6,31.4L431.1,32.2L434.9,32.8L438.5,34.5L439.6,36.8L434.6,37.3L432.5,36.2L429,34.6L430,36.5L426.8,38L434.1,38.1L437.9,38.3L430.5,40.7L422.9,42.9L414.8,43.8L411.7,43.8L408.9,44.9L405,47.9L399,49.8L397.1,49.9L393.4,50.6L389.4,51.2L387,53L387,54.9L385.6,56.7L381.1,59L382.2,61.1L380.9,63.4L379.5,66.1L375.6,66.3L371.5,64L365.9,64L363.2,62.5L361.4,59.8L356.6,56.3L355.2,54.5L354.8,52L350.9,49.5L351.9,47.4L350.1,46.4L352.8,43.2L357,42.2L358.1,41L358.7,38.8L355.5,39.8L354,40.2L351.5,40.6L348.1,39.7L347.9,37.8L349,36.3L351.6,36.3L357.3,37L352.5,35.3L350,34.3L347.2,34.7L344.9,34L348,31.4L346.3,30.4L344.1,28.5L340.8,25.5L337.2,24.5L337.3,23.3L329.8,21.7L323.9,21.5L316.5,21.6L309.7,21.8L306.5,20.9L301.7,19.2L309,18.3L314.5,18.1L302.7,17.4L296.4,16.3L296.8,15.2L307.3,13.9L317.5,12.5L318.5,11.5L311,10.5L313.5,9.4L323.1,7.5L327.1,7.2L326,5.9L332.6,5.2L341.1,4.8L349.6,4.7L352.7,5.6L360,4.1L366.7,5.1L370.6,5.3L376.3,6.2L369.7,4.7L370.1,3.5L379.4,1.9L389.2,2L392.7,1L402.5,0.7Z";
+const MW=1000,MH=394;
+function smap(host,o){
+  host.innerHTML='<div class="smap"><svg viewBox="0 0 '+MW+' '+MH+'" width="'+MW+'" height="'+MH+'"><rect width="'+MW+'" height="'+MH+'" fill="#CFE6F7"/><path d="'+WLD+'" fill="#FFFFFF" stroke="#D9CDB6" stroke-width=".6" stroke-linejoin="round"/></svg><div class="pl"></div>'+(o.interactive?'<div class="zb"><button type="button" data-z="1" aria-label="+">+</button><button type="button" data-z="-1" aria-label="−">−</button></div>':'')+'</div>';
+  const root=host.firstChild,svg=root.querySelector('svg'),pl=root.querySelector('.pl');
+  const xy=c=>[(c[1]+180)/360*MW,(84-c[0])/142*MH];
+  let cw=host.clientWidth||340,ch=host.clientHeight||200;
+  const base=()=>Math.max(cw/MW,ch/MH);
+  let k=1,tx0=0,ty0=0,pins=[];
+  const clamp=()=>{const s=base()*k;k=Math.min(Math.max(k,1),o.maxk||40);const S=base()*k;
+    tx0=Math.min(0,Math.max(cw-MW*S,tx0));ty0=Math.min(0,Math.max(ch-MH*S,ty0));};
+  const apply=()=>{clamp();const S=base()*k;svg.style.transform='translate('+tx0+'px,'+ty0+'px) scale('+S+')';
+    pins.forEach(p=>{const q=xy(p.c);p.el.style.left=(q[0]*S+tx0)+'px';p.el.style.top=(q[1]*S+ty0)+'px'});};
+  const zoomAt=(f,px,py)=>{const S0=base()*k;const wx=(px-tx0)/S0,wy=(py-ty0)/S0;k=Math.min(Math.max(k*f,1),o.maxk||40);const S=base()*k;tx0=px-wx*S;ty0=py-wy*S;apply()};
+  const api={
+    setPins(list){pl.innerHTML='';pins=list.map(it=>{const el=document.createElement('button');el.type='button';el.className='pw';el.innerHTML=it.html;el.onclick=e=>{e.stopPropagation();it.onclick&&it.onclick()};pl.appendChild(el);return {c:it.c,el}});apply()},
+    k:()=>k,
+    focus(c,kk){const q=xy(c);k=kk;const S=base()*k;tx0=cw/2-q[0]*S;ty0=ch/2-q[1]*S;apply()},
+    fit(cs,maxk){
+      if(!cs.length){k=1;tx0=0;ty0=0;apply();return}
+      const P=cs.map(xy),x1=Math.min(...P.map(a=>a[0])),x2=Math.max(...P.map(a=>a[0])),y1=Math.min(...P.map(a=>a[1])),y2=Math.max(...P.map(a=>a[1]));
+      const bw=Math.max(x2-x1,40),bh=Math.max(y2-y1,40);
+      let kk=Math.min((cw*.7)/(bw*base()),(ch*.7)/(bh*base()));kk=Math.min(Math.max(kk,1),maxk||4);
+      k=kk;const S=base()*k;tx0=cw/2-(x1+x2)/2*S;ty0=ch/2-(y1+y2)/2*S;apply()},
+    dot(c,kk){const d=document.createElement('div');d.className='dot';pl.appendChild(d);pins=[{c,el:d}];api.focus(c,kk)}
+  };
+  if(o.interactive){
+    const pts=new Map();let last=null,dist=0,moved=0;
+    root.addEventListener('pointerdown',e=>{if(e.target.closest('.zb')||e.target.closest('.pw'))return;root.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);last=null;moved=0});
+    root.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const pr=pts.get(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);
+      const r=root.getBoundingClientRect();
+      if(pts.size===1){tx0+=e.clientX-pr[0];ty0+=e.clientY-pr[1];apply()}
+      else if(pts.size===2){const a=[...pts.values()],d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(dist)zoomAt(d/dist,(a[0][0]+a[1][0])/2-r.left,(a[0][1]+a[1][1])/2-r.top);dist=d}});
+    const up=e=>{pts.delete(e.pointerId);dist=0};
+    root.addEventListener('pointerup',up);root.addEventListener('pointercancel',up);
+    root.addEventListener('dblclick',e=>e.preventDefault());
+    root.querySelectorAll('.zb button').forEach(b=>b.onclick=e=>{e.stopPropagation();zoomAt(+b.dataset.z>0?1.8:1/1.8,cw/2,ch/2)});
+  }
+  new ResizeObserver(()=>{cw=host.clientWidth||cw;ch=host.clientHeight||ch;apply()}).observe(host);
+  return api;
+}
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault());
+let MAP=null,placeF='';
+const pinCoord=x=>{const c=byEn[x.dest];if(c)return [c.lat,c.lon];return (x.lat!=null&&x.lon!=null)?[x.lat,x.lon]:null};
+const baseView=()=>{const n=q.trim().toLowerCase();return list.filter(x=>(kindF==='all'||x.kind===kindF)&&hay(x).includes(n))};
+function board(){
+  MAP=null;
+  $('#body').innerHTML=`<input class="q" id="q" type="search" placeholder="${tx('search')}" value="${esc(q)}"><div class="chips" id="chips">${['all',...Object.keys(KIND)].map(k=>`<button class="chip" data-k="${k}" aria-pressed="${k===kindF}">${k==='all'?'':KIND[k]+' '}${tx(k)}</button>`).join('')}</div><div class="map" id="map"${LF?'':' hidden'}></div><div class="mh"><b id="mc"></b><button class="ghost sm" id="mclr" hidden>${tx('showall')}</button></div><div class="list" id="list"></div>`;
+  $('#q').oninput=e=>{q=e.target.value;placeF='';refresh()};
+  document.querySelectorAll('#chips .chip').forEach(b=>b.onclick=()=>{kindF=b.dataset.k;placeF='';hap();board()});
+  $('#mclr').onclick=()=>{placeF='';hap();refresh()};
+  if(LF)initMap();
+  load();
+}
+function initMap(){try{MAP=smap($('#map'),{interactive:true,maxk:30})}catch(e){MAP=null;const m=$('#map');if(m)m.hidden=true}}
+function drawMap(fit){
+  if(!MAP)return;
+  const g={};
+  baseView().forEach(x=>{const c=pinCoord(x);if(!c)return;(g[x.dest]=g[x.dest]||{c,items:[]}).items.push(x)});
+  const list2=[],pts=[];
+  Object.entries(g).forEach(([dest,o])=>{
+    const k=o.items[0],fresh=o.items.some(x=>Date.now()/1000-x.created<172800),sel=placeF===dest;
+    const html=`<div class="pin a${ci(dest)}${fresh?' fresh':''}${sel?' sel':''}"><span>${ke(k)}</span><b>${o.items.length}</b>${MAP.k()>=3||sel?`<i>${esc(dn(dest))}</i>`:''}</div>`;
+    list2.push({c:o.c,html,onclick:()=>{placeF=placeF===dest?'':dest;hap();paint();drawMap(false);if(placeF)MAP.focus(o.c,Math.max(MAP.k(),4))}});
+    pts.push(o.c);
+  });
+  MAP.setPins(list2);
+  if(fit)MAP.fit(pts,5);
+}
+const refresh=()=>{paint();drawMap(true)};
+const load=()=>run(async()=>{list=await api('/trips');paint();drawMap(true)});
+function paint(){
+  const el=$('#list');if(!el)return;
+  view=baseView().filter(x=>!placeF||x.dest===placeF);
+  const mc=$('#mc');if(mc){const t=tx('trips_cnt').replace('{n}',view.length);mc.textContent=placeF?`${dn(placeF)} · ${t}`:`🌍 ${t}`}
+  const cl=$('#mclr');if(cl)cl.hidden=!placeF;
+  el.innerHTML=view.length?view.map(row).join(''):`<div class="empty"><h2>${tx('e1')}</h2><p class="mu">${tx('e2')}</p></div>`;
+  el.querySelectorAll('.flt').forEach(b=>b.onclick=()=>openPass(view[+b.dataset.i]));
+}
+function chat(){
+  $('#body').innerHTML='<p class="mu c">…</p>';
+  run(async()=>{
+    const d=await api('/my');
+    const all=[...d.mine.filter(x=>x.chat_open||x.members>0),...d.joined];
+    $('#body').innerHTML=`<div class="scroll">${CHAT_URL?`<button class="cta" id="oc">💬 ${tx('chat1')}</button>`:''}<div class="two bt"><button class="ghost" id="hw">${tx('howto')}</button><button class="ghost" id="rl">${tx('rulesT')}</button></div><h3>${tx('mychats')}</h3>${all.length?all.map(row).join(''):`<p class="mu">${tx('nochats')}</p>`}</div>`;
+    const oc=$('#oc');if(oc)oc.onclick=()=>tg.openTelegramLink(CHAT_URL);
+    $('#hw').onclick=()=>onboarding(false);$('#rl').onclick=rulesView;
+    document.querySelectorAll('.scroll .flt').forEach(b=>b.onclick=()=>{const x=all[+b.dataset.i];x.chat_open?openChat(x.id):openPass(x)});
+  });
+}
+
+function share(x){
+  if(!BOT){toast(tx('err_notfound'));return}
+  const link=`https://t.me/${BOT}?start=trip_${x.id}`;
+  tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(`${ke(x)} ${dn(x.dest)}: ${tx('sharetxt')}`));
+}
+
+function passBadges(x){
+  const b=[];
+  if(x.audience==='f')b.push('♀ '+tx('for_f'));if(x.audience==='m')b.push('♂ '+tx('for_m'));
+  if(x.min_age||x.max_age)b.push(`${x.min_age||18}–${x.max_age||'∞'} ${tx('yo')}`);
+  if(x.approval)b.push('📩 '+tx('byreq'));
+  const mv=new Set((ME.vibe||'').split(',').filter(Boolean)),av=(x.a_vibe||'').split(',').filter(Boolean),n=av.filter(v=>mv.has(v)).length;
+  return `<p>${b.map(t=>`<span class="badge">${esc(t)}</span>`).join('')}</p>${av.length?`<p>${vibeBadges(av)}</p>`:''}${!x.mine&&n?`<span class="match">✨ ${tx('match').replace('{n}',n)}</span>`:''}`;
+}
+function openPass(x){
+  hap('medium');
+  const left=Math.max(0,x.people-(x.members||0)),mine=!!x.mine,joined=!!x.joined;
+  const rate=x.a_cnt?`★ ${x.a_avg} (${x.a_cnt})`:tx('newbie');
+  modal(`<div class="pass"><button class="x" aria-label="Close">✕</button><div class="pt a${ci(x.dest)}"><div class="mini">Travel Friends · ${tx('pass')}</div><h2>${esc(dn(x.dest))}</h2><div class="grid"><div><small>${tx('who')}</small><b><button class="lnk" id="au">${esc(x.name)}</button>${x.age?', '+x.age:''}</b><small>${rate}</small></div><div><small>${tx('when')}</small><b>${rng(x)}</b></div><div><small>${tx('seats')}</small><b>${left} / ${x.people}</b></div><div><small>${tx('budget')}</small><b>${esc(x.budget||'—')}</b></div></div></div><div class="tearl"></div><div class="stub">${x.note?`<p>${esc(x.note)}</p>`:''}${x.about?`<p class="mu">${esc(x.name)}${x.city?', '+esc(x.city):''}: ${esc(x.about)}</p>`:''}${passBadges(x)}<div class="mm" id="mm"></div><div class="bar"></div><div id="acts"></div></div></div>`);
+  $('#au').onclick=()=>openProfile(x.author_id||x.user_id,()=>openPass(x));
+  const tok=window._pt=x.id+'-'+Date.now();
+  photo(x.dest).then(u=>{const pt=$('.pt');if(!u||!pt||window._pt!==tok)return;pt.classList.add('ph');pt.style.backgroundImage=`linear-gradient(180deg,#0B1B3F55,#0B1B3Fd9),url("${big(u,960)}")`});
+  const cc=pinCoord(x),mm=$('#mm');
+  if(!cc){mm.hidden=true}else{
+    try{const ct=byEn[x.dest];smap(mm,{interactive:false}).dot(cc,ct&&ct.en===ct.ce?4:9)}catch(e){mm.hidden=true}
+  }
+  const acts=[],add=(t,fn,o)=>acts.push({t,fn,...(o||{})});
+  if(mine||joined){
+    if(x.chat_open)add(tx('openchat'),()=>openChat(x.id));
+    else add(`${tx('waiting')}: ${x.members||0}/${x.people}`,null,{dis:1});
+    if(x.ended&&x.to_rate>0)add('⭐ '+tx('rate'),()=>openRate(x.id),{alt:1});
+    if(mine&&x.pending>0)add('📩 '+tx('reqs_t')+' ('+x.pending+')',()=>openRequests(x));
+    if(mine&&!x.ended&&!x.closed){
+      add(tx('boost'),()=>run(async()=>{const {link}=await api(`/trips/${x.id}/boost`,'POST');tg.openInvoice(link,s=>{if(s==='paid'){good();closeM();toast(tx('boosted'));show(tab)}})}),{alt:1});
+      add(tx('close'),()=>ask(tx('q_close'),()=>run(async()=>{await api(`/trips/${x.id}/close`,'POST');good();closeM();toast(tx('closedt'));show(tab)})),{alt:1});
+    }
+    add('🔗 '+tx('share'),()=>share(x),{alt:1});
+  }else{
+    if(x.ended)add(tx('ended_t'),null,{dis:1});
+    else if(x.closed)add(tx('closedt'),null,{dis:1});
+    else if(left<=0)add(tx('fullt'),null,{dis:1});
+    else if(x.req==='pending')add(tx('req_pend'),null,{dis:1});
+    else if(x.req==='declined')add(tx('err_declined'),null,{dis:1});
+    else add(x.approval?tx('req_send'):tx('join'),()=>run(async()=>{
+      const r=await api(`/trips/${x.id}/join`,'POST');
+      if(r.pending){x.req='pending';good();toast(tx('req_sent'));openPass(x);return}
+      x.joined=1;x.members=(x.members||0)+1;x.chat_open=1;good();
+      $('.pass').insertAdjacentHTML('beforeend',`<div class="stamp">${tx('going')}</div>`);
+      $('.stub').classList.add('torn');toast(tx('chatopen'));
+      setTimeout(()=>openChat(x.id),1800);
+    }));
+    add('🔗 '+tx('share'),()=>share(x),{alt:1});
+  }
+  $('#acts').innerHTML=acts.map((a,i)=>`<button class="cta${a.alt?' alt':a.t===tx('join')||a.t===tx('req_send')?' pri':''}" data-i="${i}"${a.dis?' disabled':''}>${esc(a.t)}</button>`).join('');
+  document.querySelectorAll('#acts .cta').forEach(b=>{const a=acts[+b.dataset.i];if(a.fn)b.onclick=a.fn});
+}
+
+function openRequests(x){run(async()=>{
+  const rs=await api(`/trips/${x.id}/requests`);
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${tx('reqs_t')}</h2><p class="mu">${esc(dn(x.dest))}</p>${rs.length?rs.map(r=>`<div class="req"><div class="mid"><button class="lnk" data-p="${r.id}">${esc(r.name)}</button>${r.age?', '+r.age:''}<p>${r.a_cnt?'★ '+r.a_avg+' ('+r.a_cnt+')':tx('newbie')}</p></div><button class="ghost sm ok" data-a="${r.id}">${tx('acc')}</button><button class="ghost sm" data-d="${r.id}">${tx('dec')}</button></div>`).join(''):`<p class="mu">${tx('noreqs')}</p>`}</div>`);
+  const again=()=>{x.pending=Math.max(0,(x.pending||1)-1);x.members=(x.members||0);openRequests(x)};
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openProfile(+b.dataset.p,()=>openRequests(x)));
+  document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>run(async()=>{await api(`/trips/${x.id}/requests/${b.dataset.a}/accept`,'POST');x.members=(x.members||0)+1;x.chat_open=1;good();again()}));
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>run(async()=>{await api(`/trips/${x.id}/requests/${b.dataset.d}/decline`,'POST');hap();again()}));
+})}
+async function openChat(id){
+  hap();let since=0,first=true,info=null,panel=false;
+  modal(`<div class="cb"><button class="x" aria-label="Close">✕</button><div class="ch"><b id="ct"></b><button class="ghost sm" id="cm">👥</button></div><div id="mp"></div><p class="note">${tx('chatnote')}</p><div class="msgs" id="msgs"></div><div class="send"><input class="f" id="mi" maxlength="1000" placeholder="${tx('msgph')}" autocomplete="off"><button class="sb" id="sb" aria-label="Send">➤</button></div></div>`);
+  const back=()=>openChat(id);
+  const drawPanel=()=>{
+    const el=$('#mp');if(!el)return;
+    if(!panel||!info){el.innerHTML='';return}
+    const me=info.me,au=info.author_id===me;
+    el.innerHTML=`<div class="mpanel">${info.members.map(m=>`<div class="mr"><div class="mid"><button class="lnk" data-p="${m.id}">${esc(m.name)}</button>${m.is_author?` <span class="tag a0">${tx('author')}</span>`:''}<p>${m.age?yo(m.age)+' · ':''}${m.a_cnt?'★ '+m.a_avg+' ('+m.a_cnt+')':tx('newbie')}</p></div>${info.ended&&m.id!==me&&!m.rated?`<button class="ghost sm" data-r="${m.id}">⭐</button>`:''}${au&&m.id!==me?`<button class="ghost sm" data-k="${m.id}">${tx('kick')}</button>`:''}</div>`).join('')}<div class="two bt">${au?(info.closed||info.ended?'':`<button class="ghost" id="pc">${tx('close')}</button>`):`<button class="ghost" id="pl">${tx('leave')}</button>`}<button class="ghost" id="ps">🔗 ${tx('share')}</button></div></div>`;
+    el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openProfile(+b.dataset.p,back));
+    el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>openRate(id,+b.dataset.r));
+    el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>ask(tx('q_kick'),()=>run(async()=>{await api(`/trips/${id}/kick`,'POST',{user_id:+b.dataset.k});hap();pull()})));
+    const pc=$('#pc'),pl=$('#pl');
+    if(pc)pc.onclick=()=>ask(tx('q_close'),()=>run(async()=>{await api(`/trips/${id}/close`,'POST');good();toast(tx('closedt'));pull()}));
+    if(pl)pl.onclick=()=>ask(tx('q_leave'),()=>run(async()=>{await api(`/trips/${id}/leave`,'POST');closeM();show(tab)}));
+    $('#ps').onclick=()=>share({id,dest:info.dest});
+  };
+  const sendRx=(mid,e)=>run(async()=>{await api(`/messages/${mid}/react`,'POST',{emoji:e});hap();pull()});
+  const drawRx=rx=>{document.querySelectorAll('#msgs .rx').forEach(el=>{const o=(rx||{})[el.dataset.x]||{};
+    el.innerHTML=Object.entries(o).map(([e,v])=>`<button class="rc${v[1]?' on':''}" data-e="${e}">${e} ${v[0]}</button>`).join('');
+    el.querySelectorAll('.rc').forEach(b=>b.onclick=()=>sendRx(+el.dataset.x,b.dataset.e))})};
+  const pull=async()=>{
+    if(!$('#msgs')){clearInterval(poll);return}
+    try{
+      const d=await api(`/trips/${id}/chat?since=${since}`),box=$('#msgs');if(!box)return;
+      info=d;$('#ct').textContent=dn(d.dest);$('#cm').textContent=`👥 ${d.members.length} ${panel?'▴':'▾'}`;drawPanel();
+      const stick=first||box.scrollTop+box.clientHeight>=box.scrollHeight-40;
+      d.messages.forEach(m=>{since=m.id;
+        if(m.user_id===0){box.insertAdjacentHTML('beforeend',`<div class="m sys">${esc(sysText(m.text))}</div>`);return}
+        const me=m.user_id===d.me;
+        box.insertAdjacentHTML('beforeend',`<div class="m ${me?'me':''}">${me?'':`<small><button class="lnk" data-p="${m.user_id}">${esc(m.name)}</button> <button class="rp" data-m="${m.id}" aria-label="${tx('report')}">⚑</button></small>`}${esc(m.text)}<button class="rb" data-rb="${m.id}" aria-label="${tx('react')}">☺</button><div class="rx" data-x="${m.id}"></div></div>`)});
+      box.querySelectorAll('.rb:not([data-b])').forEach(b=>{b.dataset.b=1;b.onclick=()=>{const bub=b.parentElement,old=bub.querySelector('.pk');if(old){old.remove();return}
+        bub.insertAdjacentHTML('beforeend',`<div class="pk">${['👍','❤️','😂','🔥','😮'].map(e=>`<button data-e="${e}">${e}</button>`).join('')}</div>`);
+        bub.querySelectorAll('.pk button').forEach(k=>k.onclick=()=>{bub.querySelector('.pk').remove();sendRx(+b.dataset.rb,k.dataset.e)})}});
+      drawRx(d.reactions);
+      box.querySelectorAll('[data-p]:not([data-b]),.rp:not([data-b])').forEach(b=>{b.dataset.b=1;
+        if(b.dataset.p)b.onclick=()=>openProfile(+b.dataset.p,back);
+        else b.onclick=()=>run(async()=>{await api(`/messages/${b.dataset.m}/report`,'POST');toast(tx('reported'))})});
+      if(stick)box.scrollTop=box.scrollHeight;
+    }catch(e){
+      if(e.message==='notmember'){clearInterval(poll);closeM();toast(tx('err_kicked'));return}
+      if(first)toast(T[L]['err_'+e.message]||e.message);
+    }
+    first=false;
+  };
+  $('#cm').onclick=()=>{panel=!panel;if(info){$('#cm').textContent=`👥 ${info.members.length} ${panel?'▴':'▾'}`;drawPanel()}};
+  const send=()=>run(async()=>{const i=$('#mi'),v=i.value.trim();if(!v)return;i.value='';await api(`/trips/${id}/messages`,'POST',{text:v});hap();pull()});
+  $('#sb').onclick=send;$('#mi').onkeydown=e=>{if(e.key==='Enter')send()};
+  await pull();clearInterval(poll);poll=setInterval(pull,4000);
+}
+
+function openProfile(id,back){run(async()=>{
+  const p=await api('/users/'+id);
+  const tl=Object.entries(p.tags).sort((a,b)=>b[1]-a[1]);
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button>${back?`<button class="ghost" id="bk">←</button>`:''}
+  <div class="who" style="margin-top:12px"><div class="ava">${esc((p.name||'?')[0])}</div><div><h2>${esc(p.name)}</h2><p class="mu">${[yo(p.age),esc(p.city)].filter(Boolean).join(' · ')}</p></div></div>
+  <div class="metrics"><div><b>${p.trips}</b><span>${tx('trips_done')}</span></div><div><b>${p.friends||0}</b><span>${tx('friends')}</span></div><div><b>${p.cnt?'★ '+p.avg:'—'}</b><span>${tx('rating')}${p.cnt?' ('+p.cnt+')':''}</span></div></div>
+  ${p.about?`<p>${esc(p.about)}</p>`:''}${p.vibe&&p.vibe.length?`<div style="margin-top:6px">${vibeBadges(p.vibe)}</div>`:''}
+  ${tl.length?`<div>${tl.map(([k,n])=>`<span class="tgp ${NEG.has(k)?'neg':''}">${tx('tag_'+k)} ×${n}</span>`).join('')}</div>`:''}
+  <h3 style="margin:16px 0 8px;font-size:18px">${tx('reviews')}</h3>
+  ${p.reviews.length?p.reviews.map(r=>`<div class="rev"><b class="rt">${'★'.repeat(r.stars)}</b> <small>${esc(r.name)} · ${esc(dn(r.dest))}</small>${r.tags.length?`<div>${r.tags.map(k=>`<span class="tgp ${NEG.has(k)?'neg':''}">${tx('tag_'+k)}</span>`).join('')}</div>`:''}${r.text?`<p>${esc(r.text)}</p>`:''}</div>`).join(''):`<p class="mu">${tx('noreviews')}</p>`}
+  ${p.me?'':`<div class="two bt"><button class="ghost" id="bl">${p.blocked?tx('unblock'):tx('block')}</button><button class="ghost" id="rpu">${tx('reportu')}</button></div>`}</div>`);
+  const bk=$('#bk');if(bk)bk.onclick=back;
+  const bl=$('#bl');
+  if(bl){
+    bl.onclick=()=>{
+      const go=()=>run(async()=>{await api('/block','POST',{user_id:id,on:!p.blocked});good();closeM();toast(tx('done_ok'));show(tab)});
+      if(p.blocked)go();else ask(tx('q_block'),go);
+    };
+    $('#rpu').onclick=()=>run(async()=>{await api(`/users/${id}/report`,'POST');toast(tx('reported'))});
+  }
+})}
+
+function openRate(tid,only){run(async()=>{
+  const d=await api(`/trips/${tid}/people`);
+  if(!d.ended)throw new Error('notended');
+  const qu=d.members.filter(m=>m.id!==d.me&&!m.rated&&(!only||m.id===only));
+  if(!qu.length){toast(tx('norate'));return}
+  let i=0;
+  const step=()=>{
+    if(i>=qu.length){closeM();toast(tx('rated_ok'));show(tab);return}
+    const m=qu[i];let s=0;const sel=new Set();
+    modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${tx('rate_t')}</h2><p class="mu">${esc(dn(d.dest))}</p><h3 style="margin:10px 0 0;font-size:20px">${esc(m.name)}${m.age?', '+m.age:''}</h3><div class="sp" id="sp">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-label="${n}">★</button>`).join('')}</div><div class="chips wrap" id="tgs">${TAGS.map(k=>`<button type="button" class="chip" data-t="${k}" aria-pressed="false">${tx('tag_'+k)}</button>`).join('')}</div><textarea class="f" id="rtx" maxlength="300" placeholder="${tx('rate_ph')}"></textarea><button class="cta" id="go">${tx('rate_send')}</button><button class="cta alt" id="sk">${tx('rate_skip')}</button></div>`);
+    document.querySelectorAll('#sp button').forEach(b=>b.onclick=()=>{s=+b.dataset.n;hap();document.querySelectorAll('#sp button').forEach(o=>o.classList.toggle('on',+o.dataset.n<=s))});
+    document.querySelectorAll('#tgs .chip').forEach(b=>b.onclick=()=>{const k=b.dataset.t;sel.has(k)?sel.delete(k):sel.add(k);b.setAttribute('aria-pressed',sel.has(k));hap()});
+    $('#sk').onclick=()=>{i++;step()};
+    $('#go').onclick=()=>run(async()=>{
+      if(!s){hap();toast(tx('pickstars'));return}
+      await api('/reviews','POST',{trip_id:tid,to_id:m.id,stars:s,tags:[...sel],text:$('#rtx').value});
+      good();i++;step();
+    });
+  };
+  step();
+})}
+
+function rulesView(){
+  modal(`<div class="form ob"><button class="x" aria-label="Close">✕</button><div class="big">📜</div><h2>${tx('rulesT')}</h2><ul class="rules">${T[L].rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul><button class="cta" id="nx">${tx('ok')}</button></div>`);
+  $('#nx').onclick=closeM;
+}
+function onboarding(must){
+  let i=0;const S=T[L].ob,n=S.length+1;
+  const draw=()=>{
+    const last=i===S.length;
+    modal(`<div class="form ob"><button class="x" aria-label="Close">✕</button>${last?`<div class="big">📜</div><h2>${tx('rulesT')}</h2><ul class="rules">${T[L].rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:`<div class="big">${S[i].e}</div><h2>${S[i].h}</h2><p>${S[i].p}</p>${S[i].ex?`<div class="ex">${S[i].ex}</div>`:''}`}<div class="dots">${Array.from({length:n},(_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div><button class="cta" id="nx">${last?(must?tx('accept'):tx('ok')):tx('next')}</button></div>`,must);
+    $('#nx').onclick=()=>{
+      if(!last){i++;hap();draw();return}
+      if(!must){closeM();return}
+      run(async()=>{await api('/rules','POST');good();closeM();gate()});
+    };
+  };
+  draw();
+}
+
+function gate(){
+  if(ms.classList.contains('on')&&locked)return;
+  run(async()=>{const m=await api('/me');if(!m.rules_ok)onboarding(true);else if(!m.registered)regForm()});
+}
+function minorScreen(){
+  modal(`<div class="form c"><div class="big">🔞</div><h2>${tx('minor_t')}</h2><p>${tx('minor_p')}</p></div>`,true);
+}
+function regForm(){
+  modal(`<div class="form"><div class="big">🪪</div><h2>${tx('reg_t')}</h2><p class="mu" style="margin-bottom:12px">${tx('reg_p')}</p><label for="bd0">${tx('birth')}</label><input class="f" id="bd0" type="date" min="1920-01-01" max="${new Date().toISOString().slice(0,10)}"><label>${tx('gender')}</label><div class="seg" id="gs"></div><label for="rc">${tx('city')}</label><input class="f" id="rc" maxlength="60"><label for="ra">${tx('about')}</label><textarea class="f" id="ra" maxlength="500" placeholder="${tx('pha')}"></textarea><label>${tx('vibe_t')}</label><p class="mu" style="font-size:13px;margin:-2px 0 6px">${tx('vibe_h')}</p><div class="chips wrap" id="vb"></div><button class="cta" id="rg">${tx('reg_go')}</button></div>`,true);
+  let gender='x';const vs=new Set();
+  seg($('#gs'),[['f',tx('g_f')],['m',tx('g_m')],['x',tx('g_x')]],gender,v=>gender=v);vibePicker($('#vb'),vs);
+  $('#rg').onclick=()=>run(async()=>{
+    const b=$('#bd0').value;if(!b)throw new Error('baddate');
+    await api('/register','POST',{birth:b,gender,vibe:[...vs],city:$('#rc').value,about:$('#ra').value});
+    refreshMe();good();closeM();toast(tx('welcome'));show(tab);
+  });
+}
+
+function passport(){
+  $('#body').innerHTML='<p class="mu c">…</p>';
+  run(async()=>{
+    const [m,d]=await Promise.all([api('/me'),api('/my')]);
+    const all=[...d.mine,...d.joined];
+    const av=U.photo_url?`<img src="${esc(U.photo_url)}" alt="">`:esc((m.name||'?')[0]);
+    $('#body').innerHTML=`<div class="scroll"><div class="who"><div class="ava">${av}</div><div><h2>${esc(m.name)}</h2><p class="mu">${[yo(m.age),esc(m.city||'')].filter(Boolean).join(' · ')}</p></div><button class="ghost" id="edit">${tx('edit')}</button></div>${m.about?`<p>${esc(m.about)}</p>`:''}
+    <div class="metrics"><div><b>${m.trips}</b><span>${tx('trips_done')}</span></div><div><b>${m.friends||0}</b><span>${tx('friends')}</span></div><div><b>${m.cnt?'★ '+m.avg:'—'}</b><span>${tx('rating')}${m.cnt?' ('+m.cnt+')':''}</span></div></div>
+    <button class="ghost" id="pub0" style="width:100%">${tx('myprof')}</button>
+    <h3>${tx('stamps')}</h3>${all.length?`<div class="stamps">${all.map((x,i)=>`<button class="st a${ci(x.dest)}" data-s="${i}" style="--r:${(ci(x.dest+i)-2.5)*5}deg">${esc(dn(x.dest))}<small>${fmt(x.date_from)||'✈'}</small></button>`).join('')}</div>`:`<p class="mu">${tx('nost')}</p>`}
+    ${d.mine.length?`<h3>${tx('mytrips')}</h3>${d.mine.map((x,i)=>row(x,i)).join('')}`:''}</div>`;
+    document.querySelectorAll('.st').forEach(b=>b.onclick=()=>openPass(all[+b.dataset.s]));
+    document.querySelectorAll('.scroll .flt').forEach(b=>b.onclick=()=>openPass(d.mine[+b.dataset.i]));
+    $('#pub0').onclick=()=>openProfile(m.id);
+    $('#edit').onclick=()=>{hap();modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${esc(m.name)}</h2><label for="city">${tx('city')}</label><input class="f" id="city" maxlength="60" value="${esc(m.city)}"><label for="ab">${tx('about')}</label><textarea class="f" id="ab" maxlength="500" placeholder="${tx('pha')}">${esc(m.about)}</textarea><label>${tx('vibe_t')}</label><div class="chips wrap" id="vb"></div><button class="cta" id="sv">${tx('save')}</button></div>`);
+      const vs=new Set((m.vibe||'').split(',').filter(Boolean));vibePicker($('#vb'),vs);
+      $('#sv').onclick=()=>run(async()=>{await api('/profile','POST',{city:$('#city').value,about:$('#ab').value,vibe:[...vs]});refreshMe();good();closeM();toast(tx('saved'));passport()})};
+  });
+}
+
+function picker(inp,box){
+  let pick=null;
+  inp.oninput=()=>{pick=null;const v=inp.value.trim().toLowerCase();
+    const m=v?CITY.filter(c=>(c.en+' '+c.ru+' '+c.ce+' '+c.cr).toLowerCase().includes(v)).sort((x,y)=>(y.en===y.ce)-(x.en===x.ce)).slice(0,8):[];
+    box.innerHTML=m.map((c,i)=>`<button type="button" class="opt" data-i="${i}">${esc(L==='ru'?c.ru:c.en)}${c.en===c.ce?'':` <span class="mu">${esc(L==='ru'?c.cr:c.ce)}</span>`}</button>`).join('');
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{pick=m[+b.dataset.i];inp.value=L==='ru'?pick.ru:pick.en;box.innerHTML=''})};
+  return ()=>pick;
+}
+function newTrip(){
+  hap();let kind='flight';const t0=new Date().toISOString().slice(0,10);
+  modal(`<div class="form"><button class="x" aria-label="Close">✕</button><h2>${tx('create')}</h2>
+  <label>${tx('kind')}</label><div class="chips" id="kc">${Object.keys(KIND).map(k=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${k===kind}">${KIND[k]} ${tx(k)}</button>`).join('')}</div>
+  <label for="dest">${tx('where')}</label><input class="f" id="dest" placeholder="${tx('ph')}" autocomplete="off"><div class="opts" id="opts"></div>
+  <div class="two"><div><label for="df">${tx('from')}</label><input class="f" id="df" type="date" min="${t0}"></div><div><label for="dt">${tx('to')}</label><input class="f" id="dt" type="date" min="${t0}"></div></div>
+  <div class="two"><div><label for="pp">${tx('people')}</label><input class="f" id="pp" type="number" min="1" max="20" value="1"></div><div><label for="bd">${tx('budget')}</label><input class="f" id="bd" placeholder="€800"></div></div><p class="mu" style="margin:-4px 0 12px;font-size:14px">${tx('limitnote')}</p>
+  <label>${tx('who_t')}</label><div class="seg" id="au2"></div>
+  <label>${tx('age_t')}</label><div class="two"><div><input class="f" id="a1" type="number" min="18" max="99" placeholder="18"></div><div><input class="f" id="a2" type="number" min="18" max="99" placeholder="99"></div></div>
+  <label class="sw"><input type="checkbox" id="ap"><span>${tx('approval')}<br><small class="mu">${tx('approval_h')}</small></span></label>
+  <label for="nt">${tx('plan_l')}</label><textarea class="f" id="nt" placeholder="${tx('phn')}"></textarea>
+  <button class="cta pri" id="pub">${tx('publish')}</button></div>`);
+  document.querySelectorAll('#kc .chip').forEach(b=>b.onclick=()=>{kind=b.dataset.k;hap();document.querySelectorAll('#kc .chip').forEach(o=>o.setAttribute('aria-pressed',o===b))});
+  const getPick=picker($('#dest'),$('#opts'));
+  let aud='all';seg($('#au2'),[['all',tx('aud_all')],['f',tx('aud_f')],['m',tx('aud_m')]],aud,v=>aud=v);
+  $('#pub').onclick=()=>run(async()=>{
+    const v=i=>$('#'+i).value,typed=v('dest').trim();
+    if(!typed)throw new Error(tx('nodest'));
+    const low=typed.toLowerCase(),c=getPick()||CITY.find(c=>c.en.toLowerCase()===low||c.ru.toLowerCase()===low);
+    await api('/trips','POST',{dest:c?c.en:typed,country:c?c.ce:'',lat:c?c.lat:null,lon:c?c.lon:null,kind,date_from:v('df'),date_to:v('dt'),people:+v('pp')||1,budget:v('bd'),note:v('nt'),audience:aud,min_age:+v('a1')||0,max_age:+v('a2')||0,approval:$('#ap').checked?1:0});
+    good();closeM();toast(tx('posted'));show('pass');
+  });
+}
+function deep(){
+  const P=new URLSearchParams(location.search),c=P.get('chat'),r=P.get('rate'),t=P.get('trip'),rq=P.get('req');
+  if(rq)run(async()=>{openRequests(await api('/trips/'+(+rq)))});else if(c)openChat(+c);else if(r)openRate(+r);else if(t)run(async()=>{openPass(await api('/trips/'+(+t)))});
+}
+shell();show('board');
+setTimeout(()=>run(async()=>{const m=await api('/me');ME=m;if(m.rules_ok&&m.registered)deep()}),2800);
+</script>
+</body>
+</html>
