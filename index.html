@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Travel Friends</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+:root{--sea:#0E3B43;--lagoon:#1F8A8A;--sun:#FFB627;--chalk:#F6F8F7;--ink:#12262B;--mute:#5E7378;--line:#D5DEDC}
+*{box-sizing:border-box;margin:0}
+body{font:16px/1.45 Manrope,system-ui,sans-serif;background:var(--chalk);color:var(--ink);padding:16px 16px 96px}
+h1,h2{font-family:Unbounded,system-ui,sans-serif;font-weight:700}
+h1{font-size:22px;margin:4px 0 16px}
+input,textarea,button{font:inherit}
+input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);margin-bottom:12px}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:4px}
+textarea{min-height:90px;resize:vertical}
+button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+.primary{background:var(--sea);color:#fff;width:100%}
+.sun{background:var(--sun);color:var(--ink)}
+.ghost{background:transparent;color:var(--lagoon);border:1px solid var(--lagoon)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.pass{background:#fff;border-radius:14px;margin-bottom:14px;border:1px solid var(--line);overflow:hidden}
+.pass.boost{border-color:var(--sun);border-width:2px}
+.top{background:var(--sea);color:#fff;padding:16px}
+.top h2{font-size:20px}
+.top p{opacity:.85;font-size:14px;margin-top:4px}
+.tear{height:0;border-top:2px dashed var(--line);position:relative}
+.tear:before,.tear:after{content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;background:var(--chalk);border:1px solid var(--line)}
+.tear:before{left:-11px}.tear:after{right:-11px}
+.bot{padding:14px 16px}
+.bot .who{font-size:14px;color:var(--mute);margin-bottom:8px}
+.bot .note{margin-bottom:12px}
+.tag{display:inline-block;background:var(--sun);color:var(--ink);font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;margin-bottom:8px}
+.empty{text-align:center;color:var(--mute);padding:40px 16px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;color:var(--mute);padding:10px}
+nav button[aria-current=true]{color:var(--sea);box-shadow:inset 0 3px 0 var(--sun)}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.toast{position:fixed;left:16px;right:16px;bottom:80px;background:var(--ink);color:#fff;padding:12px;border-radius:10px;text-align:center}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav>
+  <button data-v="feed">Поездки</button>
+  <button data-v="new">Новая поездка</button>
+  <button data-v="me">Профиль</button>
+</nav>
+<script>
+const tg = Telegram.WebApp; tg.ready(); tg.expand();
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = d => d ? new Date(d).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}) : '';
+
+async function api(path, method = 'GET', body) {
+  const r = await fetch('/api' + path, {
+    method, body: body ? JSON.stringify(body) : undefined,
+    headers: {'Content-Type': 'application/json', 'X-Init-Data': tg.initData}
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.detail || 'Что-то пошло не так');
+  return j;
+}
+function toast(t) {
+  const e = document.createElement('div'); e.className = 'toast'; e.textContent = t;
+  document.body.append(e); setTimeout(() => e.remove(), 2500);
+}
+async function act(fn) { try { await fn(); } catch (e) { toast(e.message); } }
+
+let view = 'feed', q = '';
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => go(b.dataset.v));
+function go(v) {
+  view = v;
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-current', b.dataset.v === v));
+  ({feed, new: newTrip, me: profile})[v]();
+}
+
+async function feed() {
+  app.innerHTML = `<h1>Куда едем?</h1>
+    <input id="q" type="search" placeholder="Найти направление" value="${esc(q)}">
+    <div id="list"><p class="empty">Загружаю…</p></div>`;
+  document.getElementById('q').oninput = e => { q = e.target.value; load(); };
+  load();
+}
+async function load() {
+  const el = document.getElementById('list'); if (!el) return;
+  act(async () => {
+    const trips = await api('/trips?q=' + encodeURIComponent(q));
+    el.innerHTML = trips.length ? trips.map(t => `
+      <article class="pass ${t.boosted ? 'boost' : ''}">
+        <div class="top"><h2>${esc(t.dest)}</h2>
+          <p>${fmt(t.date_from)} – ${fmt(t.date_to)} · ищу ${t.people} чел.${t.budget ? ' · ' + esc(t.budget) : ''}</p></div>
+        <div class="tear"></div>
+        <div class="bot">
+          ${t.boosted ? '<span class="tag">Вверху ленты</span>' : ''}
+          <p class="who">${esc(t.name)}${t.city ? ', ' + esc(t.city) : ''}</p>
+          ${t.note ? `<p class="note">${esc(t.note)}</p>` : ''}
+          ${t.mine
+            ? `<button class="sun" onclick="boost(${t.id})">Поднять в ленте на неделю</button>`
+            : `<button class="primary" onclick="joinTrip(${t.id})">Поехать вместе</button>`}
+        </div>
+      </article>`).join('')
+      : '<p class="empty">Пока нет поездок. Опубликуй первую во вкладке «Новая поездка».</p>';
+  });
+}
+function joinTrip(id) { act(async () => { await api(`/trips/${id}/join`, 'POST'); toast('Запрос отправлен. Автор получит сообщение.'); }); }
+function boost(id) {
+  act(async () => {
+    const {link} = await api(`/trips/${id}/boost`, 'POST');
+    tg.openInvoice(link, s => { if (s === 'paid') { toast('Поездка поднята'); load(); } });
+  });
+}
+
+function newTrip() {
+  app.innerHTML = `<h1>Новая поездка</h1>
+    <label for="dest">Куда</label><input id="dest" placeholder="Например, Грузия">
+    <div class="row"><div><label for="df">С</label><input id="df" type="date"></div>
+    <div><label for="dt">По</label><input id="dt" type="date"></div></div>
+    <div class="row"><div><label for="pp">Сколько человек ищу</label><input id="pp" type="number" min="1" max="20" value="1"></div>
+    <div><label for="bd">Бюджет</label><input id="bd" placeholder="до 800 €"></div></div>
+    <label for="nt">Что планируешь</label><textarea id="nt" placeholder="Маршрут, стиль поездки, с кем хочешь ехать"></textarea>
+    <button class="primary" id="go">Опубликовать</button>`;
+  document.getElementById('go').onclick = () => act(async () => {
+    const v = id => document.getElementById(id).value;
+    await api('/trips', 'POST', {dest: v('dest'), date_from: v('df'), date_to: v('dt'),
+      people: +v('pp') || 1, budget: v('bd'), note: v('nt')});
+    toast('Поездка опубликована'); go('feed');
+  });
+}
+
+function profile() {
+  app.innerHTML = `<h1>Профиль</h1><p class="empty">Загружаю…</p>`;
+  act(async () => {
+    const m = await api('/me');
+    app.innerHTML = `<h1>${esc(m.name)}</h1>
+      <label for="city">Город</label><input id="city" value="${esc(m.city)}">
+      <label for="ab">О себе</label><textarea id="ab" placeholder="Как путешествуешь, что любишь">${esc(m.about)}</textarea>
+      <button class="primary" id="sv">Сохранить</button>`;
+    document.getElementById('sv').onclick = () => act(async () => {
+      await api('/profile', 'POST', {city: document.getElementById('city').value, about: document.getElementById('ab').value});
+      toast('Сохранено');
+    });
+  });
+}
+go('feed');
+</script>
+</body>
+</html>
