@@ -9,6 +9,7 @@ x-backend: &backend
     ADMIN_ID: ${ADMIN_ID:-0}
     BOOST_STARS: ${BOOST_STARS:-50}
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+    FRONTEND_RELEASE: ${FRONTEND_RELEASE:-0}
   depends_on:
     db:
       condition: service_healthy

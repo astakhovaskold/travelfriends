@@ -1,0 +1,37 @@
+{
+  "name": "travel-friends-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:baseline": "FRONTEND_TARGET=legacy playwright test --project=chromium --update-snapshots",
+    "test:visual": "FRONTEND_TARGET=solid playwright test --project=chromium",
+    "test:webkit": "FRONTEND_TARGET=solid PLAYWRIGHT_HTML_OUTPUT_DIR=playwright-report/webkit playwright test --project=webkit",
+    "test:production": "FRONTEND_TARGET=production playwright test --project=chromium",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint . --error-on-warnings",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check . --error-on-warnings",
+    "check:fix": "biome check --write ."
+  },
+  "dependencies": {
+    "@fontsource/bricolage-grotesque": "5.3.0",
+    "solid-js": "1.9.17"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.64.0",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.4",
+    "vite-plugin-solid": "2.11.14",
+    "vitest": "5.0.3"
+  }
+}

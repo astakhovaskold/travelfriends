@@ -1,0 +1,49 @@
+name: Frontend migration checks
+on:
+  push:
+  pull_request:
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.64.0-noble
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build | tee build-size.txt
+      - name: Verify immutable legacy source
+        run: sha256sum -c legacy/SHA256SUMS
+      - name: Capture original HTML in the canonical Linux environment
+        run: npm run test:baseline
+      - name: Compare Solid against the original HTML without updating snapshots
+        run: npm run test:visual
+      - name: Check WebKit behavior
+        run: npm run test:webkit
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install API runtime for built-client checks
+        run: |
+          python -m venv ../.venv
+          ../.venv/bin/python -m pip install -r ../backend/requirements.txt
+      - name: Verify production build through FastAPI
+        run: npm run test:production
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-verification
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            frontend/tests/snapshots/linux/
+            frontend/build-size.txt

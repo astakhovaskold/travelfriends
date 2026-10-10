@@ -1,0 +1,14 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+
+@source "../";
+@theme {
+  --color-ink: #0b1b3f;
+  --color-night: #fbf6ec;
+  --color-coral: #ff6b4a;
+  --color-line: #e7ddcb;
+  --color-muted: #6b7794;
+  --radius-card: 18px;
+  --shadow-card: 0 4px 14px #0b1b3f12;
+}
