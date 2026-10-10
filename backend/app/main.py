@@ -5,8 +5,8 @@ from app.db.session import get_engine
 from app.integrations.telegram import payments
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 
@@ -40,40 +40,12 @@ for router, tag in (
         if not route.tags:
             route.tags = [tag]
     app.include_router(router)
-app.mount(
-    "/assets-app",
-    StaticFiles(directory=str(get_settings().FRONTEND_DIST), check_dir=False),
-    name="frontend-assets",
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(get_settings().CORS_ORIGINS),
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "Authorization", "X-Init-Data"],
 )
-
-
-def solid_index():
-    source = get_settings().FRONTEND_DIST / "index.html"
-    if not source.is_file():
-        return JSONResponse(
-            {"detail": "Frontend build missing; run npm ci && npm run build in frontend"},
-            status_code=503,
-        )
-    return FileResponse(source, headers={"Cache-Control": "no-cache"})
-
-
-@app.get("/", include_in_schema=False)
-def index():
-    return (
-        solid_index()
-        if get_settings().FRONTEND_RELEASE
-        else FileResponse(get_settings().FRONTEND_PATH)
-    )
-
-
-@app.get("/next/", include_in_schema=False)
-def next_index():
-    return solid_index()
-
-
-@app.get("/legacy/", include_in_schema=False)
-def legacy_index():
-    return FileResponse(get_settings().FRONTEND_PATH)
 
 
 @app.get("/api/config", tags=["Система"])

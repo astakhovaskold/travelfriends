@@ -55,9 +55,9 @@ export default defineConfig({
   ],
   webServer: {
     command: production
-      ? 'ENV_FILE=/dev/null DATABASE_URL=sqlite:///:memory: ../.venv/bin/python -m uvicorn app.main:app --app-dir ../backend --host 127.0.0.1 --port 5174'
+      ? 'npm exec vite preview -- --host 127.0.0.1 --port 5174 --strictPort'
       : 'npm run dev',
-    url: baseURL + (production ? '/next/' : '/assets-app/'),
+    url: baseURL + '/',
     reuseExistingServer: !process.env.CI,
   },
 });

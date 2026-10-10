@@ -1,0 +1,11 @@
+{
+  "biome.configurationPath": "frontend/biome.json",
+  "[typescript][typescriptreact][javascript][javascriptreact][css]": {
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.biome": "explicit",
+      "source.organizeImports.biome": "explicit"
+    }
+  }
+}

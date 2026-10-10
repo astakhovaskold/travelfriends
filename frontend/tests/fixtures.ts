@@ -231,7 +231,7 @@ export async function setup(
             'utf8',
           ).replaceAll(
             './files/',
-            'http://127.0.0.1:5173/assets-app/node_modules/@fontsource/bricolage-grotesque/files/',
+            'http://127.0.0.1:5173/node_modules/@fontsource/bricolage-grotesque/files/',
           ),
         )
         .join('\n');
@@ -480,10 +480,10 @@ export async function setup(
 export async function open(page: Page, query = '', splash = false) {
   const target =
     process.env.FRONTEND_TARGET === 'legacy'
-      ? '/assets-app/legacy/index.html'
+      ? '/legacy/index.html'
       : process.env.FRONTEND_TARGET === 'production'
-        ? '/next/'
-        : '/assets-app/';
+        ? '/'
+        : '/';
   await page.goto(target + query);
   await expect(page.locator('#app .top')).toBeVisible();
   if (!splash) {

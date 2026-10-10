@@ -2,7 +2,7 @@
 
 FastAPI backend для Telegram Mini App, обычного сайта и будущего мобильного клиента. Общие пользователи и PostgreSQL;
 Telegram — отдельная интеграция. Исходный HTML сохранён без изменений в `frontend/legacy/index.html`. Новый клиент —
-SolidJS + TypeScript + Tailwind; доступен для проверки на `/next/` после сборки.
+SolidJS + TypeScript + Tailwind; хостится отдельно от API.
 
 Документация для дальнейшей работы: [обзор проекта](docs/PROJECT_STATE.md), [план миграции frontend](docs/FRONTEND_MIGRATION.md), [индекс docs](docs/README.md).
 
@@ -11,17 +11,47 @@ SolidJS + TypeScript + Tailwind; доступен для проверки на `
 ```sh
 npm --prefix frontend ci
 npm --prefix frontend run dev
-# Vite: http://127.0.0.1:5173/assets-app/, API proxy → localhost:8000
+# Vite: http://127.0.0.1:5173/, API proxy → localhost:8000
 npm --prefix frontend run typecheck
 npm --prefix frontend run test
 npm --prefix frontend run build
 ```
 
-После сборки FastAPI обслуживает SolidJS на `/next/` и assets на `/assets-app/`.
-По умолчанию `/` и `/legacy/` сохраняют исходный Mini App.
-После Linux CI и проверки Telegram iOS/Android задайте `FRONTEND_RELEASE=1` и перезапустите API:
-новый клиент станет `/`. Для возврата — `FRONTEND_RELEASE=0` и перезапуск.
-Docker собирает frontend в отдельном Node 24 stage; отдельный frontend-сервис не нужен.
+Frontend собирается в `frontend/dist` и размещается на отдельном статическом хостинге.
+FastAPI обслуживает только API, `/docs` и `/health`.
+Локально Vite проксирует `/api` на backend; production-сборка использует `VITE_API_URL`.
+
+## Production: Railway + Neon + отдельный frontend
+
+Backend-сервис Railway: корень репозитория `/`, config `/railway.json`.
+Docker собирает только backend с production-зависимостями. Railway запускает API на `$PORT`,
+проверяет `/health` (включая соединение с базой) и выполняет Alembic перед деплоем.
+Один API worker и одна реплика сохраняют поведение ограничителей в памяти.
+
+В Variables backend-сервиса перенесите значения существующего Neon из `.env.production`:
+
+- `DATABASE_URL` — существующий pooled URL Neon.
+- `MIGRATION_DATABASE_URL` — direct URL **той же базы** Neon для Alembic.
+- Сохраните параметры `sslmode` и `channel_binding` в обоих URL.
+- `WEBAPP_URL=https://your-frontend.example` — публичный адрес фронтенда для Telegram.
+- `CORS_ORIGINS=https://your-frontend.example` — разрешённый origin без пути;
+  несколько доменов разделяются запятыми.
+- `BOT_TOKEN`, `BOT_USERNAME`, `ADMIN_ID` — при использовании Telegram.
+- `FORWARDED_ALLOW_IPS` — доверенные адреса proxy, видимые Uvicorn.
+
+Новая база не создаётся. Секреты задаются в Railway Variables, не в `railway.json`;
+локальные `.env.production` и `.env.neon` не входят в Docker image.
+Pre-deploy применяет миграции к указанной базе Neon; проверьте её адрес перед первым деплоем.
+При ошибке миграции Railway не запускает новый deployment.
+
+На хостинге фронтенда задайте корень `frontend`, команду сборки `npm ci && npm run build`,
+каталог результата `dist` и build-переменную `VITE_API_URL=https://your-api.up.railway.app`
+(без `/api`). Это публичный адрес, не секрет; изменение требует пересборки.
+Добавьте origin этого хостинга в `CORS_ORIGINS` backend-сервиса.
+
+Telegram bot-worker при необходимости запускается отдельным сервисом:
+`python -m app.worker`. Не применяйте к нему API start command и `/health` из `railway.json`;
+миграции выполняет API-сервис. Для токена должен работать один polling-процесс.
 
 ```sh
 cd frontend
@@ -87,7 +117,7 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
-API и прежний HTML: http://localhost:8000, OpenAPI: http://localhost:8000/docs, проверка базы: `/health`.
+API: http://localhost:8000, OpenAPI: http://localhost:8000/docs, проверка базы: `/health`.
 Compose сначала ждёт PostgreSQL, затем выполняет `alembic upgrade head` и запускает API. Данные хранятся в volume `postgres_data`. API не требует токена и не запускает бота.
 
 Для Telegram заполните `BOT_TOKEN`, `BOT_USERNAME` (без @), `WEBAPP_URL` (публичный HTTPS URL), при необходимости `ADMIN_ID`, затем:

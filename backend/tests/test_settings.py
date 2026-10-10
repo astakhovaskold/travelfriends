@@ -1,7 +1,7 @@
 import pytest
+
 from app import config
 from app.config import Settings, load_settings
-from pathlib import Path
 
 
 def test_settings_defaults_and_database_normalization(tmp_path):
@@ -11,7 +11,7 @@ def test_settings_defaults_and_database_normalization(tmp_path):
     assert settings.BOOST_STARS == 50
     assert settings.SESSION_TTL == 2592000
     assert settings.DATABASE_URL == settings.MIGRATION_DATABASE_URL == "sqlite:///data.db"
-    assert settings.FRONTEND_PATH.is_absolute()
+    assert settings.CORS_ORIGINS == ()
     assert (
             Settings(DATABASE_URL="postgres://localhost/example").DATABASE_URL
             == "postgresql+psycopg://localhost/example"
@@ -68,10 +68,10 @@ def test_invalid_settings_name_is_reported_without_inputs(tmp_path, name, value)
 
 
 def test_settings_can_be_replaced_without_environment_changes(monkeypatch):
-    replacement = Settings(ADMIN_ID=700, FRONTEND_PATH=Path("relative.html"))
+    replacement = Settings(ADMIN_ID=700, CORS_ORIGINS="https://frontend.example/")
     monkeypatch.setattr(config, "_settings", replacement)
     assert config.get_settings() is replacement
-    assert config.get_settings().FRONTEND_PATH.is_absolute()
+    assert config.get_settings().CORS_ORIGINS == ("https://frontend.example",)
 
 
 def test_dotenv_interpolation_preserves_environment_priority(tmp_path, monkeypatch):

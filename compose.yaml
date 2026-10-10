@@ -1,15 +1,17 @@
 name: travelfriends
 x-backend: &backend
-  build: .
+  build:
+    context: .
+    target: production
   environment: &environment
     DATABASE_URL: postgresql+psycopg://travelfriends:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/travelfriends
     BOT_TOKEN: ${BOT_TOKEN:-}
     BOT_USERNAME: ${BOT_USERNAME:-}
-    WEBAPP_URL: ${WEBAPP_URL:-http://localhost:8000}
+    WEBAPP_URL: ${WEBAPP_URL:-http://localhost:5173}
     ADMIN_ID: ${ADMIN_ID:-0}
     BOOST_STARS: ${BOOST_STARS:-50}
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
-    FRONTEND_RELEASE: ${FRONTEND_RELEASE:-0}
+    CORS_ORIGINS: ${CORS_ORIGINS:-}
   depends_on:
     db:
       condition: service_healthy
@@ -59,6 +61,9 @@ services:
   tests:
     <<: *backend
     profiles: [test]
+    build:
+      context: .
+      target: tests
     environment:
       <<: *environment
       COVERAGE_FILE: /app/coverage/.coverage

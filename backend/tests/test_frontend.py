@@ -1,46 +1,33 @@
-from app import config, main
-from fastapi.staticfiles import StaticFiles
+from app import main
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 
 
-def test_frontend_preview_and_rollback(tmp_path, monkeypatch):
-    legacy = tmp_path / "legacy.html"
-    legacy.write_text("<h1>Legacy</h1>")
-    dist = tmp_path / "dist"
-    dist.mkdir()
-    (dist / "index.html").write_text('<script src="/assets-app/assets/app.js"></script>')
-    (dist / "assets").mkdir()
-    (dist / "assets" / "app.js").write_text('console.log("Solid")')
-    monkeypatch.setattr(
-        config,
-        "_settings",
-        config.get_settings().model_copy(
-            update={"FRONTEND_PATH": legacy, "FRONTEND_DIST": dist, "FRONTEND_RELEASE": False}
-        ),
-    )
-    mount = next(
-        route for route in main.app.routes if getattr(route, "name", None) == "frontend-assets"
-    )
-    monkeypatch.setattr(mount, "app", StaticFiles(directory=dist))
+def test_api_does_not_serve_frontend():
     client = TestClient(main.app)
-    assert client.get("/").text == "<h1>Legacy</h1>"
-    assert "/assets-app/assets/app.js" in client.get("/next/").text
-    assert client.get("/assets-app/assets/app.js").status_code == 200
-    assert client.get("/assets-app/assets/missing.js").status_code == 404
-    assert client.get("/legacy/").text == "<h1>Legacy</h1>"
-    monkeypatch.setattr(
-        config, "_settings", config.get_settings().model_copy(update={"FRONTEND_RELEASE": True})
-    )
-    assert client.get("/").text == client.get("/next/").text
-    assert client.get("/legacy/").text == "<h1>Legacy</h1>"
+    for path in ("/", "/next/", "/legacy/", "/assets-app/assets/app.js"):
+        assert client.get(path).status_code == 404
     assert client.get("/api/config").status_code == 200
     assert client.get("/docs").status_code == 200
 
 
-def test_missing_build_is_explicit(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        config, "_settings", config.get_settings().model_copy(update={"FRONTEND_DIST": tmp_path})
+def test_cross_origin_telegram_request():
+    app = CORSMiddleware(
+        main.app,
+        allow_origins=["https://frontend.example"],
+        allow_methods=["POST"],
+        allow_headers=["Content-Type", "Authorization", "X-Init-Data"],
     )
-    response = TestClient(main.app).get("/next/")
-    assert response.status_code == 503
-    assert "Frontend build missing" in response.json()["detail"]
+    client = TestClient(app)
+    headers = {
+        "Origin": "https://frontend.example",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type,x-init-data,authorization",
+    }
+    response = client.options("/api/auth/telegram", headers=headers)
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == headers["Origin"]
+    headers["Origin"] = "https://untrusted.example"
+    response = client.options("/api/auth/telegram", headers=headers)
+    assert response.status_code == 400
+    assert "access-control-allow-origin" not in response.headers

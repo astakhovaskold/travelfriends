@@ -29,9 +29,16 @@ class Settings(BaseModel):
     DATABASE_URL: str = Field(default="sqlite:///data.db", repr=False)
     MIGRATION_DATABASE_URL: str | None = Field(default=None, repr=False)
     SESSION_TTL: int = Field(default=2592000, gt=0)
-    FRONTEND_PATH: Path = PROJECT_ROOT / "frontend" / "legacy" / "index.html"
-    FRONTEND_DIST: Path = PROJECT_ROOT / "frontend" / "dist"
-    FRONTEND_RELEASE: bool = False
+    CORS_ORIGINS: tuple[str, ...] = ()
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: object) -> object:
+        if isinstance(value, str):
+            return tuple(
+                origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()
+            )
+        return value
 
     @field_validator("ADMIN_ID", mode="before")
     @classmethod
@@ -42,11 +49,6 @@ class Settings(BaseModel):
     @classmethod
     def normalize_database_url(cls, value: str | None) -> str | None:
         return database_url(value) if value is not None else None
-
-    @field_validator("FRONTEND_PATH", "FRONTEND_DIST")
-    @classmethod
-    def resolve_frontend_path(cls, value: Path) -> Path:
-        return value.resolve()
 
     @model_validator(mode="after")
     def migration_fallback(self) -> "Settings":

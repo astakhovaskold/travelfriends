@@ -7,7 +7,7 @@ export default defineConfig({
     solid(),
     tailwind(),
   ],
-  base: '/assets-app/',
+  base: '/',
   server: {
     port: 5173,
     strictPort: true,

@@ -12,13 +12,15 @@ export function errorDetail(value: unknown): string {
   return 'Error';
 }
 
+const apiOrigin = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+
 export async function api<T>(
   path: string,
   method = 'GET',
   body?: unknown,
   signal?: AbortSignal,
 ): Promise<T> {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${apiOrigin}/api${path}`, {
     method,
     signal,
     headers: {
