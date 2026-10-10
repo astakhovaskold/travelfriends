@@ -1,28 +1,90 @@
+"""Validated deployment settings, loaded without modifying the process environment."""
+
 import os
+from collections.abc import Mapping
+from dotenv import dotenv_values
+from dotenv.variables import parse_variables
 from pathlib import Path
-from dotenv import load_dotenv
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(os.getenv('ENV_FILE', str(PROJECT_ROOT / '.env.local')), override=False)
 
-def database_url(value):
-    if value.startswith('postgresql://'):
-        return value.replace('postgresql://', 'postgresql+psycopg://', 1)
-    if value.startswith('postgres://'):
-        return value.replace('postgres://', 'postgresql+psycopg://', 1)
+
+def database_url(value: str) -> str:
+    if value.startswith("postgresql://"):
+        return value.replace("postgresql://", "postgresql+psycopg://", 1)
+    if value.startswith("postgres://"):
+        return value.replace("postgres://", "postgresql+psycopg://", 1)
     return value
 
-BOT_USERNAME = os.getenv('BOT_USERNAME', '')
-BOT_TOKEN = os.getenv('BOT_TOKEN', '')
-WEBAPP_URL = os.getenv('WEBAPP_URL', 'http://localhost:8000')
-BOOST_STARS = int(os.getenv('BOOST_STARS', '50'))
-ADMIN_ID = int(os.getenv('ADMIN_ID', '0') or 0)
-DATABASE_URL = database_url(os.getenv('DATABASE_URL', 'sqlite:///data.db'))
-MIGRATION_DATABASE_URL = database_url(os.getenv('MIGRATION_DATABASE_URL', DATABASE_URL))
-SESSION_TTL = int(os.getenv('SESSION_TTL', '2592000'))
-FRONTEND_PATH = Path(os.getenv('FRONTEND_PATH', str(Path(__file__).resolve().parents[2] / 'frontend' / 'index.html'))).resolve()
-MAX_ACTIVE = 5
-TAGS = {'reliable', 'fun', 'respectful', 'organized', 'punctual', 'late', 'rude'}
-KINDS = ('flight', 'train', 'road', 'hike', 'plan', 'other')
-VIBES = {'early', 'nature', 'night', 'museums', 'spontaneous', 'planner', 'food', 'photo', 'active', 'chill'}
-GENDERS = ('f', 'm', 'x')
+
+class Settings(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="ignore", hide_input_in_errors=True)
+
+    BOT_USERNAME: str = ""
+    BOT_TOKEN: str = Field(default="", repr=False)
+    WEBAPP_URL: str = "http://localhost:8000"
+    BOOST_STARS: int = Field(default=50, gt=0)
+    ADMIN_ID: int = 0
+    DATABASE_URL: str = Field(default="sqlite:///data.db", repr=False)
+    MIGRATION_DATABASE_URL: str | None = Field(default=None, repr=False)
+    SESSION_TTL: int = Field(default=2592000, gt=0)
+    FRONTEND_PATH: Path = PROJECT_ROOT / "frontend" / "legacy" / "index.html"
+    FRONTEND_DIST: Path = PROJECT_ROOT / "frontend" / "dist"
+    FRONTEND_RELEASE: bool = False
+
+    @field_validator("ADMIN_ID", mode="before")
+    @classmethod
+    def empty_admin_id(cls, value: object) -> object:
+        return 0 if value == "" else value
+
+    @field_validator("DATABASE_URL", "MIGRATION_DATABASE_URL")
+    @classmethod
+    def normalize_database_url(cls, value: str | None) -> str | None:
+        return database_url(value) if value is not None else None
+
+    @field_validator("FRONTEND_PATH", "FRONTEND_DIST")
+    @classmethod
+    def resolve_frontend_path(cls, value: Path) -> Path:
+        return value.resolve()
+
+    @model_validator(mode="after")
+    def migration_fallback(self) -> "Settings":
+        if self.MIGRATION_DATABASE_URL is None:
+            object.__setattr__(self, "MIGRATION_DATABASE_URL", self.DATABASE_URL)
+        return self
+
+
+def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
+    """Environment wins over the selected dotenv file; tests may supply their own mapping."""
+    environment = dict(os.environ if environ is None else environ)
+    path = environment.get("ENV_FILE", str(PROJECT_ROOT / ".env.local"))
+    values: dict[str, str | None] = {}
+    for key, value in dotenv_values(path, interpolate=False).items():
+        # Match load_dotenv(override=False), including ${VAR:-default} expansion.
+        resolution = {**values, **environment}
+        values[key] = (
+            "".join(atom.resolve(resolution) for atom in parse_variables(value))
+            if value is not None
+            else None
+        )
+    values = {key: value for key, value in values.items() if value is not None}
+    values.update(environment)
+
+    try:
+        return Settings.model_validate(values)
+    except ValidationError as error:
+        # Never interpolate inputs: database URLs and tokens can contain secrets.
+        details = "; ".join(
+            f"{'.'.join(str(part) for part in item['loc'])}: {item['msg']}"
+            for item in error.errors(include_input=False, include_url=False)
+        )
+        raise ValueError(f"Invalid application settings: {details}") from None
+
+
+_settings = load_settings()
+
+
+def get_settings() -> Settings:
+    """Single runtime accessor; replace _settings in tests without touching os.environ."""
+    return _settings

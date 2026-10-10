@@ -1,5 +1,6 @@
-from typing import Optional, List
 from pydantic import BaseModel
+from typing import List, Optional
+
 
 class Trip(BaseModel):
     kind: str = "flight"
@@ -55,5 +56,3 @@ class KickReq(BaseModel):
 
 class React(BaseModel):
     emoji: str
-
-

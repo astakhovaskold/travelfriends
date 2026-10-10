@@ -1,0 +1,71 @@
+"""User-facing copy. Protocol payloads and error codes are maintained separately."""
+
+from typing import Any
+
+TEXTS: dict[str, dict[str, str]] = {
+    "ru": {
+        "person.someone": "Кто-то",
+        "trip.request_join": "{who} хочет поехать с тобой: {dest}. Посмотри заявку.",
+        "trip.joined": "{who} едет с тобой: {dest} ({members}/{people})",
+        "trip.accepted": "Тебя приняли в поездку «{dest}»! Чат открыт.",
+        "trip.declined": "Автор не смог взять тебя в поездку «{dest}». Найди другую, их много.",
+        "trip.removed": "Автор исключил тебя из группы «{dest}».",
+        "chat.new_message": "Новое сообщение в чате «{dest}»",
+        "review.received": "⭐ Тебе оставили отзыв: {stars}",
+        "review.prompt": "Поездка «{dest}» завершилась. Оцени попутчиков: это помогает другим.",
+        "payment.completed": "Готово: поездка неделю будет вверху табло.",
+        "button.open_app": "Открыть Travel Friends",
+        "bot.welcome": "Находи попутчиков и публикуй свои поездки.",
+        "button.chat": "Открыть чат",
+        "button.rate": "Оценить попутчиков",
+        "button.trip": "Открыть поездку",
+        "button.req": "Посмотреть заявки",
+        "admin.ban_usage": "/ban <user id>",
+        "admin.unban_usage": "/unban <user id>",
+        "admin.banned": "Banned {user_id}",
+        "admin.unbanned": "Unbanned {user_id}",
+        "admin.stats": "Users: {users}\nTrips: {trips}\nJoins: {joins}\nMessages: {messages}\nReviews: {reviews}\nReports: {reports}",
+        "admin.profile_report": "Profile report: user {user_id} ({name}) by {reporter_id}\n/ban {user_id}",
+        "admin.message_report": "Report: trip {trip_id}, user {user_id} ({name}): {text}\n/ban {user_id}",
+        "payment.invalid": "Invalid payment",
+        "payment.title": "Поднять поездку / Boost trip",
+        "payment.description": "{dest}: 7 days on top / 7 дней вверху",
+        "payment.label": "7 days / 7 дней",
+        "button.menu": "Travel Friends",
+    },
+    "en": {
+        "person.someone": "Someone",
+        "trip.request_join": "{who} wants to join your trip: {dest}. Review the request.",
+        "trip.joined": "{who} joined your trip: {dest} ({members}/{people})",
+        "trip.accepted": "You are in! “{dest}” — the chat is open.",
+        "trip.declined": "The author couldn’t take you on “{dest}”. Many other trips are waiting.",
+        "trip.removed": "The author removed you from the “{dest}” group.",
+        "chat.new_message": "New message in the “{dest}” chat",
+        "review.received": "⭐ You got a new review: {stars}",
+        "review.prompt": "Your trip “{dest}” is over. Rate your buddies: it helps others.",
+        "payment.completed": "Done: your trip stays at the top of the board for a week.",
+        "button.open_app": "Open Travel Friends",
+        "bot.welcome": "Find travel buddies and post your trips.",
+        "button.chat": "Open chat",
+        "button.rate": "Rate your buddies",
+        "button.trip": "Open trip",
+        "button.req": "View requests",
+        "admin.ban_usage": "/ban <user id>",
+        "admin.unban_usage": "/unban <user id>",
+        "admin.banned": "Banned {user_id}",
+        "admin.unbanned": "Unbanned {user_id}",
+        "admin.stats": "Users: {users}\nTrips: {trips}\nJoins: {joins}\nMessages: {messages}\nReviews: {reviews}\nReports: {reports}",
+        "admin.profile_report": "Profile report: user {user_id} ({name}) by {reporter_id}\n/ban {user_id}",
+        "admin.message_report": "Report: trip {trip_id}, user {user_id} ({name}): {text}\n/ban {user_id}",
+        "payment.invalid": "Invalid payment",
+        "payment.title": "Поднять поездку / Boost trip",
+        "payment.description": "{dest}: 7 days on top / 7 дней вверху",
+        "payment.label": "7 days / 7 дней",
+        "button.menu": "Travel Friends",
+    },
+}
+
+
+def render_text(key: str, lang: str, **params: Any) -> str:
+    """Unknown languages use English; unknown keys and missing parameters are programming errors."""
+    return TEXTS.get(lang, TEXTS["en"])[key].format(**params)

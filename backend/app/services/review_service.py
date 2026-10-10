@@ -1,33 +1,48 @@
 import time
-from fastapi import HTTPException
+from app import errors
+from app.constants import REVIEW_MAX_LENGTH, TAGS
 from app.db.session import db
+from app.repositories.reviews import ReviewsRepository
 from app.schemas import Review
-from app.services.common import is_ended, people
-from app.config import TAGS
-from app.services.notification_service import safe_send
-from app.api.auth import ensure_ready
-
+from app.services.auth_service import ensure_ready
 from app.services.chat_service import chat_access
-async def add_review(r: Review, u: dict):
-    ensure_ready(u)
-    if not 1 <= r.stars <= 5 or r.to_id == u["id"]:
-        raise HTTPException(400, "badreq")
-    tags = ",".join(t for t in dict.fromkeys(r.tags) if t in TAGS)
-    with db(write=True) as c:
-        c.lock_trip(r.trip_id)
-        trip = chat_access(c, r.trip_id, u["id"])
+from app.services.common import is_ended
+from app.services.notification_service import safe_send
+from app.services.participation_service import people
+from app.texts import render_text
+from fastapi import HTTPException
+
+
+async def add_review(review: Review, user: dict):
+    ensure_ready(user)
+    if not 1 <= review.stars <= 5 or review.to_id == user["id"]:
+        raise HTTPException(400, errors.BADREQ)
+    tags = ",".join((t for t in dict.fromkeys(review.tags) if t in TAGS))
+
+    with db(write=True) as transaction:
+        repository = ReviewsRepository(transaction)
+        transaction.lock_trip(review.trip_id)
+        trip = chat_access(transaction, review.trip_id, user["id"])
         if not is_ended(trip):
-            raise HTTPException(400, "notended")
-        if r.to_id not in {p["id"] for p in people(c, r.trip_id)}:
-            raise HTTPException(400, "badreq")
-        if c.execute("select 1 from reviews where trip_id=? and from_id=? and to_id=?",
-                     (r.trip_id, u["id"], r.to_id)).fetchone():
-            raise HTTPException(400, "dup")
-        c.execute("insert into reviews(trip_id,from_id,to_id,stars,tags,text,created) values(?,?,?,?,?,?,?)",
-                  (r.trip_id, u["id"], r.to_id, r.stars, tags, r.text.strip()[:300], int(time.time())))
-        lang = c.execute("select lang from users where id=?", (r.to_id,)).fetchone()["lang"]
-    await safe_send(r.to_id, f"⭐ Тебе оставили отзыв: {'★' * r.stars}" if lang == "ru"
-                    else f"⭐ You got a new review: {'★' * r.stars}")
+            raise HTTPException(400, errors.NOTENDED)
+        if review.to_id not in {p["id"] for p in people(transaction, review.trip_id)}:
+            raise HTTPException(400, errors.BADREQ)
+        if repository.exists(review.trip_id, user["id"], review.to_id):
+            raise HTTPException(400, errors.DUP)
+        repository.add(
+            review.trip_id,
+            user["id"],
+            review.to_id,
+            review.stars,
+            tags,
+            review.text.strip()[:REVIEW_MAX_LENGTH],
+            int(time.time()),
+        )
+        lang = repository.recipient_language(review.to_id)["lang"]
+
+    await safe_send(
+        review.to_id,
+        render_text("review.received", "ru" if lang == "ru" else "en", stars="★" * review.stars),
+    )
+
     return {"ok": True}
-
-
