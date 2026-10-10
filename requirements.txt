@@ -1,4 +1,1 @@
-fastapi
-uvicorn
-aiogram>=3.13
-pydantic
+-r backend/requirements.txt
