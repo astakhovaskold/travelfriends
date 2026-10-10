@@ -44,10 +44,33 @@ Docker собирает только backend с production-зависимост�
 Pre-deploy применяет миграции к указанной базе Neon; проверьте её адрес перед первым деплоем.
 При ошибке миграции Railway не запускает новый deployment.
 
-На хостинге фронтенда задайте корень `frontend`, команду сборки `npm ci && npm run build`,
-каталог результата `dist` и build-переменную `VITE_API_URL=https://your-api.up.railway.app`
-(без `/api`). Это публичный адрес, не секрет; изменение требует пересборки.
-Добавьте origin этого хостинга в `CORS_ORIGINS` backend-сервиса.
+Frontend на Railway — отдельный сервис из того же репозитория:
+
+| Настройка              | Backend         | Frontend                 |
+|------------------------|-----------------|--------------------------|
+| Root Directory         | `/`             | `/`                      |
+| Railway Config File    | `/railway.json` | `/frontend/railway.json` |
+| Dockerfile (из config) | `Dockerfile`    | `frontend/Dockerfile`    |
+| Процесс                | Uvicorn         | Caddy                    |
+| Проверка здоровья      | `/health` с БД  | `/health` без БД         |
+
+В frontend-сервисе удалите вручную заданные backend Build/Start/Pre-deploy commands,
+а также `RAILWAY_DOCKERFILE_PATH`, если он указывает на корневой `Dockerfile`.
+Используйте Dockerfile builder и config `/frontend/railway.json`.
+Не задавайте Root Directory `/frontend`: пути COPY рассчитаны на корень репозитория.
+Frontend Dockerfile собирает Vite через Node, затем Caddy раздаёт только `dist`.
+После изменения настроек и публикации файлов в Git выполните новый deploy.
+В логах frontend должен запускаться Caddy; Uvicorn означает использование backend-конфигурации.
+
+Frontend Variables: `VITE_API_URL=https://your-api.up.railway.app` (без `/api`).
+Docker получает этот адрес как build ARG; без него сборка frontend останавливается с ошибкой.
+Это публичный адрес, не секрет; изменение требует пересборки.
+В обоих сервисах можно задать `PORT=8080` и Target Port домена `8080`.
+Добавьте origin frontend-домена в `CORS_ORIGINS` и `WEBAPP_URL` backend-сервиса.
+Frontend не требует BOT_TOKEN и DATABASE_URL.
+
+На другом статическом хостинге используйте корень `frontend`, команду
+`npm ci && npm run build` и каталог результата `dist`.
 
 Telegram bot-worker при необходимости запускается отдельным сервисом:
 `python -m app.worker`. Не применяйте к нему API start command и `/health` из `railway.json`;
