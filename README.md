@@ -48,7 +48,7 @@ Frontend на Railway — отдельный сервис из того же р�
 
 | Настройка              | Backend         | Frontend                 |
 |------------------------|-----------------|--------------------------|
-| Root Directory         | `/`             | `/`                      |
+| Root Directory         | `/`             | `/frontend`              |
 | Railway Config File    | `/railway.json` | `/frontend/railway.json` |
 | Dockerfile (из config) | `Dockerfile`    | `frontend/Dockerfile`    |
 | Процесс                | Uvicorn         | Caddy                    |
@@ -57,7 +57,8 @@ Frontend на Railway — отдельный сервис из того же р�
 В frontend-сервисе удалите вручную заданные backend Build/Start/Pre-deploy commands,
 а также `RAILWAY_DOCKERFILE_PATH`, если он указывает на корневой `Dockerfile`.
 Используйте Dockerfile builder и config `/frontend/railway.json`.
-Не задавайте Root Directory `/frontend`: пути COPY рассчитаны на корень репозитория.
+Задайте Root Directory `/frontend`: пути COPY рассчитаны на эту директорию.
+Railway Config File всё равно задаётся от корня репозитория: `/frontend/railway.json`.
 Frontend Dockerfile собирает Vite через Node, затем Caddy раздаёт только `dist`.
 После изменения настроек и публикации файлов в Git выполните новый deploy.
 В логах frontend должен запускаться Caddy; Uvicorn означает использование backend-конфигурации.
