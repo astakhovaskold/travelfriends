@@ -1,12 +1,4 @@
-import {
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  onMount,
-  Show,
-  Switch,
-} from 'solid-js';
+import {createSignal, For, Match, onCleanup, onMount, Show, Switch,} from 'solid-js';
 import {api} from '../api/client';
 import type {Me, Trip} from '../api/types';
 import {Close} from '../components/common';
@@ -100,6 +92,10 @@ export function App() {
       return;
     }
     const value = await refreshMe();
+    openGate(value);
+  }
+
+  function openGate(value: Me) {
     if (!value.rules_ok) {
       open({
         kind: 'onboarding',
@@ -215,6 +211,8 @@ export function App() {
           const value = await refreshMe();
           if (value.rules_ok && value.registered) {
             await deep();
+          } else {
+            openGate(value);
           }
         }),
       2800,
