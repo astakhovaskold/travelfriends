@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-include = ["backend/**/*.py", "main.py"]
+include = ["**/*.py"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I"]
@@ -12,3 +12,7 @@ known-first-party = ["app"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

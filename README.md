@@ -1,156 +1,161 @@
 # Travel Friends
 
-FastAPI backend для Telegram Mini App, обычного сайта и будущего мобильного клиента. Общие пользователи и PostgreSQL;
-Telegram — отдельная интеграция. Исходный HTML сохранён без изменений в `frontend/legacy/index.html`. Новый клиент —
-SolidJS + TypeScript + Tailwind; хостится отдельно от API.
+FastAPI backend и отдельный SolidJS + TypeScript frontend. Caddy внутри frontend
+раздаёт только статические файлы; API работает отдельным сервисом. Ingress не настроен.
 
-Документация для дальнейшей работы: [обзор проекта](docs/PROJECT_STATE.md), [план миграции frontend](docs/FRONTEND_MIGRATION.md), [индекс docs](docs/README.md).
+## Полный стек через корневой Compose
 
-## Frontend: разработка, сборка и проверка
-
-```sh
-npm --prefix frontend ci
-npm --prefix frontend run dev
-# Vite: http://127.0.0.1:5173/, API proxy → localhost:8000
-npm --prefix frontend run typecheck
-npm --prefix frontend run test
-npm --prefix frontend run build
-```
-
-Frontend собирается в `frontend/dist` и размещается на отдельном статическом хостинге.
-FastAPI обслуживает только API, `/docs` и `/health`.
-Локально Vite проксирует `/api` на backend; production-сборка использует `VITE_API_URL`.
-
-## Production: Railway + Neon + отдельный frontend
-
-Backend-сервис Railway: корень репозитория `/`, config `/railway.json`.
-Docker собирает только backend с production-зависимостями. Railway запускает API на `$PORT`,
-проверяет `/health` (включая соединение с базой) и выполняет Alembic перед деплоем.
-Один API worker и одна реплика сохраняют поведение ограничителей в памяти.
-
-В Variables backend-сервиса перенесите значения существующего Neon из `.env.production`:
-
-- `DATABASE_URL` — существующий pooled URL Neon.
-- `MIGRATION_DATABASE_URL` — direct URL **той же базы** Neon для Alembic.
-- Сохраните параметры `sslmode` и `channel_binding` в обоих URL.
-- `WEBAPP_URL=https://your-frontend.example` — публичный адрес фронтенда для Telegram.
-- `CORS_ORIGINS=https://your-frontend.example` — разрешённый origin без пути;
-  несколько доменов разделяются запятыми.
-- `BOT_TOKEN`, `BOT_USERNAME`, `ADMIN_ID` — при использовании Telegram.
-- `FORWARDED_ALLOW_IPS` — доверенные адреса proxy, видимые Uvicorn.
-
-Новая база не создаётся. Секреты задаются в Railway Variables, не в `railway.json`;
-локальные `.env.production` и `.env.neon` не входят в Docker image.
-Pre-deploy применяет миграции к указанной базе Neon; проверьте её адрес перед первым деплоем.
-При ошибке миграции Railway не запускает новый deployment.
-
-Frontend на Railway — отдельный сервис из того же репозитория:
-
-| Настройка              | Backend         | Frontend                 |
-|------------------------|-----------------|--------------------------|
-| Root Directory         | `/`             | `/frontend`              |
-| Railway Config File    | `/railway.json` | `/frontend/railway.json` |
-| Dockerfile (из config) | `Dockerfile`    | `frontend/Dockerfile`    |
-| Процесс                | Uvicorn         | Caddy                    |
-| Проверка здоровья      | `/health` с БД  | `/health` без БД         |
-
-В frontend-сервисе удалите вручную заданные backend Build/Start/Pre-deploy commands,
-а также `RAILWAY_DOCKERFILE_PATH`, если он указывает на корневой `Dockerfile`.
-Используйте Dockerfile builder и config `/frontend/railway.json`.
-Задайте Root Directory `/frontend`: пути COPY рассчитаны на эту директорию.
-Railway Config File всё равно задаётся от корня репозитория: `/frontend/railway.json`.
-Frontend Dockerfile собирает Vite через Node, затем Caddy раздаёт только `dist`.
-После изменения настроек и публикации файлов в Git выполните новый deploy.
-В логах frontend должен запускаться Caddy; Uvicorn означает использование backend-конфигурации.
-
-Frontend Variables: `VITE_API_URL=https://your-api.up.railway.app` (без `/api`).
-Docker получает этот адрес как build ARG; без него сборка frontend останавливается с ошибкой.
-Это публичный адрес, не секрет; изменение требует пересборки.
-В обоих сервисах можно задать `PORT=8080` и Target Port домена `8080`.
-Добавьте origin frontend-домена в `CORS_ORIGINS` и `WEBAPP_URL` backend-сервиса.
-Frontend не требует BOT_TOKEN и DATABASE_URL.
-
-На другом статическом хостинге используйте корень `frontend`, команду
-`npm ci && npm run build` и каталог результата `dist`.
-
-Telegram bot-worker при необходимости запускается отдельным сервисом:
-`python -m app.worker`. Не применяйте к нему API start command и `/health` из `railway.json`;
-миграции выполняет API-сервис. Для токена должен работать один polling-процесс.
-
-```sh
-cd frontend
-npx playwright install chromium webkit
-npm run test:baseline # оригинальный HTML → эталонные изображения
-npm run test:visual   # Solid → сравнение с эталонами без их обновления
-npm run test:webkit   # сценарии на движке Safari
-```
-
-Тесты используют Telegram/API-заглушки, фиксированные дату и данные, локальные шрифты.
-В CI сравнение выполняется в закреплённом Linux-контейнере Playwright; локальные macOS-эталоны
-хранятся отдельно. Подробности и ограничения: [миграция frontend](docs/FRONTEND_MIGRATION.md).
-Email-вход и самостоятельный браузерный клиент в эту миграцию не входят.
-
-## Локальный запуск без Docker
-
-Рекомендуемый вариант для разработки — Postgres.app и база `travelfriends_db`.
-
-```sh
-cp .env.local.example .env.local
-# При необходимости укажите своего PostgreSQL-пользователя в DATABASE_URL.
-.venv/bin/alembic -c backend/alembic.ini upgrade head
-.venv/bin/uvicorn app.main:app --app-dir backend --reload
-```
-
-Backend автоматически читает `.env.local`; переменные процесса имеют приоритет. Секретные `.env.local` и `.env.neon` исключены из Git. Для выбора другого файла используется `ENV_FILE`.
-
-Neon подключается существующим драйвером psycopg: приложение использует pooled URL, Alembic — `MIGRATION_DATABASE_URL` с direct URL. TLS и channel binding сохраняются.
-
-```sh
-# Проверка миграции без изменения схемы:
-ENV_FILE=.env.neon .venv/bin/alembic -c backend/alembic.ini current
-# Запуск API с Neon (после отдельного применения миграций):
-ENV_FILE=.env.neon .venv/bin/uvicorn app.main:app --app-dir backend --reload
-```
-
-Изменение локальной схемы не изменяет Neon: переключение базы делается явно через `ENV_FILE`.
-
-Production использует локальный секретный `.env.production` с Neon: `DATABASE_URL` — pooled,
-`MIGRATION_DATABASE_URL` — direct. Файл исключён из Git и Docker build context.
-Перед запуском заполните публичный HTTPS `WEBAPP_URL`, при использовании Telegram —
-`BOT_TOKEN` и `ADMIN_ID`; задайте доверенные IP reverse proxy в `FORWARDED_ALLOW_IPS`.
-Выбор production-окружения явный (по умолчанию по-прежнему `.env.local`):
-
-```sh
-ENV_FILE=.env.production .venv/bin/alembic -c backend/alembic.ini upgrade head
-ENV_FILE=.env.production .venv/bin/uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
-```
-
-Эти команды применяют миграции к production и запускают API; подготовка файла сама по себе
-не выполняет миграции или deploy. Для контейнера передавайте настройки через
-`--env-file .env.production`; файл не включается в образ.
-
-Swagger `/docs` сгруппирован по разделам: Авторизация, Профиль и онбординг, Поездки,
-Заявки, Чаты, Отзывы, Модерация, Платежи и Система.
-
-
-## Запуск через Docker Compose (опционально)
+`compose.yaml` запускает production-сборки frontend и API, PostgreSQL и Alembic-миграции.
 
 ```sh
 cp .env.example .env
-# Укажите случайный POSTGRES_PASSWORD (буквы/цифры).
+# Задайте POSTGRES_PASSWORD.
 docker compose up --build -d
 ```
 
-API: http://localhost:8000, OpenAPI: http://localhost:8000/docs, проверка базы: `/health`.
-Compose сначала ждёт PostgreSQL, затем выполняет `alembic upgrade head` и запускает API. Данные хранятся в volume `postgres_data`. API не требует токена и не запускает бота.
+Frontend: http://localhost:8080. API: http://localhost:8000, OpenAPI: `/docs`.
+API запускается после миграций, frontend — после успешной проверки схемы через `/health`.
+Данные PostgreSQL сохраняются в volume. Перезапуск не удаляет данные.
 
-Для Telegram заполните `BOT_TOKEN`, `BOT_USERNAME` (без @), `WEBAPP_URL` (публичный HTTPS URL), при необходимости `ADMIN_ID`, затем:
+Для VDS задайте `VITE_API_URL` с публичным адресом API, `WEBAPP_URL` с адресом фронта
+и соответствующий origin в `CORS_ORIGINS`. Для прямого доступа извне задайте
+`API_BIND_HOST=0.0.0.0` и `FRONTEND_BIND_HOST=0.0.0.0`; по умолчанию порты доступны
+только через loopback. `API_PORT` и `FRONTEND_PORT` меняют опубликованные порты.
+Caddy не проксирует `/api`: браузер обращается к адресу `VITE_API_URL`.
+Изменение этого адреса требует пересборки frontend.
+
+Для внешней PostgreSQL/Neon задайте `DATABASE_URL` и `MIGRATION_DATABASE_URL`;
+приложение и миграции используют эти адреса вместо встроенной БД.
+Встроенный db-сервис при обычном полном запуске также стартует.
+
+Telegram bot-worker включается отдельно:
 
 ```sh
 docker compose --profile telegram up --build -d
 ```
 
-Бот работает отдельным процессом. Для одного токена запускайте один bot-worker. При переносе с Render остановите прежний polling-процесс. `ADMIN_ID` — Telegram ID администратора; аргументы `/ban` и `/unban` — внутренние ID пользователей, указанные в жалобах.
+У API нет polling-процесса. Для одного BOT_TOKEN запускайте один bot-worker.
+
+## Backend отдельно: разработка в Docker
+
+```sh
+docker compose --env-file /dev/null -f backend/compose.yaml up --build
+# То же из backend/:
+# docker compose up --build
+```
+
+Запускаются отдельная development-БД, миграции и API на http://localhost:8000.
+Код backend смонтирован из рабочей директории; Uvicorn перезапускается при изменениях.
+Production и development Compose имеют разные project names и volumes.
+При запуске из корня --env-file /dev/null исключает случайное использование
+корневого production .env. Из директории backend можно запускать docker compose напрямую.
+`backend/.env.local` при наличии передаёт дополнительные настройки, например BOT_TOKEN.
+DATABASE_URL по умолчанию переопределяется на БД Compose, а не на localhost контейнера.
+
+Чтобы запустить только API с внешней БД, например Neon, выберите env-файл явно:
+
+```sh
+docker compose -f backend/compose.yaml --env-file backend/.env.neon run --rm --no-deps migrate
+docker compose -f backend/compose.yaml --env-file backend/.env.neon up --build --no-deps api
+```
+
+Если PostgreSQL запущен на компьютере, в URL контейнера используйте
+`host.docker.internal` вместо `localhost`. Для Linux development Compose содержит
+соответствующий host-gateway mapping. При доступе к backend через host-gateway
+он должен слушать доступный контейнеру интерфейс: задайте API_BIND_HOST=0.0.0.0
+для backend Compose или --host 0.0.0.0 при нативном запуске.
+
+Backend-тесты в Docker:
+
+```sh
+docker compose -f backend/compose.yaml --profile test run --rm tests
+```
+
+## Backend отдельно: запуск без Docker
+
+Все Python-конфигурации находятся в `backend/`. Корневые `main.py`, `requirements.txt`,
+`pytest.ini` и `pyproject.toml` больше не нужны.
+
+```sh
+cd backend
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+cp .env.example .env.local
+# Для Postgres.app настройте DATABASE_URL и создайте travelfriends_db.
+.venv/bin/alembic -c alembic.ini upgrade head
+.venv/bin/uvicorn app.main:app --reload
+```
+
+Backend автоматически читает `backend/.env.local`; переменные процесса имеют приоритет.
+Существующие `.env.local`, `.env.neon`, `.env.production` перенесены в `backend/`
+и исключены из Git и Docker build context. Для выбора другого файла используйте ENV_FILE:
+
+```sh
+cd backend
+ENV_FILE=.env.neon .venv/bin/alembic -c alembic.ini current
+ENV_FILE=.env.neon .venv/bin/uvicorn app.main:app --reload
+```
+
+`DATABASE_URL` Neon — pooled URL, `MIGRATION_DATABASE_URL` — direct URL той же базы.
+Сохраняйте параметры sslmode/channel_binding. Проверка `alembic current` схему не меняет.
+Бот при необходимости запускается из backend отдельной командой `python -m app.worker`.
+
+## Frontend отдельно: разработка
+
+В Docker:
+
+```sh
+docker compose --env-file /dev/null -f frontend/compose.yaml up --build
+```
+
+Vite доступен на http://localhost:5173. `/api` проксируется на
+`http://host.docker.internal:8000`: backend может работать в отдельном Compose
+или напрямую на компьютере. Для другого адреса задайте `API_PROXY_TARGET`.
+Для прямых браузерных запросов вместо development-прокси задайте `VITE_API_URL`.
+Это прокси только Vite для разработки; production Caddy раздаёт только frontend.
+
+Без Docker:
+
+```sh
+cd frontend
+npm ci
+npm run dev
+npm run typecheck
+npm run test
+npm run build
+```
+
+Локальный Vite проксирует API на `127.0.0.1:8000`. Пример настроек — `frontend/.env.example`.
+Для production-сборки на отдельном хостинге задайте
+`VITE_API_URL=https://your-api.example` без `/api`; результат — `frontend/dist`.
+
+## Railway production
+
+Оба сервиса определены в `.railway/railway.ts`; JSON-конфиги заменены на IaC.
+
+| Настройка      | Backend                             | Frontend            |
+|----------------|-------------------------------------|---------------------|
+| Сервис         | travelfriends-api                   | travelfriends-web   |
+| Root Directory | /backend                            | /frontend           |
+| Dockerfile     | backend/Dockerfile                  | frontend/Dockerfile |
+| Процесс        | Uvicorn                             | Caddy               |
+| Порт           | 8080                                | 8080                |
+| Pre-deploy     | alembic -c alembic.ini upgrade head | отсутствует         |
+| Healthcheck    | /health с проверкой схемы           | /health             |
+
+Существующая Neon остаётся внешней БД; URL и Telegram-секреты сохраняются через preserve().
+Локальные env-файлы не переносятся в Railway Variables автоматически.
+
+```sh
+npm --prefix .railway ci
+.railway/node_modules/.bin/railway link --project travel-friends --environment production
+npm --prefix .railway run plan
+npm --prefix .railway run apply
+```
+
+Проверяйте план перед apply. IaC не применяется от одного push: выполняйте plan/apply,
+затем deploy приложения. BOT_TOKEN нужен API для проверки Telegram initData;
+polling-бот требует отдельного процесса. Для него не используйте API start/healthcheck.
 
 ## Структура
 
@@ -175,7 +180,12 @@ backend/
 frontend/src/                # SolidJS: app, features, API, Telegram adapter
 frontend/legacy/index.html   # исходный Mini App
 frontend/tests/              # Playwright и Vitest
-compose.yaml
+backend/Dockerfile
+backend/compose.yaml
+backend/pyproject.toml
+frontend/Dockerfile
+frontend/compose.yaml
+compose.yaml                 # полный production-стек
 ```
 
 Выбраны SQLAlchemy Core и параметризованные SQL-запросы: существующая логика перенесена постепенно, без полной замены на ORM. ID пользователей — внутренние; Telegram ID хранится в `auth_identities`. У импортированных пользователей прежние числовые ID сохраняются вместе со связями.
@@ -190,7 +200,8 @@ HTTP-ошибки и не отправляют уведомления. При в
 dependencies — в `api/auth.py`. Архитектурные тесты защищают эти границы.
 
 Настройки загружаются через `get_settings()`: окружение имеет приоритет над файлом `ENV_FILE` (по умолчанию
-`.env.local`), включая подстановки `${VAR}`. Загрузка не меняет `os.environ`. Pydantic проверяет типы, положительную
+`backend/.env.local`), включая подстановки `${VAR}`. Загрузка не меняет `os.environ`. Pydantic проверяет типы,
+положительную
 стоимость продвижения и TTL сессии; ошибки не выводят входные значения и секреты. Доменным лимитам и переводам
 соответствуют отдельные модули. Тексты берутся через `render_text(key, lang, **params)` с английским fallback; коды
 ошибок и payload системных событий сохраняют прежний формат.
@@ -224,67 +235,37 @@ docker compose run --rm -v /absolute/path/backup.db:/backup/data.db:ro api \
 
 Проверьте итоговые количества строк перед переключением сервиса. Если в старой базе есть ссылки на отсутствующих пользователей/поездки/сообщения, перенос остановится с названиями таблиц и ID. Исправляйте только копию backup согласно выбранному решению (например, удаление устаревшей блокировки после проверки); строки автоматически не удаляются. Повторный импорт в непустую базу запрещён.
 
-## Тесты
+## Проверки
 
-Перед разделением исходного `main.py`: **23 теста, 92% покрытия строк**. Результат: `docs/plans/baseline-test-results.txt`.
-
-Быстрые тесты на временной SQLite:
+Из backend/:
 
 ```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -r backend/requirements-dev.txt
+.venv/bin/python -m ruff check .
+.venv/bin/python -m ruff format --check .
 .venv/bin/python -m pytest -q
 ```
 
-Полный набор на настоящем PostgreSQL:
+PostgreSQL-тесты используют отдельные случайные schema и не удаляют таблицы приложения:
 
 ```sh
-docker compose --profile test run --rm tests
-# Или против выделенной тестовой базы:
 TEST_DATABASE_URL=postgresql+psycopg://user:password@localhost/test_db \
   .venv/bin/python -m pytest --cov=app --cov-report=term-missing -q
 ```
 
-Каждый PostgreSQL-тест получает отдельную случайную schema; таблицы приложения не удаляются. Тесты применяют настоящую
-Alembic-миграцию. Проверяются контракты API, ограничения доступа, платежи и повторная доставка charge, сессии, перенос
-SQLite, lifecycle API/бота, атомарность последнего места и конкуренция принятия заявки с прямым вступлением. Telegram
-вызовы заменены заглушками. GitHub Actions проверяет Ruff и запускает SQLite- и PostgreSQL-тесты с порогом покрытия 90%.
-Проверяются также настройки, переводы, архитектурные границы, откат участия при ошибке записи системного сообщения и
-отправка уведомления после commit.
-
-## Локальная разработка без Docker
-
-Настройки локальной разработки берутся из `.env.local` либо из переменных процесса. Можно переопределить их явно:
+Frontend-проверки из frontend/:
 
 ```sh
-export DATABASE_URL='postgresql+psycopg://user:password@localhost/travelfriends_db'
-.venv/bin/alembic -c backend/alembic.ini upgrade head
-.venv/bin/uvicorn app.main:app --app-dir backend --reload
-# Отдельно при необходимости:
-PYTHONPATH=backend .venv/bin/python -m app.worker
+npm run check
+npm run typecheck
+npm run test
+npm run build
+npm run test:production
 ```
 
-`uvicorn main:app` из корня также поддерживается. Для временного локального запуска можно использовать `DATABASE_URL=sqlite:///data.db`, предварительно выполнив миграцию. Существующий старый SQLite-файл нужно переносить через импортер, а не накатывать новую начальную миграцию поверх него.
+Playwright production-проверки используют статическую сборку через Vite preview.
+Telegram/API-запросы подменяются заглушками; production-секреты им не нужны.
 
-Публичный адрес обслуживайте через HTTPS reverse proxy. Для него задайте `FORWARDED_ALLOW_IPS` — точные доверенные IP proxy, которые видит Uvicorn внутри контейнера (при proxy на хосте это может быть IP Docker gateway). Proxy должен устанавливать `X-Forwarded-For` и `X-Forwarded-Proto`. Иначе пользователи за proxy будут делить один лимит входа. Не задавайте `*`, если к API могут обращаться недоверенные клиенты. Compose по умолчанию публикует API только на `127.0.0.1:8000`; PostgreSQL наружу не публикуется. Резервные копии PostgreSQL нужно настроить отдельно. Ограничители сообщений и паузы между уведомлениями пока хранятся в памяти API-процесса, поэтому для прежнего поведения используйте один API worker.
-
-## Стиль Python-кода
-
-Ruff закреплён в `backend/requirements-dev.txt`, конфигурация — в корневом `pyproject.toml`: строки до 100 символов,
-двойные кавычки, сортировка импортов и базовые проверки `E4`, `E7`, `E9`, `F`, `I`. Проверки охватывают приложение,
-тесты, миграции, скрипты и корневой entrypoint.
-
-```sh
-# Исправление импортов и форматирование
-.venv/bin/python -m ruff check --fix .
-.venv/bin/python -m ruff format .
-
-# Те же проверки, что в CI, без изменения файлов
-.venv/bin/python -m ruff check .
-.venv/bin/python -m ruff format --check .
-.venv/bin/python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=90 -q
-```
-
-В редакторе можно включить Ruff как форматтер при сохранении. Между проверками, работой с данными и отправкой
-уведомлений добавляйте смысловые пустые строки вручную; форматтер не определяет этапы сценария и не форматирует
-содержимое SQL-строк.
+При ошибке `relation "auth_limits" does not exist` проверьте применение миграций
+к базе API. `/health` возвращает 503 для пустой/неполной схемы или устаревшей Alembic-версии.
+При CORS error проверьте `Configured CORS origins` в startup-логах backend и его Variables.
+Изменение CORS_ORIGINS требует перезапуска backend.

@@ -1,17 +1,26 @@
+import logging
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from app import errors
 from app.api import auth, chats, reviews, trips, users
 from app.config import get_settings
+from app.db.models import metadata
 from app.db.session import get_engine
 from app.integrations.telegram import payments
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import text
+from pathlib import Path
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 
 
 @asynccontextmanager
 async def lifespan(app):
+    logging.getLogger("uvicorn.error").info(
+        "Configured CORS origins: %s", get_settings().CORS_ORIGINS
+    )
     yield
     get_engine().dispose()
 
@@ -27,40 +36,30 @@ OPENAPI_TAGS = [
     {"name": "Платежи", "description": "Продвижение поездок через Telegram Stars."},
     {"name": "Система", "description": "Конфигурация клиента и проверка доступности базы."},
 ]
-app = FastAPI(title="Travel Friends", lifespan=lifespan, openapi_tags=OPENAPI_TAGS)
-for router, tag in (
-        (auth.router, "Авторизация"),
-        (users.router, "Профиль и онбординг"),
-        (trips.router, "Поездки"),
-        (chats.router, "Чаты"),
-        (reviews.router, "Отзывы"),
-        (payments.router, "Платежи"),
-):
-    for route in router.routes:
-        if not route.tags:
-            route.tags = [tag]
-    app.include_router(router)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=list(get_settings().CORS_ORIGINS),
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "Authorization", "X-Init-Data"],
-)
 
 
-@app.get("/api/config", tags=["Система"])
 def config():
     return {"bot": get_settings().BOT_USERNAME, "telegram_enabled": bool(get_settings().BOT_TOKEN)}
 
 
-@app.get("/health", tags=["Система"])
 def health():
-    with get_engine().connect() as connection:
-        connection.execute(text("select 1"))
+    try:
+        with get_engine().connect() as connection:
+            tables = set(inspect(connection).get_table_names())
+            if not set(metadata.tables).issubset(tables) or "alembic_version" not in tables:
+                return JSONResponse({"detail": "Database migrations required"}, status_code=503)
+            revisions = set(
+                connection.execute(text("select version_num from alembic_version")).scalars()
+            )
+            migration_config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+            heads = set(ScriptDirectory.from_config(migration_config).get_heads())
+            if revisions != heads:
+                return JSONResponse({"detail": "Database migrations required"}, status_code=503)
+    except SQLAlchemyError:
+        return JSONResponse({"detail": "Database unavailable"}, status_code=503)
     return {"status": "ok"}
 
 
-@app.middleware("http")
 async def limit_auth(request, call_next):
     if request.method == "POST" and request.url.path in {
         "/api/auth/register",
@@ -77,3 +76,33 @@ async def limit_auth(request, call_next):
                 {"detail": errors.SLOW}, status_code=429, headers={"Retry-After": "60"}
             )
     return await call_next(request)
+
+
+def create_app():
+    application = FastAPI(title="Travel Friends", lifespan=lifespan, openapi_tags=OPENAPI_TAGS)
+    for router, tag in (
+            (auth.router, "Авторизация"),
+            (users.router, "Профиль и онбординг"),
+            (trips.router, "Поездки"),
+            (chats.router, "Чаты"),
+            (reviews.router, "Отзывы"),
+            (payments.router, "Платежи"),
+    ):
+        for route in router.routes:
+            if not route.tags:
+                route.tags = [tag]
+        application.include_router(router)
+    application.middleware("http")(limit_auth)
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(get_settings().CORS_ORIGINS),
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+        allow_headers=["Content-Type", "Authorization", "X-Init-Data"],
+    )
+
+    application.get("/api/config", tags=["Система"])(config)
+    application.get("/health", tags=["Система"])(health)
+    return application
+
+
+app = create_app()

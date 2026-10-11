@@ -1,0 +1,16 @@
+{
+  "name": "travelfriends-railway",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "pull": "railway config pull",
+    "plan": "railway config plan",
+    "apply": "railway config apply"
+  },
+  "dependencies": {
+    "railway": "3.13.1"
+  },
+  "devDependencies": {
+    "@railway/cli": "5.64.2"
+  }
+}

@@ -1,20 +1,26 @@
 name: travelfriends
+
 x-backend: &backend
   build:
-    context: .
+    context: ./backend
     target: production
   environment: &environment
-    DATABASE_URL: postgresql+psycopg://travelfriends:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/travelfriends
+    ENV_FILE: /dev/null
+    DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://travelfriends:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/travelfriends}
+    MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:-${DATABASE_URL:-postgresql+psycopg://travelfriends:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/travelfriends}}
     BOT_TOKEN: ${BOT_TOKEN:-}
     BOT_USERNAME: ${BOT_USERNAME:-}
-    WEBAPP_URL: ${WEBAPP_URL:-http://localhost:5173}
+    WEBAPP_URL: ${WEBAPP_URL:-http://localhost:8080}
+    CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
     ADMIN_ID: ${ADMIN_ID:-0}
     BOOST_STARS: ${BOOST_STARS:-50}
+    SESSION_TTL: ${SESSION_TTL:-2592000}
     FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
-    CORS_ORIGINS: ${CORS_ORIGINS:-}
+    PORT: '8000'
   depends_on:
     db:
       condition: service_healthy
+
 services:
   db:
     image: postgres:17
@@ -30,13 +36,15 @@ services:
       timeout: 5s
       retries: 20
     restart: unless-stopped
+
   migrate:
     <<: *backend
-    command: [alembic, -c, backend/alembic.ini, upgrade, head]
+    command: [ alembic, -c, alembic.ini, upgrade, head ]
+
   api:
     <<: *backend
     ports:
-      - '127.0.0.1:8000:8000'
+      - '${API_BIND_HOST:-127.0.0.1}:${API_PORT:-8000}:8000'
     depends_on:
       db:
         condition: service_healthy
@@ -48,6 +56,22 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    environment:
+      PORT: '8080'
+    ports:
+      - '${FRONTEND_BIND_HOST:-127.0.0.1}:${FRONTEND_PORT:-8080}:8080'
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
   bot:
     <<: *backend
     profiles: [telegram]
@@ -58,21 +82,6 @@ services:
       migrate:
         condition: service_completed_successfully
     restart: unless-stopped
-  tests:
-    <<: *backend
-    profiles: [test]
-    build:
-      context: .
-      target: tests
-    environment:
-      <<: *environment
-      COVERAGE_FILE: /app/coverage/.coverage
-      TEST_DATABASE_URL: postgresql+psycopg://travelfriends:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/travelfriends
-    command: [python, -m, pytest, --cov=app, --cov-report=term-missing, -q]
-    user: "10001:10001"
-    tmpfs:
-      - /app/.pytest_cache:uid=10001,gid=10001
-      - /app/coverage:uid=10001,gid=10001
-    working_dir: /app
+
 volumes:
   postgres_data:

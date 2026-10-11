@@ -29,14 +29,7 @@ jobs:
         run: npm run test:visual
       - name: Check WebKit behavior
         run: npm run test:webkit
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Install API runtime for built-client checks
-        run: |
-          python -m venv ../.venv
-          ../.venv/bin/python -m pip install -r ../backend/requirements.txt
-      - name: Verify production build through FastAPI
+      - name: Verify static production build
         run: npm run test:production
       - uses: actions/upload-artifact@v4
         if: always()

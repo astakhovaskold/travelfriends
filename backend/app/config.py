@@ -1,13 +1,15 @@
 """Validated deployment settings, loaded without modifying the process environment."""
 
+import json
 import os
 from collections.abc import Mapping
 from dotenv import dotenv_values
 from dotenv.variables import parse_variables
 from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from urllib.parse import urlsplit
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 
 def database_url(value: str) -> str:
@@ -23,7 +25,7 @@ class Settings(BaseModel):
 
     BOT_USERNAME: str = ""
     BOT_TOKEN: str = Field(default="", repr=False)
-    WEBAPP_URL: str = "http://localhost:8000"
+    WEBAPP_URL: str = "http://localhost:5173"
     BOOST_STARS: int = Field(default=50, gt=0)
     ADMIN_ID: int = 0
     DATABASE_URL: str = Field(default="sqlite:///data.db", repr=False)
@@ -35,10 +37,32 @@ class Settings(BaseModel):
     @classmethod
     def parse_cors_origins(cls, value: object) -> object:
         if isinstance(value, str):
-            return tuple(
-                origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()
-            )
-        return value
+            value = value.strip()
+            if value.startswith("["):
+                value = json.loads(value)
+            else:
+                value = value.split(",")
+        if not isinstance(value, (list, tuple)):
+            raise ValueError("Use comma-separated HTTP(S) origins or a JSON array")
+        origins = []
+        for item in value:
+            origin = item.strip().strip("\"'").strip().rstrip("/")
+            if not origin:
+                continue
+            parsed = urlsplit(origin)
+            if (
+                    parsed.scheme not in {"http", "https"}
+                    or not parsed.hostname
+                    or parsed.username is not None
+                    or parsed.password is not None
+                    or parsed.path
+                    or parsed.query
+                    or parsed.fragment
+                    or any(char.isspace() for char in origin)
+            ):
+                raise ValueError("Each CORS origin must be an HTTP(S) URL without a path")
+            origins.append(origin)
+        return tuple(origins)
 
     @field_validator("ADMIN_ID", mode="before")
     @classmethod
@@ -60,7 +84,7 @@ class Settings(BaseModel):
 def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
     """Environment wins over the selected dotenv file; tests may supply their own mapping."""
     environment = dict(os.environ if environ is None else environ)
-    path = environment.get("ENV_FILE", str(PROJECT_ROOT / ".env.local"))
+    path = environment.get("ENV_FILE", str(BACKEND_ROOT / ".env.local"))
     values: dict[str, str | None] = {}
     for key, value in dotenv_values(path, interpolate=False).items():
         # Match load_dotenv(override=False), including ${VAR:-default} expansion.

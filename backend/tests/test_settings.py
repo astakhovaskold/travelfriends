@@ -90,3 +90,13 @@ def test_dotenv_interpolation_preserves_environment_priority(tmp_path, monkeypat
     assert settings.SESSION_TTL == 120
     assert settings.BOT_USERNAME == "fallback"
     assert load_settings({"ENV_FILE": str(dotenv)}).SESSION_TTL == 75
+
+
+def test_default_dotenv_is_backend_local_even_from_repository_root(tmp_path, monkeypatch):
+    backend = tmp_path / "backend"
+    backend.mkdir()
+    (tmp_path / ".env.local").write_text("BOOST_STARS=10\n")
+    (backend / ".env.local").write_text("BOOST_STARS=75\n")
+    monkeypatch.setattr(config, "BACKEND_ROOT", backend)
+    monkeypatch.chdir(tmp_path)
+    assert load_settings({}).BOOST_STARS == 75
