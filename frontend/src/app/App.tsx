@@ -96,12 +96,7 @@ export function App() {
   }
 
   function openGate(value: Me) {
-    if (!value.rules_ok) {
-      open({
-        kind: 'onboarding',
-        must: true,
-      });
-    } else if (!value.registered) {
+    if (!value.registered) {
       open({
         kind: 'register',
       });

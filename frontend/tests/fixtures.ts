@@ -295,6 +295,7 @@ export async function setup(
       });
     }
     if (path === '/register') {
+      rules = true;
       registered = true;
       return ok({
         ok: true,

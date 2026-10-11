@@ -25,7 +25,7 @@ class UsersRepository:
             self, birth: str, gender: str, vibe: str, city: str, about: str, user_id: int
     ) -> Result:
         return self.transaction.execute(
-            "update users set birth=?, gender=?, vibe=?, city=?, about=?, registered=1 where id=?",
+            "update users set birth=?, gender=?, vibe=?, city=?, about=?, rules_ok=1, registered=1 where id=?",
             (birth, gender, vibe, city, about, user_id),
         )
 

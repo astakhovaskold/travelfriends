@@ -31,6 +31,7 @@ class Reg(BaseModel):
     city: str = ""
     about: str = ""
     vibe: List[str] = []
+    rules_accepted: bool = False
 
 
 class Msg(BaseModel):

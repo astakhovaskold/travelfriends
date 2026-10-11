@@ -33,7 +33,7 @@ def accept_rules(user: dict):
 def register(request: Reg, user: dict):
     with db() as transaction:
         row = UsersRepository(transaction).registration_state(user["id"])
-    if not row["rules_ok"]:
+    if not row["rules_ok"] and not request.rules_accepted:
         raise HTTPException(403, errors.RULES)
     try:
         birth_date = datetime.date.fromisoformat(request.birth)

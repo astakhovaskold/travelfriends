@@ -3,14 +3,7 @@ import {api} from '../api/client';
 import type {Me, MyTrips, PublicProfile} from '../api/types';
 import {splitVibes} from '../api/types';
 import {useApp} from '../app/context';
-import {
-  Choices,
-  Close,
-  Identity,
-  Metrics,
-  MultiChoices,
-  VibeBadges,
-} from '../components/common';
+import {Choices, Close, Identity, Metrics, MultiChoices, VibeBadges,} from '../components/common';
 import {TripRow} from '../components/TripRow';
 import {ci, dn, NEG} from '../data/trips';
 import {fmt, tx} from '../i18n';
@@ -302,6 +295,9 @@ export function ProfileForm(props: { me?: Me }) {
         if (!value('birth')) {
           throw new Error('baddate');
         }
+        if (!value('rules_accepted')) {
+          throw new Error('rules');
+        }
         await api(
           '/register',
           'POST',
@@ -309,6 +305,7 @@ export function ProfileForm(props: { me?: Me }) {
             ...fields,
             birth: value('birth'),
             gender: gender(),
+            rules_accepted: true,
           },
           controller.signal,
         );
@@ -360,6 +357,10 @@ export function ProfileForm(props: { me?: Me }) {
           selected={gender()}
           onChange={setGender}
         />
+        <label class="flex items-start gap-2 mt-[8px] text-[13px]">
+          <input name="rules_accepted" type="checkbox" value="1"/>
+          <span>{tx('accept')}</span>
+        </label>
       </Show>
       <label for={props.me ? 'city' : 'rc'}>{tx('city')}</label>
       <input

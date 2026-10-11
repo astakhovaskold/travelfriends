@@ -97,15 +97,13 @@ test('request approval and author accepts applicant', async ({page}) => {
 test('onboarding and profile registration', async ({page}) => {
   const requests = await setup(page, 'en', 'onboarding');
   await open(page);
-  for (let i = 0; i < 6; i++) {
-    await page.locator('#nx').click();
-  }
   await expect(page.locator('#rg')).toBeVisible();
   await page.locator('#bd0').fill('1997-01-01');
   await page.locator('#rc').fill('Madrid');
   await page.locator('#ra').fill('Hello');
   await page.locator('#gs [data-s="f"]').click();
   await page.locator('#vb [data-v="nature"]').click();
+  await page.locator('input[name="rules_accepted"]').check();
   await page.locator('#rg').click();
   await expect(page.locator('.ms')).not.toHaveClass(/on/);
   expect(requests.find((r) => r.path === '/register')?.body).toMatchObject({
@@ -115,6 +113,7 @@ test('onboarding and profile registration', async ({page}) => {
     vibe: [
       'nature',
     ],
+    rules_accepted: true,
   });
 });
 test('Stars invoice and author close action', async ({page}) => {
